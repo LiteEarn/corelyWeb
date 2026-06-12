@@ -1,0 +1,16 @@
+<div class="page-header">
+  <div class="page-header-left">
+    <button mat-icon-button *ngIf="showBackButton" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="page-header-text">
+      <h1 class="page-header-title">{{ title }}</h1>
+      <p class="page-header-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+  <div class="page-header-right">
+    <button mat-raised-button *ngIf="showActionButton" color="primary">
+      {{ actionButtonText }}
+    </button>
+  </div>
+</div>

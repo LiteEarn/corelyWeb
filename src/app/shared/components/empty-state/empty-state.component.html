@@ -1,0 +1,8 @@
+<div class="empty-state">
+  <mat-icon class="empty-state-icon">{{ icon }}</mat-icon>
+  <h2 class="empty-state-title">{{ title }}</h2>
+  <p class="empty-state-message">{{ message }}</p>
+  <button mat-raised-button *ngIf="showActionButton" color="primary">
+    {{ actionButtonText }}
+  </button>
+</div>

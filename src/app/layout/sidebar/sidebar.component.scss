@@ -1,0 +1,127 @@
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.25s ease, transform 0.25s ease;
+
+  &.sidebar-closed {
+    width: 72px;
+  }
+
+  /* Mobile drawer styles: when host element has class 'mobile' we'll switch to overlay behavior */
+  &.mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    width: 260px;
+    transform: translateX(-100%);
+    box-shadow: 0 8px 24px rgba(2,6,23,0.2);
+    transition: transform 0.25s ease;
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  justify-content: center;
+
+  .sidebar:not(.sidebar-closed) & {
+    justify-content: flex-start;
+  }
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+
+  .sidebar-closed & {
+    margin-right: 0;
+  }
+
+  .logo-icon {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+  }
+}
+
+.sidebar-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+
+  .sidebar:not(.sidebar-closed) & {
+    align-items: stretch;
+  }
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #64748b;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  width: 100%;
+  justify-content: center;
+
+  .sidebar:not(.sidebar-closed) & {
+    justify-content: flex-start;
+  }
+
+  &:hover {
+    background: #f1f5f9;
+    color: var(--text-color);
+  }
+
+  &.nav-item-active {
+    background: rgba(15, 118, 110, 0.1);
+    color: var(--primary-color);
+  }
+
+  .nav-icon {
+    margin-right: 12px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+
+    .sidebar-closed & {
+      margin-right: 0;
+    }
+  }
+
+  .nav-label {
+    font-size: 14px;
+  }
+}
+
+// Remove old mobile styles as they're now handled by .sidebar-mobile class

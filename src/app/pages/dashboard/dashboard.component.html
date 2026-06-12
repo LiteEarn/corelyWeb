@@ -1,0 +1,38 @@
+<div class="dashboard-content">
+  <h1>Dashboard</h1>
+
+  <div class="stats-grid">
+    <app-stat-card
+      title="Total de Alunos"
+      value="150"
+      icon="people"
+      color="primary">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Avaliações Pendentes"
+      value="12"
+      icon="assignment"
+      color="warning">
+    </app-stat-card>
+
+    <app-stat-card
+      title="Objetivos Concluídos"
+      value="85%"
+      icon="check_circle"
+      color="success">
+    </app-stat-card>
+  </div>
+
+  <div class="dashboard-widgets">
+    <!-- Cards e widgets específicos do dashboard -->
+    <mat-card class="dashboard-widget">
+      <mat-card-header>
+        <mat-card-title>Atividades Recentes</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Conteúdo das atividades recentes...</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

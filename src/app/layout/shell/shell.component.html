@@ -1,0 +1,19 @@
+<div class="shell-layout">
+  <!-- Sidebar: on desktop part of layout; on mobile acts as overlay drawer -->
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    [class.mobile]="isMobile"
+    [class.open]="isSidebarOpen"
+  ></app-sidebar>
+
+  <!-- overlay for mobile when sidebar is open -->
+  <div class="overlay" *ngIf="isMobile && isSidebarOpen" (click)="toggleSidebar()"></div>
+
+  <div class="content-wrapper">
+    <app-topbar (toggleSidebar)="toggleSidebar()"></app-topbar>
+
+    <div class="shell-content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

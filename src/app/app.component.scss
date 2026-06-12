@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+::ng-deep {
+  router-outlet ~ * {
+    height: calc(100vh - var(--topbar-height));
+    overflow-y: auto;
+  }
+}
+
+
