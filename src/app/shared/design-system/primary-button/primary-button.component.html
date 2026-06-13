@@ -1,0 +1,10 @@
+<button
+  mat-raised-button
+  color="primary"
+  class="ds-primary-button"
+  [disabled]="disabled || loading"
+  (click)="click.emit()">
+  <mat-icon *ngIf="loading" class="ds-spinner">refresh</mat-icon>
+  <mat-icon *ngIf="icon && !loading" class="ds-icon">{{ icon }}</mat-icon>
+  <span class="ds-label">{{ label }}</span>
+</button>

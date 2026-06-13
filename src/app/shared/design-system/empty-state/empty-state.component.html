@@ -1,0 +1,15 @@
+<div class="ds-empty-state">
+  <div class="ds-empty-icon-wrapper">
+    <mat-icon class="ds-empty-icon">{{ icon }}</mat-icon>
+  </div>
+  <h3 class="ds-empty-title">{{ title }}</h3>
+  <p *ngIf="description" class="ds-empty-description">{{ description }}</p>
+  <ds-button
+    *ngIf="showAction"
+    [label]="actionText"
+    [icon]="actionIcon"
+    variant="primary"
+    class="ds-empty-cta"
+    (click)="actionClick.emit()">
+  </ds-button>
+</div>

@@ -1,0 +1,122 @@
+@import '../variables';
+
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  border: none;
+  border-radius: $ds-borderRadius-sm;
+  cursor: pointer;
+  transition: all $ds-transition-normal;
+  text-decoration: none;
+  position: relative;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.ds-button-full-width {
+    width: 100%;
+  }
+
+  // Sizes
+  &.ds-button-sm {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  &.ds-button-md {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  &.ds-button-lg {
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+
+  // Primary variant
+  &.ds-button-primary {
+    background-color: $ds-primary;
+    color: $ds-white;
+
+    &:hover:not(:disabled) {
+      background-color: darken($ds-primary, 5%);
+      box-shadow: $ds-shadow-hover;
+    }
+
+    &:active:not(:disabled) {
+      background-color: darken($ds-primary, 10%);
+    }
+  }
+
+  // Secondary variant
+  &.ds-button-secondary {
+    background-color: $ds-white;
+    color: $ds-primary;
+    border: 1px solid $ds-neutral300;
+
+    &:hover:not(:disabled) {
+      background-color: $ds-neutral100;
+      border-color: $ds-neutral600;
+    }
+
+    &:active:not(:disabled) {
+      background-color: $ds-neutral300;
+    }
+  }
+
+  // Danger variant
+  &.ds-button-danger {
+    background-color: $ds-white;
+    color: $ds-danger;
+    border: 1px solid $ds-danger;
+
+    &:hover:not(:disabled) {
+      background-color: $ds-danger;
+      color: $ds-white;
+    }
+
+    &:active:not(:disabled) {
+      background-color: darken($ds-danger, 10%);
+      color: $ds-white;
+    }
+  }
+
+  // Icon
+  .ds-button-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+
+    &.ds-button-icon-start {
+      margin-right: 4px;
+    }
+
+    &.ds-button-icon-end {
+      margin-left: 4px;
+    }
+  }
+
+  // Spinner
+  .ds-button-spinner {
+    margin: 0;
+  }
+
+  // Label
+  .ds-button-label {
+    white-space: nowrap;
+  }
+}

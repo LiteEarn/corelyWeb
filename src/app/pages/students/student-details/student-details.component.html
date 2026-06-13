@@ -1,0 +1,104 @@
+<div class="student-details-page">
+  <ds-page-header
+    title="Detalhes do Aluno"
+    subtitle="Visualize as informações do aluno"
+    [showBackButton]="true"
+    (backButtonClick)="onBack()">
+  </ds-page-header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading && student" class="content-container">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <div class="details-header">
+        <h2 class="details-title">{{ student.fullName }}</h2>
+        <p class="details-subtitle">{{ student.email }}</p>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon>phone</mat-icon>
+          <div class="info-content">
+            <span class="label">Telefone</span>
+            <span class="value">{{ student.phone }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>email</mat-icon>
+          <div class="info-content">
+            <span class="label">Email</span>
+            <span class="value">{{ student.email }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>cake</mat-icon>
+          <div class="info-content">
+            <span class="label">Data de Nascimento</span>
+            <span class="value">{{ formatDate(student.birthDate) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>check_circle</mat-icon>
+          <div class="info-content">
+            <span class="label">Status</span>
+            <ds-status-chip [status]="student.active ? 'active' : 'inactive'" [label]="getActiveStatus(student.active)"></ds-status-chip>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <button mat-button (click)="onBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Voltar
+        </button>
+        <button mat-raised-button color="primary" (click)="onEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+      </div>
+    </ds-page-card>
+
+    <mat-card class="tabs-card">
+      <mat-tab-group [(selectedIndex)]="selectedTab">
+        <mat-tab label="Dados">
+          <div class="tab-content">
+            <p>Informações básicas do aluno exibidas acima.</p>
+          </div>
+        </mat-tab>
+        <mat-tab label="Objetivos">
+          <div class="tab-content">
+            <ds-empty-state
+              icon="flag"
+              title="Objetivos"
+              description="Em breve você poderá visualizar os objetivos do aluno aqui.">
+            </ds-empty-state>
+          </div>
+        </mat-tab>
+        <mat-tab label="Avaliações">
+          <div class="tab-content">
+            <ds-empty-state
+              icon="assessment"
+              title="Avaliações"
+              description="Em breve você poderá visualizar as avaliações do aluno aqui.">
+            </ds-empty-state>
+          </div>
+        </mat-tab>
+        <mat-tab label="Evoluções">
+          <div class="tab-content">
+            <ds-empty-state
+              icon="trending_up"
+              title="Evoluções"
+              description="Em breve você poderá visualizar as evoluções do aluno aqui.">
+            </ds-empty-state>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  </div>
+</div>

@@ -1,6 +1,6 @@
 <div class="page-header">
   <div class="page-header-left">
-    <button mat-icon-button *ngIf="showBackButton" class="back-button">
+    <button mat-icon-button *ngIf="showBackButton" class="back-button" (click)="backButtonClick.emit()">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <div class="page-header-text">
@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="page-header-right">
-    <button mat-raised-button *ngIf="showActionButton" color="primary">
+    <button mat-raised-button *ngIf="showActionButton" color="primary" (click)="actionButtonClick.emit()">
       {{ actionButtonText }}
     </button>
   </div>

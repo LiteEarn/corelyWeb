@@ -1,0 +1,42 @@
+@import '../variables';
+
+.ds-status-chip {
+  ::ng-deep .mdc-evolution-chip-set__chips {
+    display: flex;
+  }
+
+  ::ng-deep .mat-mdc-chip {
+    border-radius: $ds-borderRadius-sm;
+    font-size: 13px;
+    font-weight: 500;
+    height: 28px;
+    padding: 0 12px;
+    cursor: default;
+    transition: all $ds-transition-normal;
+  }
+
+  .ds-chip-active {
+    background-color: $ds-successLight;
+    color: $ds-successDark;
+  }
+
+  .ds-chip-inactive {
+    background-color: $ds-neutral100;
+    color: $ds-neutral600;
+  }
+
+  .ds-chip-pending {
+    background-color: $ds-warningLight;
+    color: $ds-warningDark;
+  }
+
+  .ds-chip-success {
+    background-color: $ds-successLight;
+    color: $ds-successDark;
+  }
+
+  .ds-chip-warning {
+    background-color: $ds-warningLight;
+    color: $ds-warningDark;
+  }
+}

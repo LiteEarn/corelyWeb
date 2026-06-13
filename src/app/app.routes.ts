@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { ShellComponent } from './layout';
-import { DashboardComponent, StudentsComponent, ObjectivesComponent, EvaluationsComponent, EvolutionsComponent } from './pages';
+import { DashboardComponent, StudentsComponent, StudentFormComponent, StudentDetailsComponent, ObjectivesComponent, EvaluationsComponent, EvolutionsComponent } from './pages';
 
 export const routes: Routes = [
   {
@@ -9,6 +9,9 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'students', component: StudentsComponent },
+      { path: 'students/new', component: StudentFormComponent },
+      { path: 'students/:id', component: StudentDetailsComponent },
+      { path: 'students/:id/edit', component: StudentFormComponent },
       { path: 'goals', component: ObjectivesComponent },
       { path: 'assessments', component: EvaluationsComponent },
       { path: 'evolutions', component: EvolutionsComponent },

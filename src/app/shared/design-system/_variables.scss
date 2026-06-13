@@ -1,0 +1,87 @@
+// Colors
+$ds-primary: #0F766E;
+$ds-secondary: #14B8A6;
+$ds-success: #16A34A;
+$ds-warning: #F59E0B;
+$ds-danger: #DC2626;
+
+$ds-neutral900: #0F172A;
+$ds-neutral600: #475569;
+$ds-neutral300: #CBD5E1;
+$ds-neutral100: #F1F5F9;
+$ds-white: #FFFFFF;
+
+$ds-text: #0F172A;
+$ds-textSecondary: #64748B;
+$ds-textTertiary: #94A3B8;
+$ds-border: #E2E8F0;
+$ds-background: #F8FAFC;
+$ds-surface: #FFFFFF;
+
+$ds-successLight: #DCFCE7;
+$ds-successDark: #166534;
+$ds-error: #EF4444;
+$ds-errorLight: #FEE2E2;
+$ds-errorDark: #DC2626;
+$ds-warningLight: #FEF3C7;
+$ds-warningDark: #D97706;
+$ds-info: #3B82F6;
+$ds-infoLight: #DBEAFE;
+$ds-infoDark: #2563EB;
+
+// Spacing
+$ds-spacing-xs: 4px;
+$ds-spacing-sm: 8px;
+$ds-spacing-md: 12px;
+$ds-spacing-lg: 16px;
+$ds-spacing-xl: 24px;
+$ds-spacing-xxl: 32px;
+$ds-spacing-xxxl: 48px;
+
+// Border Radius
+$ds-borderRadius-sm: 8px;
+$ds-borderRadius-md: 12px;
+$ds-borderRadius-lg: 16px;
+$ds-borderRadius-full: 9999px;
+
+// Shadows
+$ds-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$ds-shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+$ds-shadow-modal: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+// Font Sizes
+$ds-fontSize-xs: 12px;
+$ds-fontSize-sm: 13px;
+$ds-fontSize-md: 14px;
+$ds-fontSize-lg: 15px;
+$ds-fontSize-xl: 16px;
+$ds-fontSize-2xl: 18px;
+$ds-fontSize-3xl: 20px;
+$ds-fontSize-4xl: 24px;
+$ds-fontSize-5xl: 28px;
+$ds-fontSize-6xl: 32px;
+
+// Font Weights
+$ds-fontWeight-regular: 400;
+$ds-fontWeight-medium: 500;
+$ds-fontWeight-semibold: 600;
+$ds-fontWeight-bold: 700;
+
+// Line Heights
+$ds-lineHeight-tight: 1.25;
+$ds-lineHeight-normal: 1.5;
+$ds-lineHeight-relaxed: 1.75;
+
+// Transitions
+$ds-transition-fast: 150ms ease;
+$ds-transition-normal: 200ms ease;
+$ds-transition-slow: 300ms ease;
+
+// Z-Index
+$ds-zIndex-dropdown: 1000;
+$ds-zIndex-sticky: 1020;
+$ds-zIndex-fixed: 1030;
+$ds-zIndex-modalBackdrop: 1040;
+$ds-zIndex-modal: 1050;
+$ds-zIndex-popover: 1060;
+$ds-zIndex-tooltip: 1070;
