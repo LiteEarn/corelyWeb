@@ -1,0 +1,39 @@
+@import '../variables';
+
+.ds-page-table {
+  width: 100%;
+
+  ::ng-deep .mat-mdc-header-row {
+    background-color: $ds-neutral100;
+    height: 56px;
+  }
+
+  ::ng-deep .mat-mdc-header-cell {
+    font-weight: $ds-fontWeight-semibold;
+    color: $ds-neutral600;
+    font-size: $ds-fontSize-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 $ds-spacing-lg;
+  }
+
+  ::ng-deep .mat-mdc-cell {
+    color: $ds-neutral900;
+    font-size: $ds-fontSize-md;
+    padding: $ds-spacing-lg;
+    border-bottom: 1px solid $ds-neutral300;
+  }
+
+  ::ng-deep .mat-mdc-row {
+    height: 64px;
+    transition: background-color $ds-transition-normal;
+  }
+
+  ::ng-deep .mat-mdc-row:hover {
+    background-color: $ds-neutral100;
+  }
+
+  ::ng-deep .mat-mdc-row:last-child .mat-mdc-cell {
+    border-bottom: none;
+  }
+}

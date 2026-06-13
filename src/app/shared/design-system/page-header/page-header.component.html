@@ -1,0 +1,25 @@
+<div class="ds-page-header">
+  <button
+    *ngIf="showBackButton"
+    mat-button
+    class="ds-back-button"
+    (click)="backButtonClick.emit()">
+    <mat-icon>arrow_back</mat-icon>
+    {{ backButtonText }}
+  </button>
+
+  <div class="ds-header-content">
+    <h1 class="ds-title">{{ title }}</h1>
+    <p *ngIf="subtitle" class="ds-subtitle">{{ subtitle }}</p>
+  </div>
+
+  <button
+    *ngIf="showActionButton"
+    mat-raised-button
+    color="primary"
+    class="ds-action-button"
+    (click)="actionButtonClick.emit()">
+    <mat-icon>add</mat-icon>
+    {{ actionButtonText }}
+  </button>
+</div>

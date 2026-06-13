@@ -1,0 +1,20 @@
+<button
+  [attr.class]="buttonClass"
+  [disabled]="disabled || loading"
+  [class.ds-button-full-width]="fullWidth"
+  (click)="handleClick($event)"
+>
+  <ng-container *ngIf="showSpinner">
+    <mat-spinner diameter="16" class="ds-button-spinner"></mat-spinner>
+  </ng-container>
+
+  <ng-container *ngIf="showIcon && iconPosition === 'start'">
+    <mat-icon class="ds-button-icon ds-button-icon-start">{{ icon }}</mat-icon>
+  </ng-container>
+
+  <span class="ds-button-label" *ngIf="label">{{ label }}</span>
+
+  <ng-container *ngIf="showIcon && iconPosition === 'end'">
+    <mat-icon class="ds-button-icon ds-button-icon-end">{{ icon }}</mat-icon>
+  </ng-container>
+</button>

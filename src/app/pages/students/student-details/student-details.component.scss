@@ -1,0 +1,149 @@
+.student-details-page {
+  padding: 32px 24px;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 96px 32px;
+
+    .spinner {
+      font-size: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+      color: #64748b;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      font-size: 15px;
+    }
+  }
+
+  .content-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .details-header {
+    margin-bottom: 24px;
+
+    .details-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.3px;
+    }
+
+    .details-subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+
+    mat-icon {
+      font-size: 24px;
+      color: #0f766e;
+    }
+
+    .info-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .label {
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 14px;
+        color: #0f172a;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .details-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .tabs-card {
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: white;
+
+    .tab-content {
+      padding: 32px;
+      min-height: 200px;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .student-details-page {
+    padding: 24px 16px;
+
+    .content-container {
+      gap: 20px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .details-actions {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
+
+    .tabs-card {
+      .tab-content {
+        padding: 24px 20px;
+      }
+    }
+  }
+}

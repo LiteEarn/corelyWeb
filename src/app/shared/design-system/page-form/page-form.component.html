@@ -1,0 +1,21 @@
+<div class="ds-page-form">
+  <div class="ds-form-content">
+    <ng-content></ng-content>
+  </div>
+
+  <div class="ds-form-footer">
+    <ds-button
+      [label]="cancelText"
+      variant="secondary"
+      [disabled]="loading"
+      (click)="cancel.emit()">
+    </ds-button>
+    <ds-button
+      [label]="submitText"
+      [variant]="submitVariant"
+      [loading]="loading"
+      [disabled]="disabled"
+      (click)="submit.emit()">
+    </ds-button>
+  </div>
+</div>
