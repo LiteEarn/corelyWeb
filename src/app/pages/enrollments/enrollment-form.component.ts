@@ -132,8 +132,10 @@ export class EnrollmentFormComponent implements OnInit {
       return;
     }
 
+    const formValue = this.enrollmentForm.getRawValue();
     const payload = {
-      ...this.enrollmentForm.getRawValue(),
+      ...formValue,
+      enrollmentDate: formValue.enrollmentDate ? this.formatDateForApi(formValue.enrollmentDate) : '',
       studioId: this.currentStudioService.getStudioId()
     };
 
@@ -195,5 +197,13 @@ export class EnrollmentFormComponent implements OnInit {
     }
 
     return 'Campo inválido';
+  }
+
+  formatDateForApi(date: Date): string {
+    // Use local timezone methods to avoid UTC conversion
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

@@ -125,6 +125,7 @@ export class SessionFormComponent implements OnInit {
     const formValue = this.sessionForm.value;
     const session: Session = {
       ...formValue,
+      scheduledDate: formValue.scheduledDate ? this.formatDateForApi(formValue.scheduledDate) : '',
       // Implementação temporária para MVP. Futuramente o Studio será obtido do usuário autenticado.
       studioId: this.currentStudioService.getStudioId()
     };
@@ -193,5 +194,13 @@ export class SessionFormComponent implements OnInit {
     }
 
     return 'Campo inválido';
+  }
+
+  formatDateForApi(date: Date): string {
+    // Use local timezone methods to avoid UTC conversion
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

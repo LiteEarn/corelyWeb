@@ -28,10 +28,7 @@ export class StudentService {
   }
 
   create(student: Student): Observable<Student> {
-<<<<<<< HEAD
     console.log('StudentService create chamado', student);
-=======
->>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
     return this.http.post<Student>(this.apiUrl, student);
   }
 
