@@ -1,0 +1,117 @@
+<div class="instructor-details-page">
+  <app-page-header
+    [title]="pageTitle"
+    [subtitle]="pageSubtitle"
+    [showBackButton]="true">
+  </app-page-header>
+
+  <div *ngIf="loading" class="loading-state">
+    <p>Carregando dados do instrutor...</p>
+  </div>
+
+  <div *ngIf="!loading && instructor" class="instructor-content">
+    <!-- Dados Pessoais -->
+    <mat-card class="details-section">
+      <mat-card-header>
+        <mat-card-title>Dados Pessoais</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label class="detail-label">Nome Completo</label>
+            <span class="detail-value">{{ instructor.fullName }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label class="detail-label">Email</label>
+            <span class="detail-value">{{ instructor.email }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label class="detail-label">Telefone</label>
+            <span class="detail-value">{{ instructor.phone }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Informações Profissionais -->
+    <mat-card class="details-section">
+      <mat-card-header>
+        <mat-card-title>Informações Profissionais</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="details-grid">
+          <div class="detail-item">
+            <label class="detail-label">Especialidade</label>
+            <span class="detail-value">{{ instructor.specialty }}</span>
+          </div>
+
+          <div class="detail-item">
+            <label class="detail-label">Status</label>
+            <mat-chip-set>
+              <mat-chip [class]="instructor.active ? 'status-active' : 'status-inactive'">
+                {{ instructor.active ? 'Ativo' : 'Inativo' }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Informações do Sistema -->
+    <mat-card class="details-section" *ngIf="instructor.createdAt || instructor.updatedAt">
+      <mat-card-header>
+        <mat-card-title>Informações do Sistema</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="details-grid">
+          <div class="detail-item" *ngIf="instructor.createdAt">
+            <label class="detail-label">Data de Cadastro</label>
+            <span class="detail-value">{{ formatDate(instructor.createdAt) }}</span>
+          </div>
+
+          <div class="detail-item" *ngIf="instructor.updatedAt">
+            <label class="detail-label">Última Atualização</label>
+            <span class="detail-value">{{ formatDate(instructor.updatedAt) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    <div class="details-actions">
+      <button mat-button (click)="onBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="onEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+
+        <button mat-raised-button color="warn" (click)="onDelete()">
+          <mat-icon>delete</mat-icon>
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !instructor" class="error-state">
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <h3>Instrutor não encontrado</h3>
+          <p>O instrutor solicitado não foi encontrado ou pode ter sido removido.</p>
+          <button mat-raised-button color="primary" (click)="onBack()">
+            Voltar para Lista
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

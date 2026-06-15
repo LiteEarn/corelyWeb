@@ -1,0 +1,213 @@
+.instructor-details-page {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 64px 32px;
+  text-align: center;
+
+  p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+  }
+}
+
+.instructor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.details-section {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+
+  .mat-mdc-card-header {
+    padding: 24px 24px 0 24px;
+
+    .mat-mdc-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+  }
+
+  .mat-mdc-card-content {
+    padding: 16px 24px 24px 24px;
+  }
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .detail-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .detail-value {
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-color);
+    word-break: break-word;
+  }
+}
+
+.status-active {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.status-inactive {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+}
+
+.details-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-top: 8px;
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    min-width: 120px;
+  }
+
+  .mat-mdc-raised-button {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+
+  .error-card {
+    max-width: 400px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 32px;
+
+    .error-icon {
+      font-size: 64px;
+      color: #ef4444;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0 0 8px 0;
+    }
+
+    p {
+      font-size: 16px;
+      color: #64748b;
+      margin: 0 0 24px 0;
+    }
+
+    button {
+      min-width: 160px;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .instructor-details-page {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .details-actions {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .action-buttons {
+      justify-content: center;
+    }
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .details-section {
+    .mat-mdc-card-header {
+      padding: 16px 16px 0 16px;
+    }
+
+    .mat-mdc-card-content {
+      padding: 16px;
+    }
+  }
+
+  .error-state {
+    min-height: 300px;
+    padding: 16px;
+
+    .error-card {
+      width: 100%;
+    }
+
+    .error-content {
+      padding: 24px 16px;
+
+      .error-icon {
+        font-size: 48px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+    }
+  }
+}

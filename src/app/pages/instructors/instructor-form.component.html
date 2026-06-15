@@ -1,0 +1,91 @@
+<div class="instructor-form-page">
+  <app-page-header
+    [title]="pageTitle"
+    [subtitle]="pageSubtitle"
+    [showBackButton]="true">
+  </app-page-header>
+
+  <div *ngIf="loading" class="loading-state">
+    <p>Carregando dados do instrutor...</p>
+  </div>
+
+  <form [formGroup]="instructorForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+    <!-- Dados Pessoais -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Dados Pessoais</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nome Completo</mat-label>
+            <input matInput formControlName="fullName" placeholder="Digite o nome completo">
+            <mat-error *ngIf="instructorForm.get('fullName')?.errors && instructorForm.get('fullName')?.touched">
+              {{ getFieldError('fullName') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Telefone</mat-label>
+            <input matInput formControlName="phone" placeholder="(XX) XXXXX-XXXX">
+            <mat-error *ngIf="instructorForm.get('phone')?.errors && instructorForm.get('phone')?.touched">
+              {{ getFieldError('phone') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="email@exemplo.com">
+            <mat-error *ngIf="instructorForm.get('email')?.errors && instructorForm.get('email')?.touched">
+              {{ getFieldError('email') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Informações Profissionais -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Informações Profissionais</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Especialidade</mat-label>
+            <mat-select formControlName="specialty" placeholder="Selecione a especialidade">
+              <mat-option *ngFor="let specialty of specialties" [value]="specialty">
+                {{ specialty }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="instructorForm.get('specialty')?.errors && instructorForm.get('specialty')?.touched">
+              {{ getFieldError('specialty') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <div class="status-field">
+            <label class="status-label">Status</label>
+            <mat-slide-toggle formControlName="active" color="primary">
+              {{ instructorForm.get('active')?.value ? 'Ativo' : 'Inativo' }}
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button mat-button type="button" (click)="onCancel()" [disabled]="saving">
+        Cancelar
+      </button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="instructorForm.invalid || saving">
+        <mat-icon *ngIf="saving">hourglass_empty</mat-icon>
+        {{ saving ? 'Salvando...' : (isEditMode ? 'Atualizar' : 'Criar') }}
+      </button>
+    </div>
+  </form>
+</div>
