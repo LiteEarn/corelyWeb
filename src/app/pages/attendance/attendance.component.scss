@@ -1,0 +1,157 @@
+.attendance-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filters-card {
+  margin-bottom: 24px;
+}
+
+.filters-content {
+  padding: 16px;
+}
+
+.filters-section {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.class-group-filter {
+  flex: 1;
+  min-width: 250px;
+}
+
+.date-filter {
+  flex: 0 0 200px;
+}
+
+.load-students-button {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.empty-state-wrapper {
+  margin-top: 48px;
+}
+
+.students-list {
+  margin-top: 24px;
+}
+
+.students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.students-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.save-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.students-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.student-card {
+  margin: 0;
+}
+
+.student-card-content {
+  padding: 16px;
+}
+
+.student-info {
+  margin-bottom: 16px;
+}
+
+.student-name {
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.student-phone {
+  font-size: 14px;
+  color: #666;
+}
+
+.attendance-controls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.present-checkbox {
+  flex: 0 0 auto;
+}
+
+.observation-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .attendance-page {
+    padding: 16px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .class-group-filter,
+  .date-filter {
+    flex: 1;
+    min-width: 100%;
+  }
+
+  .load-students-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .students-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .save-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .attendance-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .observation-field {
+    min-width: 100%;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .students-cards {
+    grid-template-columns: 1fr;
+  }
+}

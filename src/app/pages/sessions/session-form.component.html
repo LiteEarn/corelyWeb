@@ -1,0 +1,94 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="submitButtonText"
+  [loading]="isLoading"
+  [disabled]="sessionForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para agenda'"
+      [title]="pageTitle"
+      subtitle="Cadastre uma nova aula para gerenciar sua agenda e acompanhar as sessões."
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <form [formGroup]="sessionForm">
+        <div class="form-section">
+          <h2 class="section-title">Informações da Aula</h2>
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Título</mat-label>
+              <input matInput formControlName="title" placeholder="Digite o título da aula">
+              <mat-error *ngIf="shouldShowError('title')">
+                {{ getFieldError('title') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Instrutor</mat-label>
+              <mat-select formControlName="instructorId">
+                <mat-option value="">Selecione um instrutor</mat-option>
+                <mat-option *ngFor="let instructor of instructors" [value]="instructor.id">
+                  {{ instructor.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('instructorId')">
+                {{ getFieldError('instructorId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="scheduledDate">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('scheduledDate')">
+                {{ getFieldError('scheduledDate') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Hora Início</mat-label>
+              <input matInput type="time" formControlName="startTime">
+              <mat-error *ngIf="shouldShowError('startTime')">
+                {{ getFieldError('startTime') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Hora Fim</mat-label>
+              <input matInput type="time" formControlName="endTime">
+              <mat-error *ngIf="shouldShowError('endTime')">
+                {{ getFieldError('endTime') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Máximo de Alunos</mat-label>
+              <input matInput type="number" formControlName="maxStudents" placeholder="0" min="1">
+              <mat-error *ngIf="shouldShowError('maxStudents')">
+                {{ getFieldError('maxStudents') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="scheduled">Agendada</mat-option>
+                <mat-option value="in_progress">Em Andamento</mat-option>
+                <mat-option value="completed">Concluída</mat-option>
+                <mat-option value="cancelled">Cancelada</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </ds-page-card>
+  </div>
+</ds-page-form>

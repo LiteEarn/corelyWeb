@@ -30,7 +30,11 @@
 
   <mat-card class="table-card">
     <mat-card-content class="table-content">
+<<<<<<< HEAD
+      <table mat-table [dataSource]="dataSource" class="full-width-table">
+=======
       <ds-page-table [dataSource]="filteredInstructors" [displayedColumns]="displayedColumns">
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
         <ng-container matColumnDef="fullName">
           <th mat-header-cell *matHeaderCellDef>Nome</th>
           <td mat-cell *matCellDef="let instructor">{{ instructor.fullName }}</td>
@@ -64,7 +68,14 @@
             </button>
           </td>
         </ng-container>
+<<<<<<< HEAD
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+=======
       </ds-page-table>
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
 
       <div *ngIf="filteredInstructors.length === 0" class="empty-state-wrapper">
         <ds-empty-state

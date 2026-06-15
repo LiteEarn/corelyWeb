@@ -1,0 +1,85 @@
+<div class="attendance-page">
+  <ds-page-header
+    title="Presença"
+    subtitle="Registre a presença dos alunos das turmas.">
+  </ds-page-header>
+
+  <mat-card class="filters-card">
+    <mat-card-content class="filters-content">
+      <div class="filters-section" [formGroup]="filterForm">
+        <mat-form-field appearance="outline" class="class-group-filter">
+          <mat-label>Turma</mat-label>
+          <mat-select formControlName="classGroupId">
+            <mat-option value="">Selecione uma turma</mat-option>
+            <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
+              {{ classGroup.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="date-filter">
+          <mat-label>Data</mat-label>
+          <input matInput [matDatepicker]="picker" formControlName="attendanceDate">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="load-students-button" (click)="loadStudents()" [disabled]="isLoading">
+          <mat-icon>people</mat-icon>
+          Carregar Alunos
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="!hasLoadedStudents" class="empty-state-wrapper">
+    <ds-empty-state
+      icon="fact_check"
+      title="Selecione uma turma e uma data para registrar presença."
+      description="Escolha a turma e a data para carregar a lista de alunos e registrar a presença.">
+    </ds-empty-state>
+  </div>
+
+  <div *ngIf="hasLoadedStudents && studentsAttendance.length > 0" class="students-list">
+    <div class="students-header">
+      <h3>Lista de Alunos</h3>
+      <button mat-raised-button color="primary" class="save-button" (click)="saveAttendance()">
+        <mat-icon>save</mat-icon>
+        Salvar Presença
+      </button>
+    </div>
+
+    <div class="students-cards">
+      <mat-card *ngFor="let student of studentsAttendance" class="student-card">
+        <mat-card-content class="student-card-content">
+          <div class="student-info">
+            <div class="student-name">{{ student.studentName }}</div>
+            <div class="student-phone">{{ formatPhone(student.studentPhone) }}</div>
+          </div>
+
+          <div class="attendance-controls">
+            <mat-checkbox
+              [checked]="student.present"
+              (change)="student.present = $event.checked"
+              class="present-checkbox">
+              Presente
+            </mat-checkbox>
+
+            <mat-form-field appearance="outline" class="observation-field">
+              <mat-label>Observação</mat-label>
+              <input matInput [(ngModel)]="student.observation" placeholder="Adicione uma observação...">
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div *ngIf="hasLoadedStudents && studentsAttendance.length === 0" class="empty-state-wrapper">
+    <ds-empty-state
+      icon="person_off"
+      title="Nenhum aluno matriculado"
+      description="Esta turma não possui alunos matriculados.">
+    </ds-empty-state>
+  </div>
+</div>

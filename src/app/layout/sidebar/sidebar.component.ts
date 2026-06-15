@@ -20,6 +20,14 @@ export class SidebarComponent {
   menuItems = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'school', label: 'Alunos', route: '/students' },
+<<<<<<< HEAD
+    { icon: 'person', label: 'Instrutores', route: '/instructors' },
+    { icon: 'groups', label: 'Turmas', route: '/class-groups' },
+    { icon: 'assignment_ind', label: 'Matrículas', route: '/enrollments' },
+    { icon: 'fact_check', label: 'Presença', route: '/attendance' },
+    { icon: 'event', label: 'Agenda', route: '/sessions' },
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
     { icon: 'flag', label: 'Objetivos', route: '/goals' },
     { icon: 'assignment', label: 'Avaliações', route: '/assessments' },
     { icon: 'trending_up', label: 'Evoluções', route: '/evolutions' },

@@ -1,0 +1,75 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="submitButtonText"
+  [loading]="isLoading"
+  [disabled]="enrollmentForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para matrículas'"
+      [title]="pageTitle"
+      subtitle="Cadastre uma nova matrícula para vincular alunos às turmas."
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <form [formGroup]="enrollmentForm">
+        <div class="form-section">
+          <h2 class="section-title">Informações da Matrícula</h2>
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Aluno</mat-label>
+              <mat-select formControlName="studentId">
+                <mat-option value="">Selecione um aluno</mat-option>
+                <mat-option *ngFor="let student of students" [value]="student.id">
+                  {{ student.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('studentId')">
+                {{ getFieldError('studentId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Turma</mat-label>
+              <mat-select formControlName="classGroupId">
+                <mat-option value="">Selecione uma turma</mat-option>
+                <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
+                  {{ classGroup.name }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('classGroupId')">
+                {{ getFieldError('classGroupId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data da Matrícula</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="enrollmentDate">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('enrollmentDate')">
+                {{ getFieldError('enrollmentDate') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="active">Ativa</mat-option>
+                <mat-option value="inactive">Inativa</mat-option>
+                <mat-option value="cancelled">Cancelada</mat-option>
+                <mat-option value="completed">Concluída</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </ds-page-card>
+  </div>
+</ds-page-form>

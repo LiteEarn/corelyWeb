@@ -5,7 +5,11 @@
   [disabled]="studentForm.invalid"
   (cancel)="onCancel()"
   (submit)="onSubmit()">
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
   <div class="form-header">
     <ds-page-header
       [showBackButton]="true"
@@ -25,40 +29,65 @@
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Nome Completo</mat-label>
               <input matInput formControlName="fullName" placeholder="Digite o nome completo">
+<<<<<<< HEAD
+              <mat-error *ngIf="shouldShowError('fullName')">
+                {{ getFieldError('fullName') }}
+=======
               <mat-error *ngIf="studentForm.get('fullName')?.hasError('required')">
                 Nome é obrigatório
               </mat-error>
               <mat-error *ngIf="studentForm.get('fullName')?.hasError('minlength')">
                 Nome deve ter no mínimo 3 caracteres
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
               </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Telefone</mat-label>
+<<<<<<< HEAD
+              <input matInput formControlName="phone" placeholder="(00) 00000-0000"
+                     (input)="onPhoneInput($event)" maxlength="15">
+              <mat-error *ngIf="shouldShowError('phone')">
+                {{ getFieldError('phone') }}
+=======
               <input matInput formControlName="phone" placeholder="(00) 00000-0000">
               <mat-error *ngIf="studentForm.get('phone')?.hasError('required')">
                 Telefone é obrigatório
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
               </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Email</mat-label>
+<<<<<<< HEAD
+              <input matInput formControlName="email" placeholder="email@exemplo.com" type="email">
+              <mat-error *ngIf="shouldShowError('email')">
+                {{ getFieldError('email') }}
+=======
               <input matInput formControlName="email" placeholder="email@exemplo.com">
               <mat-error *ngIf="studentForm.get('email')?.hasError('required')">
                 Email é obrigatório
               </mat-error>
               <mat-error *ngIf="studentForm.get('email')?.hasError('email')">
                 Email inválido
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
               </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Data de Nascimento</mat-label>
+<<<<<<< HEAD
+              <input matInput formControlName="birthDate" placeholder="DD/MM/AAAA"
+                     (input)="onDateInput($event)" maxlength="10">
+              <mat-error *ngIf="shouldShowError('birthDate')">
+                {{ getFieldError('birthDate') }}
+=======
               <input matInput [matDatepicker]="picker" formControlName="birthDate">
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
               <mat-error *ngIf="studentForm.get('birthDate')?.hasError('required')">
                 Data de nascimento é obrigatória
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
               </mat-error>
             </mat-form-field>
 

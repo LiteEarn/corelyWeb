@@ -1,0 +1,158 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="submitButtonText"
+  [loading]="isLoading"
+  [disabled]="classGroupForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para turmas'"
+      [title]="pageTitle"
+      subtitle="Cadastre uma nova turma recorrente para gerenciar sua agenda e acompanhar as sessões."
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <mat-tab-group>
+        <mat-tab label="Informações da Turma">
+          <form [formGroup]="classGroupForm">
+            <div class="form-section">
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Nome</mat-label>
+                  <input matInput formControlName="name" placeholder="Digite o nome da turma">
+                  <mat-error *ngIf="shouldShowError('name')">
+                    {{ getFieldError('name') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field full-width">
+                  <mat-label>Descrição</mat-label>
+                  <textarea matInput formControlName="description" placeholder="Descrição opcional da turma" rows="3"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Instrutor</mat-label>
+                  <mat-select formControlName="instructorId">
+                    <mat-option value="">Selecione um instrutor</mat-option>
+                    <mat-option *ngFor="let instructor of instructors" [value]="instructor.id">
+                      {{ instructor.fullName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="shouldShowError('instructorId')">
+                    {{ getFieldError('instructorId') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Hora Início</mat-label>
+                  <input matInput type="time" formControlName="startTime">
+                  <mat-error *ngIf="shouldShowError('startTime')">
+                    {{ getFieldError('startTime') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Hora Fim</mat-label>
+                  <input matInput type="time" formControlName="endTime">
+                  <mat-error *ngIf="shouldShowError('endTime')">
+                    {{ getFieldError('endTime') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Capacidade</mat-label>
+                  <input matInput type="number" formControlName="capacity" placeholder="0" min="1">
+                  <mat-error *ngIf="shouldShowError('capacity')">
+                    {{ getFieldError('capacity') }}
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field">
+                  <mat-label>Status</mat-label>
+                  <mat-select formControlName="active">
+                    <mat-option [value]="true">Ativa</mat-option>
+                    <mat-option [value]="false">Inativa</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2 class="section-title">Dias da Semana</h2>
+              <div class="days-grid">
+                <mat-checkbox formControlName="monday">Segunda</mat-checkbox>
+                <mat-checkbox formControlName="tuesday">Terça</mat-checkbox>
+                <mat-checkbox formControlName="wednesday">Quarta</mat-checkbox>
+                <mat-checkbox formControlName="thursday">Quinta</mat-checkbox>
+                <mat-checkbox formControlName="friday">Sexta</mat-checkbox>
+                <mat-checkbox formControlName="saturday">Sábado</mat-checkbox>
+                <mat-checkbox formControlName="sunday">Domingo</mat-checkbox>
+              </div>
+            </div>
+          </form>
+        </mat-tab>
+
+        <mat-tab label="Alunos Matriculados" *ngIf="isEditMode">
+          <div class="enrolled-students-section">
+            <div class="enrolled-students-header">
+              <h2 class="section-title">Alunos Matriculados</h2>
+              <button mat-raised-button color="primary" (click)="addEnrollment()">
+                <mat-icon>add</mat-icon>
+                Adicionar Aluno
+              </button>
+            </div>
+
+            <table mat-table [dataSource]="dataSource" class="full-width-table" *ngIf="enrolledStudents.length > 0">
+              <ng-container matColumnDef="studentName">
+                <th mat-header-cell *matHeaderCellDef>Nome</th>
+                <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="studentPhone">
+                <th mat-header-cell *matHeaderCellDef>Telefone</th>
+                <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentPhone }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="studentEmail">
+                <th mat-header-cell *matHeaderCellDef>Email</th>
+                <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentEmail }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let enrollment">
+                  <ds-status-chip [status]="enrollment.status" [label]="getStatusLabel(enrollment.status)"></ds-status-chip>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Ações</th>
+                <td mat-cell *matCellDef="let enrollment">
+                  <button mat-icon-button class="action-button" [routerLink]="['/enrollments', enrollment.id]">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button mat-icon-button class="action-button" [routerLink]="['/enrollments', enrollment.id, 'edit']">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            <div class="empty-state" *ngIf="enrolledStudents.length === 0">
+              <p>Nenhum aluno matriculado nesta turma.</p>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </ds-page-card>
+  </div>
+</ds-page-form>

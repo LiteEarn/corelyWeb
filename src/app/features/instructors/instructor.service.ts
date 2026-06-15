@@ -31,6 +31,10 @@ export class InstructorService {
   }
 
   create(instructor: Instructor): Observable<Instructor> {
+<<<<<<< HEAD
+    console.log('InstructorService create chamado', instructor);
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
     return this.http.post<Instructor>(this.apiUrl, instructor);
   }
 

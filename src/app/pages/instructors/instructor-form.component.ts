@@ -12,6 +12,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
+<<<<<<< HEAD
+import { PhoneMaskUtil, CustomValidators } from '../../shared/utils';
+import { CurrentStudioService } from '../../core/services/current-studio.service';
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
 
 @Component({
   selector: 'app-instructor-form',
@@ -37,6 +42,11 @@ export class InstructorFormComponent implements OnInit {
   instructorId: string | null = null;
   loading = false;
   saving = false;
+<<<<<<< HEAD
+  isSubmitting = false;
+  isFormSubmitted = false;
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
 
   specialties = [
     'Educação Física',
@@ -55,7 +65,12 @@ export class InstructorFormComponent implements OnInit {
     private fb: FormBuilder,
     private instructorService: InstructorService,
     private router: Router,
+<<<<<<< HEAD
+    private route: ActivatedRoute,
+    private currentStudioService: CurrentStudioService
+=======
     private route: ActivatedRoute
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
   ) {
     this.instructorForm = this.createForm();
   }
@@ -71,10 +86,17 @@ export class InstructorFormComponent implements OnInit {
 
   createForm(): FormGroup {
     return this.fb.group({
+<<<<<<< HEAD
+      fullName: ['', [CustomValidators.required('Nome'), Validators.minLength(2)]],
+      phone: ['', [CustomValidators.required('Telefone'), CustomValidators.phone()]],
+      email: ['', [CustomValidators.required('Email'), CustomValidators.email()]],
+      specialty: ['', CustomValidators.required('Especialidade')],
+=======
       fullName: ['', [Validators.required, Validators.minLength(2)]],
       phone: ['', [Validators.required, Validators.pattern(/^\(\d{2}\)\s\d{4,5}-\d{4}$/)]],
       email: ['', [Validators.required, Validators.email]],
       specialty: ['', Validators.required],
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
       active: [true]
     });
   }
@@ -83,7 +105,14 @@ export class InstructorFormComponent implements OnInit {
     this.loading = true;
     this.instructorService.getById(id).subscribe({
       next: (instructor) => {
+<<<<<<< HEAD
+        this.instructorForm.patchValue({
+          ...instructor,
+          phone: PhoneMaskUtil.applyMask(instructor.phone)
+        });
+=======
         this.instructorForm.patchValue(instructor);
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
         this.loading = false;
       },
       error: (error) => {
@@ -95,9 +124,32 @@ export class InstructorFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+<<<<<<< HEAD
+    console.log('InstructorForm onSubmit executado');
+    
+    // Proteção contra múltiplos submits
+    if (this.isSubmitting) {
+      console.log('InstructorForm submit já em andamento, ignorando');
+      return;
+    }
+
+    this.isFormSubmitted = true;
+
+    if (this.instructorForm.valid) {
+      this.saving = true;
+      this.isSubmitting = true;
+      const formValue = this.instructorForm.value;
+      const instructorData: Instructor = {
+        ...formValue,
+        phone: PhoneMaskUtil.removeMask(formValue.phone),
+        // Implementação temporária para MVP. Futuramente o Studio será obtido do usuário autenticado.
+        studioId: this.currentStudioService.getStudioId()
+      };
+=======
     if (this.instructorForm.valid) {
       this.saving = true;
       const instructorData: Instructor = this.instructorForm.value;
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
 
       const operation = this.isEditMode
         ? this.instructorService.update(this.instructorId!, instructorData)
@@ -106,11 +158,19 @@ export class InstructorFormComponent implements OnInit {
       operation.subscribe({
         next: () => {
           this.saving = false;
+<<<<<<< HEAD
+          this.isSubmitting = false;
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
           this.router.navigate(['/instructors']);
         },
         error: (error) => {
           console.error('Error saving instructor:', error);
           this.saving = false;
+<<<<<<< HEAD
+          this.isSubmitting = false;
+=======
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
         }
       });
     }
@@ -120,6 +180,49 @@ export class InstructorFormComponent implements OnInit {
     this.router.navigate(['/instructors']);
   }
 
+<<<<<<< HEAD
+  // Método para aplicar máscara de telefone
+  onPhoneInput(event: any): void {
+    const input = event.target;
+    const value = input.value;
+    const maskedValue = PhoneMaskUtil.applyMask(value);
+
+    // Atualiza o valor do input com a máscara
+    input.value = maskedValue;
+
+    // Atualiza o form control com apenas números
+    const numbersOnly = PhoneMaskUtil.removeMask(maskedValue);
+    this.instructorForm.get('phone')?.setValue(numbersOnly, { emitEvent: false });
+  }
+
+  // Método para verificar se deve mostrar erro
+  shouldShowError(fieldName: string): boolean {
+    const field = this.instructorForm.get(fieldName);
+    return !!(field && field.errors && (field.touched || this.isFormSubmitted));
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.instructorForm.get(fieldName);
+    if (!field || !field.errors || (!field.touched && !this.isFormSubmitted)) {
+      return '';
+    }
+
+    // Verifica erros customizados primeiro
+    if (field.errors['required']) {
+      return field.errors['required'].message || `${fieldName} é obrigatório`;
+    }
+    if (field.errors['phone']) {
+      return field.errors['phone'].message || 'Telefone inválido';
+    }
+    if (field.errors['email']) {
+      return field.errors['email'].message || 'Email inválido';
+    }
+    if (field.errors['minlength']) {
+      return `Nome deve ter no mínimo ${field.errors['minlength'].requiredLength} caracteres`;
+    }
+
+    return 'Campo inválido';
+=======
   getFieldError(fieldName: string): string {
     const field = this.instructorForm.get(fieldName);
     if (field?.errors && field.touched) {
@@ -137,6 +240,7 @@ export class InstructorFormComponent implements OnInit {
       }
     }
     return '';
+>>>>>>> 8d033bff9dd050d48bab71765c257d850e300cf8
   }
 
   get pageTitle(): string {
