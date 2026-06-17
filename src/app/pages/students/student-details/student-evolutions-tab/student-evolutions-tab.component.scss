@@ -1,34 +1,5 @@
-.evolutions-page {
-  max-width: 1200px;
-  margin: 0 auto;
+.student-evolutions-tab {
   padding: 24px;
-}
-
-.filters-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 24px;
-}
-
-.filters-content {
-  padding: 24px;
-}
-
-.filters-section {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
-}
-
-.filter-field {
-  flex: 1;
-  min-width: 200px;
-
-  &.search-field {
-    flex: 2;
-    min-width: 300px;
-  }
 }
 
 .loading-container {
@@ -141,15 +112,6 @@
   margin-top: 2px;
 }
 
-.student-name {
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.objective-name {
-  color: #64748b;
-}
-
 .evolution-description {
   margin: 16px 0;
   color: #475569;
@@ -163,21 +125,23 @@
   margin-left: auto;
 }
 
-.more-button {
+.card-actions {
+  display: flex;
+  gap: 8px;
   margin-left: auto;
+}
+
+.action-button {
+  width: 36px;
+  height: 36px;
+
+  &.delete-button {
+    color: #ef4444;
+  }
 }
 
 // Responsive
 @media (max-width: 768px) {
-  .filters-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-field {
-    min-width: 100%;
-  }
-
   .timeline {
     padding-left: 24px;
   }

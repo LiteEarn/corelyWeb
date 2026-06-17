@@ -1,0 +1,29 @@
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 500px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.textarea-field {
+  textarea {
+    resize: none;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .form-fields {
+    min-width: 100%;
+  }
+}

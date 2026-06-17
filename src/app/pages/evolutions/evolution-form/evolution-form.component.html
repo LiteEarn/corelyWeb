@@ -1,0 +1,107 @@
+<div class="evolution-form-page">
+  <ds-page-header
+    [title]="pageTitle"
+    subtitle="Registre observações para acompanhar o progresso dos alunos."
+    [showBackButton]="true"
+    (backButtonClick)="onCancel()">
+  </ds-page-header>
+
+  <ds-page-form [loading]="isLoading">
+    <form [formGroup]="evolutionForm" (ngSubmit)="onSubmit()">
+      <mat-card class="form-card">
+        <mat-card-content>
+          <div class="form-fields">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Aluno *</mat-label>
+              <mat-select formControlName="studentId" required>
+                <mat-option *ngFor="let student of students" [value]="student.id">
+                  {{ student.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('studentId')">
+                {{ getFieldError('studentId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Objetivo</mat-label>
+              <mat-select formControlName="objectiveId">
+                <mat-option value="">Selecione um objetivo (opcional)</mat-option>
+                <mat-option *ngFor="let objective of objectives" [value]="objective.id">
+                  {{ objective.title }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Avaliação</mat-label>
+              <mat-select formControlName="evaluationId">
+                <mat-option value="">Selecione uma avaliação (opcional)</mat-option>
+                <!-- Evaluations will be loaded if needed -->
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Data *</mat-label>
+              <input matInput [matDatepicker]="evolutionDatePicker" formControlName="evolutionDate" required>
+              <mat-datepicker-toggle matSuffix [for]="evolutionDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #evolutionDatePicker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('evolutionDate')">
+                {{ getFieldError('evolutionDate') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Título *</mat-label>
+              <input matInput formControlName="title" placeholder="Ex: Sessão de Pilates">
+              <mat-error *ngIf="shouldShowError('title')">
+                {{ getFieldError('title') }}
+              </mat-error>
+              <mat-hint *ngIf="evolutionForm.get('title')?.value">
+                {{ evolutionForm.get('title')?.value.length }} / 150 caracteres
+              </mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width textarea-field">
+              <mat-label>Descrição *</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                placeholder="Descreva as observações da evolução..."
+                rows="6"
+                cdkTextareaAutosize
+                [cdkAutosizeMinRows]="3"
+                [cdkAutosizeMaxRows]="10">
+              </textarea>
+              <mat-error *ngIf="shouldShowError('description')">
+                {{ getFieldError('description') }}
+              </mat-error>
+              <mat-hint *ngIf="evolutionForm.get('description')?.value">
+                {{ getDescriptionRemainingChars() }} caracteres restantes
+              </mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end" class="form-actions">
+          <button
+            mat-button
+            type="button"
+            (click)="onCancel()"
+            [disabled]="isSubmitting">
+            Cancelar
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="isSubmitting">
+            <mat-icon *ngIf="isSubmitting" class="spinner">refresh</mat-icon>
+            <span *ngIf="!isSubmitting">{{ submitButtonText }}</span>
+            <span *ngIf="isSubmitting">Salvando...</span>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  </ds-page-form>
+</div>

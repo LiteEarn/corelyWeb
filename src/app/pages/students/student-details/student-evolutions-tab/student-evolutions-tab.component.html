@@ -1,0 +1,61 @@
+<div class="student-evolutions-tab">
+  <ds-page-header
+    title="Evoluções"
+    subtitle="Acompanhe o progresso do aluno ao longo do tratamento."
+    [showActionButton]="true"
+    actionButtonText="Nova Evolução"
+    (actionButtonClick)="onCreate()">
+  </ds-page-header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading && evolutions.length === 0" class="empty-state-wrapper">
+    <ds-empty-state
+      icon="trending_up"
+      title="Nenhuma evolução registrada"
+      description="Registre observações para acompanhar o progresso do aluno."
+      [showAction]="true"
+      actionText="Nova Evolução"
+      (actionClick)="onCreate()">
+    </ds-empty-state>
+  </div>
+
+  <div *ngIf="!isLoading && evolutions.length > 0" class="timeline-container">
+    <div class="timeline">
+      <div *ngFor="let evolution of evolutions" class="timeline-item">
+        <div class="timeline-marker"></div>
+        <mat-card class="evolution-card">
+          <mat-card-header>
+            <div mat-card-avatar class="date-avatar">
+              <span class="date-day">{{ formatDate(evolution.evolutionDate).split('/')[0] }}</span>
+              <span class="date-month">{{ formatDate(evolution.evolutionDate).split('/')[1] }}</span>
+            </div>
+            <mat-card-title-group>
+              <mat-card-title>{{ evolution.title }}</mat-card-title>
+              <mat-card-subtitle *ngIf="evolution.objectiveTitle">
+                {{ evolution.objectiveTitle }}
+              </mat-card-subtitle>
+            </mat-card-title-group>
+            <div class="card-actions">
+              <button mat-icon-button class="action-button" (click)="onEdit(evolution)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="action-button delete-button" (click)="onDelete(evolution)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="evolution-description">{{ evolution.description }}</p>
+          </mat-card-content>
+          <mat-card-actions>
+            <span class="created-by">Criado por: {{ evolution.createdBy || '-' }}</span>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

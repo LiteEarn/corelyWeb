@@ -1,18 +1,113 @@
 <div class="evolutions-page">
-  <app-page-header
+  <ds-page-header
     title="Evoluções"
-    subtitle="Acompanhe a evolução dos alunos"
+    subtitle="Acompanhe a evolução dos alunos ao longo do tratamento."
     [showActionButton]="true"
-    actionButtonText="Nova Evolução">
-  </app-page-header>
+    actionButtonText="Nova Evolução"
+    (actionButtonClick)="navigateToNew()">
+  </ds-page-header>
 
-  <mat-card class="content-card">
-    <mat-card-content>
-      <div class="empty-state">
-        <mat-icon class="empty-icon">trending_up</mat-icon>
-        <h3>Nenhuma evolução registrada</h3>
-        <p>Esta funcionalidade está em desenvolvimento. Em breve você poderá acompanhar as evoluções aqui.</p>
+  <mat-card class="filters-card">
+    <mat-card-content class="filters-content">
+      <div class="filters-section">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Aluno</mat-label>
+          <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
+            <mat-option value="all">Todos</mat-option>
+            <mat-option *ngFor="let student of students" [value]="student.id">
+              {{ student.fullName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Objetivo</mat-label>
+          <mat-select (selectionChange)="onObjectiveFilterChange($event.value)" [value]="objectiveFilter">
+            <mat-option value="all">Todos</mat-option>
+            <mat-option *ngFor="let objective of objectives" [value]="objective.id">
+              {{ objective.title }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Período Inicial</mat-label>
+          <input matInput [matDatepicker]="startDatePicker" (dateChange)="onStartDateChange($event.value)">
+          <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #startDatePicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Período Final</mat-label>
+          <input matInput [matDatepicker]="endDatePicker" (dateChange)="onEndDateChange($event.value)">
+          <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #endDatePicker></mat-datepicker>
+        </mat-form-field>
+
+                         <mat-form-field appearance="outline" class="filter-field search-field">
+           <mat-label>Buscar por título</mat-label>
+           <input matInput #titleInput (input)="onTitleFilterChange(titleInput.value)" [value]="titleFilter">
+           <mat-icon matSuffix>search</mat-icon>
+         </mat-form-field>
       </div>
     </mat-card-content>
   </mat-card>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredEvolutions.length === 0" class="empty-state-wrapper">
+    <ds-empty-state
+      icon="trending_up"
+      [title]="studentFilter !== 'all' || objectiveFilter !== 'all' || startDateFilter || endDateFilter || titleFilter ? 'Nenhuma evolução encontrada' : 'Nenhuma evolução registrada'"
+      [description]="studentFilter !== 'all' || objectiveFilter !== 'all' || startDateFilter || endDateFilter || titleFilter ? 'Tente ajustar os filtros de busca.' : 'Registre observações para acompanhar o progresso dos alunos.'"
+      [showAction]="studentFilter === 'all' && objectiveFilter === 'all' && !startDateFilter && !endDateFilter && !titleFilter"
+      actionText="Nova Evolução"
+      (actionClick)="navigateToNew()">
+    </ds-empty-state>
+  </div>
+
+  <div *ngIf="!isLoading && filteredEvolutions.length > 0" class="timeline-container">
+    <div class="timeline">
+      <div *ngFor="let evolution of filteredEvolutions" class="timeline-item">
+        <div class="timeline-marker"></div>
+        <mat-card class="evolution-card">
+          <mat-card-header>
+            <div mat-card-avatar class="date-avatar">
+              <span class="date-day">{{ formatDate(evolution.evolutionDate).split('/')[0] }}</span>
+              <span class="date-month">{{ formatDate(evolution.evolutionDate).split('/')[1] }}</span>
+            </div>
+            <mat-card-title-group>
+              <mat-card-title>{{ evolution.title }}</mat-card-title>
+              <mat-card-subtitle>
+                <span class="student-name">{{ getStudentName(evolution.studentId) }}</span>
+                <span *ngIf="evolution.objectiveId" class="objective-name"> • {{ getObjectiveTitle(evolution.objectiveId) }}</span>
+              </mat-card-subtitle>
+            </mat-card-title-group>
+            <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+               <button mat-menu-item (click)="navigateToEdit(evolution.id!)">
+                 <mat-icon>edit</mat-icon>
+                 <span>Editar</span>
+               </button>
+               <button mat-menu-item (click)="onDelete(evolution.id!)">
+                 <mat-icon>delete</mat-icon>
+                 <span>Excluir</span>
+               </button>
+             </mat-menu>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="evolution-description">{{ evolution.description }}</p>
+          </mat-card-content>
+          <mat-card-actions>
+            <span class="created-by">Criado por: {{ evolution.createdBy || '-' }}</span>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
 </div>

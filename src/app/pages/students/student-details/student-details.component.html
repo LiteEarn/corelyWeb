@@ -17,7 +17,7 @@
         <h2 class="details-title">{{ student.fullName }}</h2>
         <p class="details-subtitle">{{ student.email }}</p>
       </div>
-      
+
       <div class="info-grid">
         <div class="info-item">
           <mat-icon>phone</mat-icon>
@@ -81,15 +81,11 @@
             <app-student-evaluations-tab *ngIf="student?.id" [studentId]="student.id!"></app-student-evaluations-tab>
           </div>
         </mat-tab>
-        <mat-tab label="Evoluções">
-          <div class="tab-content">
-            <ds-empty-state
-              icon="trending_up"
-              title="Evoluções"
-              description="Em breve você poderá visualizar as evoluções do aluno aqui.">
-            </ds-empty-state>
-          </div>
-        </mat-tab>
+         <mat-tab label="Evoluções">
+           <div class="tab-content">
+             <app-student-evolutions-tab *ngIf="student?.id" [studentId]="student.id!"></app-student-evolutions-tab>
+           </div>
+         </mat-tab>
       </mat-tab-group>
     </mat-card>
   </div>

@@ -13,3 +13,4 @@ export * from './objectives/objective-details/objective-details.component';
 export * from './evaluations/evaluations.component';
 export * from './evaluations/evaluation-form/evaluation-form.component';
 export * from './evolutions/evolutions.component';
+export * from './evolutions/evolution-form/evolution-form.component';

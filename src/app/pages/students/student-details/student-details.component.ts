@@ -10,6 +10,7 @@ import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { StudentObjectivesTabComponent } from './student-objectives-tab/student-objectives-tab.component';
 import { StudentEvaluationsTabComponent } from './student-evaluations-tab/student-evaluations-tab.component';
+import { StudentEvolutionsTabComponent } from './student-evolutions-tab/student-evolutions-tab.component';
 
 @Component({
   selector: 'app-student-details',
@@ -26,7 +27,8 @@ import { StudentEvaluationsTabComponent } from './student-evaluations-tab/studen
     DsStatusChipComponent,
     DsEmptyStateComponent,
     StudentObjectivesTabComponent,
-    StudentEvaluationsTabComponent
+    StudentEvaluationsTabComponent,
+    StudentEvolutionsTabComponent
   ],
   templateUrl: './student-details.component.html',
   styleUrl: './student-details.component.scss'
