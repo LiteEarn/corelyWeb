@@ -9,6 +9,7 @@ import { DsPageHeaderComponent, DsPageCardComponent, DsStatusChipComponent, DsEm
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { StudentObjectivesTabComponent } from './student-objectives-tab/student-objectives-tab.component';
+import { StudentEvaluationsTabComponent } from './student-evaluations-tab/student-evaluations-tab.component';
 
 @Component({
   selector: 'app-student-details',
@@ -24,7 +25,8 @@ import { StudentObjectivesTabComponent } from './student-objectives-tab/student-
     DsPageCardComponent,
     DsStatusChipComponent,
     DsEmptyStateComponent,
-    StudentObjectivesTabComponent
+    StudentObjectivesTabComponent,
+    StudentEvaluationsTabComponent
   ],
   templateUrl: './student-details.component.html',
   styleUrl: './student-details.component.scss'

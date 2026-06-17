@@ -1,0 +1,106 @@
+@import '../../../shared/design-system/variables';
+
+.form-header {
+  padding: $ds-spacing-xxl $ds-spacing-xxl $ds-spacing-xl;
+}
+
+.form-content {
+  padding: 0 $ds-spacing-xxl;
+}
+
+.form-section {
+  margin-bottom: $ds-spacing-xxl;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .section-title {
+    font-size: $ds-fontSize-xl;
+    font-weight: $ds-fontWeight-semibold;
+    color: $ds-neutral900;
+    margin: 0 0 $ds-spacing-xl 0;
+    letter-spacing: -0.2px;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $ds-spacing-xl;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.imc-display {
+  display: flex;
+  align-items: center;
+  gap: $ds-spacing-md;
+  padding: $ds-spacing-md $ds-spacing-lg;
+  background: $ds-neutral100;
+  border-radius: $ds-borderRadius-md;
+  border: 1px solid $ds-border;
+
+  .imc-label {
+    font-size: $ds-fontSize-sm;
+    font-weight: $ds-fontWeight-medium;
+    color: $ds-textSecondary;
+  }
+
+  .imc-value {
+    font-size: $ds-fontSize-lg;
+    font-weight: $ds-fontWeight-semibold;
+    color: $ds-neutral900;
+  }
+}
+
+.form-field {
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    padding: 0;
+  }
+
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: $ds-spacing-sm $ds-spacing-md;
+    min-height: 40px;
+  }
+
+  ::ng-deep .mat-mdc-form-field-label {
+    top: 10px;
+  }
+
+  ::ng-deep .mat-mdc-form-field:not(.mat-mdc-form-field-should-float) .mat-mdc-form-field-label {
+    top: 10px;
+  }
+}
+
+// Responsive breakpoints
+@media (max-width: 768px) {
+  .form-header {
+    padding: $ds-spacing-lg $ds-spacing-lg $ds-spacing-lg;
+  }
+
+  .form-content {
+    padding: 0 $ds-spacing-lg;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: $ds-spacing-lg;
+  }
+}
+
+@media (max-width: 375px) {
+  .form-header {
+    padding: $ds-spacing-lg $ds-spacing-md $ds-spacing-md;
+  }
+
+  .form-content {
+    padding: 0 $ds-spacing-md;
+  }
+}

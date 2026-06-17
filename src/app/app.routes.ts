@@ -19,6 +19,7 @@ import {
   ObjectiveFormComponent,
   ObjectiveDetailsComponent,
   EvaluationsComponent,
+  EvaluationFormComponent,
   EvolutionsComponent
 } from './pages';
 
@@ -51,7 +52,9 @@ export const routes: Routes = [
       { path: 'objectives/new', component: ObjectiveFormComponent },
       { path: 'objectives/:id', component: ObjectiveDetailsComponent },
       { path: 'objectives/:id/edit', component: ObjectiveFormComponent },
-      { path: 'assessments', component: EvaluationsComponent },
+      { path: 'evaluations', component: EvaluationsComponent },
+      { path: 'evaluations/new', component: EvaluationFormComponent },
+      { path: 'evaluations/:id/edit', component: EvaluationFormComponent },
       { path: 'evolutions', component: EvolutionsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],

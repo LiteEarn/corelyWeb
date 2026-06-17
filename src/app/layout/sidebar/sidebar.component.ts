@@ -26,7 +26,7 @@ export class SidebarComponent {
     { icon: 'fact_check', label: 'Presença', route: '/attendance' },
     { icon: 'event', label: 'Agenda', route: '/sessions' },
     { icon: 'flag', label: 'Objetivos', route: '/objectives' },
-    { icon: 'assignment', label: 'Avaliações', route: '/assessments' },
+    { icon: 'assignment', label: 'Avaliações', route: '/evaluations' },
     { icon: 'trending_up', label: 'Evoluções', route: '/evolutions' },
   ];
 }

@@ -1,0 +1,64 @@
+<div class="student-evaluations-tab">
+  <ds-page-header
+    title="Avaliações do Aluno"
+    subtitle="Acompanhe as avaliações físicas deste aluno."
+    [showActionButton]="true"
+    actionButtonText="+ Nova Avaliação"
+    (actionButtonClick)="onCreate()">
+  </ds-page-header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="evaluations-content">
+    <table mat-table [dataSource]="dataSource" class="full-width-table">
+      <ng-container matColumnDef="evaluationDate">
+        <th mat-header-cell *matHeaderCellDef>Data</th>
+        <td mat-cell *matCellDef="let evaluation">{{ formatDate(evaluation.evaluationDate) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="weight">
+        <th mat-header-cell *matHeaderCellDef>Peso (kg)</th>
+        <td mat-cell *matCellDef="let evaluation">{{ evaluation.weight }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="height">
+        <th mat-header-cell *matHeaderCellDef>Altura (m)</th>
+        <td mat-cell *matCellDef="let evaluation">{{ evaluation.height }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="imc">
+        <th mat-header-cell *matHeaderCellDef>IMC</th>
+        <td mat-cell *matCellDef="let evaluation">{{ calculateIMC(evaluation.weight, evaluation.height).toFixed(2) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let evaluation">
+          <button mat-icon-button class="action-button" (click)="onEdit(evaluation)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button class="action-button delete-button" (click)="onDelete(evaluation)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <div *ngIf="evaluations.length === 0" class="empty-state-wrapper">
+      <ds-empty-state
+        icon="assignment"
+        title="Nenhuma avaliação cadastrada"
+        description="Cadastre a primeira avaliação deste aluno."
+        [showAction]="true"
+        actionText="Nova Avaliação"
+        (actionClick)="onCreate()">
+      </ds-empty-state>
+    </div>
+  </div>
+</div>

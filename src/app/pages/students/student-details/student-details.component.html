@@ -78,11 +78,7 @@
         </mat-tab>
         <mat-tab label="Avaliações">
           <div class="tab-content">
-            <ds-empty-state
-              icon="assessment"
-              title="Avaliações"
-              description="Em breve você poderá visualizar as avaliações do aluno aqui.">
-            </ds-empty-state>
+            <app-student-evaluations-tab *ngIf="student?.id" [studentId]="student.id!"></app-student-evaluations-tab>
           </div>
         </mat-tab>
         <mat-tab label="Evoluções">

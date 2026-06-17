@@ -1,0 +1,70 @@
+@import '../../../../shared/design-system/variables';
+
+.student-evaluations-tab {
+  padding: $ds-spacing-xl 0;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 32px;
+
+    .spinner {
+      font-size: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+      color: $ds-textSecondary;
+    }
+
+    p {
+      margin: 0;
+      color: $ds-textSecondary;
+      font-size: $ds-fontSize-lg;
+    }
+  }
+
+  .evaluations-content {
+    .full-width-table {
+      width: 100%;
+
+      th {
+        background-color: $ds-background;
+        font-weight: $ds-fontWeight-semibold;
+        color: $ds-neutral900;
+      }
+
+      td {
+        color: $ds-neutral900;
+      }
+    }
+  }
+
+  .action-button {
+    color: $ds-textSecondary;
+    transition: color $ds-transition-normal;
+
+    &:hover {
+      color: $ds-neutral900;
+      background-color: rgba(15, 23, 42, 0.05);
+    }
+
+    &.delete-button:hover {
+      color: $ds-error;
+      background-color: rgba(220, 38, 38, 0.05);
+    }
+  }
+
+  .empty-state-wrapper {
+    padding: 64px 32px;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

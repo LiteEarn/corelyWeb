@@ -1,0 +1,80 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="submitButtonText"
+  [loading]="isLoading"
+  [disabled]="evaluationForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para avaliações'"
+      [title]="pageTitle"
+      subtitle="Cadastre uma nova avaliação física para acompanhar a evolução dos alunos."
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <form [formGroup]="evaluationForm">
+        <div class="form-section">
+          <h2 class="section-title">Dados da Avaliação</h2>
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Aluno *</mat-label>
+              <mat-select formControlName="studentId">
+                <mat-option *ngFor="let student of students" [value]="student.id">
+                  {{ student.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('studentId')">
+                {{ getFieldError('studentId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data da Avaliação *</mat-label>
+              <input matInput [matDatepicker]="evaluationDatePicker" formControlName="evaluationDate">
+              <mat-datepicker-toggle matSuffix [for]="evaluationDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #evaluationDatePicker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('evaluationDate')">
+                {{ getFieldError('evaluationDate') }}
+              </mat-error>
+            </mat-form-field>
+
+            <div class="imc-display">
+              <span class="imc-label">IMC Calculado:</span>
+              <span class="imc-value">{{ calculatedIMC > 0 ? calculatedIMC.toFixed(2) : '-' }}</span>
+            </div>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Peso (kg) *</mat-label>
+              <input matInput type="number" formControlName="weight" placeholder="0.00" step="0.1" min="0.1" max="500">
+              <mat-error *ngIf="shouldShowError('weight')">
+                {{ getFieldError('weight') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Altura (m) *</mat-label>
+              <input matInput type="number" formControlName="height" placeholder="0.00" step="0.01" min="0.1" max="3">
+              <mat-error *ngIf="shouldShowError('height')">
+                {{ getFieldError('height') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Observações</mat-label>
+              <textarea matInput formControlName="observations" placeholder="Adicione observações sobre a avaliação" rows="4"></textarea>
+              <mat-error *ngIf="shouldShowError('observations')">
+                {{ getFieldError('observations') }}
+              </mat-error>
+              <mat-hint align="end">{{ evaluationForm.get('observations')?.value?.length || 0 }}/1000</mat-hint>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </ds-page-card>
+  </div>
+</ds-page-form>
