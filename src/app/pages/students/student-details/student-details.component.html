@@ -73,11 +73,7 @@
         </mat-tab>
         <mat-tab label="Objetivos">
           <div class="tab-content">
-            <ds-empty-state
-              icon="flag"
-              title="Objetivos"
-              description="Em breve você poderá visualizar os objetivos do aluno aqui.">
-            </ds-empty-state>
+            <app-student-objectives-tab *ngIf="student?.id" [studentId]="student.id!"></app-student-objectives-tab>
           </div>
         </mat-tab>
         <mat-tab label="Avaliações">

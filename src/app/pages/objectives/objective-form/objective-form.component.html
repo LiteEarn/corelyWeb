@@ -1,0 +1,88 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="submitButtonText"
+  [loading]="isLoading"
+  [disabled]="objectiveForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para objetivos'"
+      [title]="pageTitle"
+      subtitle="Cadastre um novo objetivo para acompanhar a evolução dos alunos."
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <form [formGroup]="objectiveForm">
+        <div class="form-section">
+          <h2 class="section-title">Dados do Objetivo</h2>
+          <div class="form-grid">
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Aluno *</mat-label>
+              <mat-select formControlName="studentId">
+                <mat-option *ngFor="let student of students" [value]="student.id">
+                  {{ student.fullName }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('studentId')">
+                {{ getFieldError('studentId') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Título *</mat-label>
+              <input matInput formControlName="title" placeholder="Digite o título do objetivo">
+              <mat-error *ngIf="shouldShowError('title')">
+                {{ getFieldError('title') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Descrição</mat-label>
+              <textarea matInput formControlName="description" placeholder="Descreva o objetivo detalhadamente" rows="3"></textarea>
+              <mat-error *ngIf="shouldShowError('description')">
+                {{ getFieldError('description') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status *</mat-label>
+              <mat-select formControlName="status">
+                <mat-option value="ACTIVE">Ativo</mat-option>
+                <mat-option value="COMPLETED">Concluído</mat-option>
+                <mat-option value="CANCELLED">Cancelado</mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('status')">
+                {{ getFieldError('status') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data Início *</mat-label>
+              <input matInput [matDatepicker]="startDatePicker" formControlName="startDate">
+              <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('startDate')">
+                {{ getFieldError('startDate') }}
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Data Meta</mat-label>
+              <input matInput [matDatepicker]="targetDatePicker" formControlName="targetDate">
+              <mat-datepicker-toggle matSuffix [for]="targetDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #targetDatePicker></mat-datepicker>
+              <mat-error *ngIf="shouldShowError('targetDate')">
+                {{ getFieldError('targetDate') }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </ds-page-card>
+  </div>
+</ds-page-form>

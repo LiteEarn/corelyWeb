@@ -39,4 +39,14 @@
     background-color: $ds-warningLight;
     color: $ds-warningDark;
   }
+
+  .ds-chip-completed {
+    background-color: $ds-infoLight;
+    color: $ds-infoDark;
+  }
+
+  .ds-chip-cancelled {
+    background-color: $ds-errorLight;
+    color: $ds-errorDark;
+  }
 }

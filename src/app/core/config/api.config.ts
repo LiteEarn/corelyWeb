@@ -6,6 +6,7 @@ export const API_CONFIG = {
     sessions: '/sessions',
     classGroups: '/class-groups',
     enrollments: '/enrollments',
-    attendance: '/attendance'
+    attendance: '/attendance',
+    objectives: '/objectives'
   }
 };

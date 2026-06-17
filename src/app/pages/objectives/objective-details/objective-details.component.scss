@@ -1,0 +1,139 @@
+@import '../../../shared/design-system/variables';
+
+.objective-details-page {
+  padding: 32px 24px;
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 96px 32px;
+
+    .spinner {
+      font-size: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+      color: $ds-textSecondary;
+    }
+
+    p {
+      margin: 0;
+      color: $ds-textSecondary;
+      font-size: $ds-fontSize-lg;
+    }
+  }
+
+  .content-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: $ds-spacing-xl;
+  }
+
+  .details-header {
+    margin-bottom: $ds-spacing-xl;
+
+    .details-title {
+      font-size: $ds-fontSize-4xl;
+      font-weight: $ds-fontWeight-bold;
+      color: $ds-neutral900;
+      margin: 0 0 $ds-spacing-sm 0;
+      letter-spacing: -0.3px;
+    }
+
+    .details-subtitle {
+      font-size: $ds-fontSize-lg;
+      color: $ds-textSecondary;
+      margin: 0;
+    }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $ds-spacing-lg;
+    margin-bottom: $ds-spacing-xl;
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: $ds-spacing-md;
+    padding: $ds-spacing-lg;
+    background: $ds-background;
+    border-radius: $ds-borderRadius-md;
+    border: 1px solid $ds-border;
+
+    mat-icon {
+      font-size: 24px;
+      color: $ds-primary;
+      flex-shrink: 0;
+    }
+
+    .info-content {
+      display: flex;
+      flex-direction: column;
+      gap: $ds-spacing-xs;
+
+      .label {
+        font-size: $ds-fontSize-xs;
+        color: $ds-textSecondary;
+        text-transform: uppercase;
+        font-weight: $ds-fontWeight-medium;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: $ds-fontSize-md;
+        color: $ds-neutral900;
+        font-weight: $ds-fontWeight-medium;
+        word-break: break-word;
+      }
+    }
+  }
+
+  .details-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $ds-spacing-md;
+    padding-top: $ds-spacing-xl;
+    border-top: 1px solid $ds-border;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .objective-details-page {
+    padding: $ds-spacing-lg $ds-spacing-md;
+
+    .content-container {
+      gap: $ds-spacing-lg;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .details-actions {
+      flex-direction: column-reverse;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}

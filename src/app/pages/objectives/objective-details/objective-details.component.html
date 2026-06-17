@@ -1,0 +1,95 @@
+<div class="objective-details-page">
+  <ds-page-header
+    title="Detalhes do Objetivo"
+    subtitle="Visualize as informações do objetivo"
+    [showBackButton]="true"
+    (backButtonClick)="onBack()">
+  </ds-page-header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading && objective" class="content-container">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <div class="details-header">
+        <h2 class="details-title">{{ objective.title }}</h2>
+        <p class="details-subtitle">{{ student?.fullName || 'Aluno não encontrado' }}</p>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon>person</mat-icon>
+          <div class="info-content">
+            <span class="label">Aluno</span>
+            <span class="value">{{ student?.fullName || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>flag</mat-icon>
+          <div class="info-content">
+            <span class="label">Status</span>
+            <ds-status-chip [status]="getStatusChipStatus(objective.status)" [label]="getStatusLabel(objective.status)"></ds-status-chip>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>calendar_today</mat-icon>
+          <div class="info-content">
+            <span class="label">Data Início</span>
+            <span class="value">{{ formatDate(objective.startDate) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>event</mat-icon>
+          <div class="info-content">
+            <span class="label">Data Meta</span>
+            <span class="value">{{ formatDate(objective.targetDate) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item full-width">
+          <mat-icon>description</mat-icon>
+          <div class="info-content">
+            <span class="label">Descrição</span>
+            <span class="value">{{ objective.description || 'Sem descrição' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>access_time</mat-icon>
+          <div class="info-content">
+            <span class="label">Criado em</span>
+            <span class="value">{{ formatDate(objective.createdAt) }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon>update</mat-icon>
+          <div class="info-content">
+            <span class="label">Atualizado em</span>
+            <span class="value">{{ formatDate(objective.updatedAt) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="details-actions">
+        <button mat-button (click)="onBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Voltar
+        </button>
+        <button mat-raised-button color="primary" (click)="onEdit()">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+        <button mat-button color="warn" (click)="onDelete()">
+          <mat-icon>delete</mat-icon>
+          Excluir
+        </button>
+      </div>
+    </ds-page-card>
+  </div>
+</div>

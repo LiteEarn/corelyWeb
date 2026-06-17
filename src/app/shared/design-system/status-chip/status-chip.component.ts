@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 
-export type ChipStatus = 'active' | 'inactive' | 'pending' | 'success' | 'warning';
+export type ChipStatus = 'active' | 'inactive' | 'pending' | 'success' | 'warning' | 'completed' | 'cancelled';
 
 @Component({
   selector: 'ds-status-chip',

@@ -16,6 +16,8 @@ import {
   SessionsComponent,
   SessionFormComponent,
   ObjectivesComponent,
+  ObjectiveFormComponent,
+  ObjectiveDetailsComponent,
   EvaluationsComponent,
   EvolutionsComponent
 } from './pages';
@@ -45,7 +47,10 @@ export const routes: Routes = [
       { path: 'sessions', component: SessionsComponent },
       { path: 'sessions/new', component: SessionFormComponent },
       { path: 'sessions/:id/edit', component: SessionFormComponent },
-      { path: 'goals', component: ObjectivesComponent },
+      { path: 'objectives', component: ObjectivesComponent },
+      { path: 'objectives/new', component: ObjectiveFormComponent },
+      { path: 'objectives/:id', component: ObjectiveDetailsComponent },
+      { path: 'objectives/:id/edit', component: ObjectiveFormComponent },
       { path: 'assessments', component: EvaluationsComponent },
       { path: 'evolutions', component: EvolutionsComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

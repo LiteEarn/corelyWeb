@@ -8,5 +8,7 @@ export * from './enrollments';
 export * from './attendance';
 export * from './sessions';
 export * from './objectives/objectives.component';
+export * from './objectives/objective-form/objective-form.component';
+export * from './objectives/objective-details/objective-details.component';
 export * from './evaluations/evaluations.component';
 export * from './evolutions/evolutions.component';

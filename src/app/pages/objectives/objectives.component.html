@@ -1,17 +1,102 @@
 <div class="objectives-page">
-  <app-page-header
+  <ds-page-header
     title="Objetivos"
-    subtitle="Gerencie os objetivos educacionais"
+    subtitle="Gerencie os objetivos dos alunos"
     [showActionButton]="true"
-    actionButtonText="Novo Objetivo">
-  </app-page-header>
+    actionButtonText="Novo Objetivo"
+    (actionButtonClick)="navigateToNew()">
+  </ds-page-header>
 
-  <mat-card class="content-card">
-    <mat-card-content>
-      <div class="empty-state">
-        <mat-icon class="empty-icon">flag</mat-icon>
-        <h3>Nenhum objetivo cadastrado</h3>
-        <p>Esta funcionalidade está em desenvolvimento. Em breve você poderá gerenciar os objetivos aqui.</p>
+  <mat-card class="filters-card">
+    <mat-card-content class="filters-content">
+      <div class="filters-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar objetivo</mat-label>
+          <input matInput #searchInput (input)="onSearchChange(searchInput.value)" placeholder="Buscar objetivo">
+          <mat-icon matPrefix class="search-icon">search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="status-filter">
+          <mat-label>Status</mat-label>
+          <mat-select (selectionChange)="onStatusFilterChange($event.value)" [value]="statusFilter">
+            <mat-option value="all">Todos</mat-option>
+            <mat-option value="ACTIVE">Ativo</mat-option>
+            <mat-option value="COMPLETED">Concluído</mat-option>
+            <mat-option value="CANCELLED">Cancelado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="student-filter">
+          <mat-label>Aluno</mat-label>
+          <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
+            <mat-option value="all">Todos</mat-option>
+            <mat-option *ngFor="let student of students" [value]="student.id">
+              {{ student.fullName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <mat-card-content class="table-content">
+      <table mat-table [dataSource]="dataSource" class="full-width-table">
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef>Objetivo</th>
+          <td mat-cell *matCellDef="let objective">{{ objective.title }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="student">
+          <th mat-header-cell *matHeaderCellDef>Aluno</th>
+          <td mat-cell *matCellDef="let objective">{{ getStudentName(objective.studentId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let objective">
+            <ds-status-chip [status]="getStatusChipStatus(objective.status)" [label]="getStatusLabel(objective.status)"></ds-status-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="startDate">
+          <th mat-header-cell *matHeaderCellDef>Data Início</th>
+          <td mat-cell *matCellDef="let objective">{{ formatDate(objective.startDate) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="targetDate">
+          <th mat-header-cell *matHeaderCellDef>Meta</th>
+          <td mat-cell *matCellDef="let objective">{{ formatDate(objective.targetDate) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Ações</th>
+          <td mat-cell *matCellDef="let objective">
+            <button mat-icon-button class="action-button" (click)="navigateToDetails(objective.id)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button class="action-button" (click)="navigateToEdit(objective.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="action-button delete-button" (click)="onDelete(objective.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <div *ngIf="filteredObjectives.length === 0" class="empty-state-wrapper">
+        <ds-empty-state
+          icon="flag"
+          [title]="searchValue || statusFilter !== 'all' || studentFilter !== 'all' ? 'Nenhum objetivo encontrado' : 'Nenhum objetivo cadastrado'"
+          [description]="searchValue || statusFilter !== 'all' || studentFilter !== 'all' ? 'Tente ajustar os filtros de busca.' : 'Cadastre o primeiro objetivo para acompanhar a evolução dos alunos.'"
+          [showAction]="!searchValue && statusFilter === 'all' && studentFilter === 'all'"
+          actionText="Novo Objetivo"
+          (actionClick)="navigateToNew()">
+        </ds-empty-state>
       </div>
     </mat-card-content>
   </mat-card>

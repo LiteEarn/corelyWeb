@@ -8,6 +8,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { DsPageHeaderComponent, DsPageCardComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../../shared/design-system';
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
+import { StudentObjectivesTabComponent } from './student-objectives-tab/student-objectives-tab.component';
 
 @Component({
   selector: 'app-student-details',
@@ -22,7 +23,8 @@ import { Student } from '../../../features/students/student.model';
     DsPageHeaderComponent,
     DsPageCardComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent
+    DsEmptyStateComponent,
+    StudentObjectivesTabComponent
   ],
   templateUrl: './student-details.component.html',
   styleUrl: './student-details.component.scss'

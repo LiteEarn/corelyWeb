@@ -1,0 +1,66 @@
+<div class="student-objectives-tab">
+  <ds-page-header
+    title="Objetivos do Aluno"
+    subtitle="Acompanhe as metas e resultados deste aluno."
+    [showActionButton]="true"
+    actionButtonText="+ Novo Objetivo"
+    (actionButtonClick)="onCreate()">
+  </ds-page-header>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="objectives-content">
+    <table mat-table [dataSource]="dataSource" class="full-width-table">
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Título</th>
+        <td mat-cell *matCellDef="let objective">{{ objective.title }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let objective">
+          <ds-status-chip [status]="getStatusChipStatus(objective.status)" [label]="getStatusLabel(objective.status)"></ds-status-chip>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="startDate">
+        <th mat-header-cell *matHeaderCellDef>Data Início</th>
+        <td mat-cell *matCellDef="let objective">{{ formatDate(objective.startDate) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="targetDate">
+        <th mat-header-cell *matHeaderCellDef>Data Meta</th>
+        <td mat-cell *matCellDef="let objective">{{ formatDate(objective.targetDate) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let objective">
+          <button mat-icon-button class="action-button" (click)="onEdit(objective)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button class="action-button delete-button" (click)="onDelete(objective)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <div *ngIf="objectives.length === 0" class="empty-state-wrapper">
+      <ds-empty-state
+        icon="flag"
+        title="Nenhum objetivo cadastrado"
+        description="Cadastre o primeiro objetivo deste aluno."
+        [showAction]="true"
+        actionText="Novo Objetivo"
+        (actionClick)="onCreate()">
+      </ds-empty-state>
+    </div>
+  </div>
+</div>

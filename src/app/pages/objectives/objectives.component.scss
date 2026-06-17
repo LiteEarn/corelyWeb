@@ -1,37 +1,180 @@
+@import '../../shared/design-system/variables';
+
 .objectives-page {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: $ds-spacing-xxl $ds-spacing-lg;
 }
 
-.content-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+.filters-card {
+  border-radius: $ds-borderRadius-lg;
+  border: 1px solid $ds-border;
+  box-shadow: $ds-shadow-card;
+  margin-bottom: $ds-spacing-xl;
+  background: $ds-white;
+
+  .filters-content {
+    padding: $ds-spacing-lg;
+  }
+
+  .filters-section {
+    display: flex;
+    gap: $ds-spacing-lg;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .search-field {
+      flex: 1;
+      min-width: 280px;
+
+      .search-icon {
+        color: $ds-textTertiary;
+        font-size: 20px;
+      }
+
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        padding: 0;
+      }
+
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding: $ds-spacing-md $ds-spacing-lg;
+        min-height: 48px;
+      }
+    }
+
+    .status-filter {
+      width: 220px;
+      min-width: 220px;
+
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        padding: 0;
+      }
+
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding: $ds-spacing-md $ds-spacing-lg;
+        min-height: 48px;
+      }
+    }
+
+    .student-filter {
+      width: 220px;
+      min-width: 220px;
+
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+
+      ::ng-deep .mat-mdc-text-field-wrapper {
+        padding: 0;
+      }
+
+      ::ng-deep .mat-mdc-form-field-infix {
+        padding: $ds-spacing-md $ds-spacing-lg;
+        min-height: 48px;
+      }
+    }
+  }
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 64px 32px;
-  text-align: center;
+.table-card {
+  border-radius: $ds-borderRadius-lg;
+  border: 1px solid $ds-border;
+  box-shadow: $ds-shadow-card;
+  overflow: hidden;
+  background: $ds-white;
 
-  .empty-icon {
-    font-size: 64px;
-    color: #cbd5e1;
-    margin-bottom: 16px;
+  .table-content {
+    padding: 0;
+  }
+}
+
+.action-button {
+  color: $ds-textSecondary;
+  transition: color $ds-transition-normal;
+
+  &:hover {
+    color: $ds-neutral900;
+    background-color: rgba(15, 23, 42, 0.05);
   }
 
-  h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-color);
-    margin: 0 0 8px 0;
+  &.delete-button:hover {
+    color: $ds-error;
+    background-color: rgba(220, 38, 38, 0.05);
+  }
+}
+
+.empty-state-wrapper {
+  padding: 96px $ds-spacing-xxl;
+}
+
+.hidden-table {
+  display: none;
+}
+
+// Responsive breakpoints
+@media (max-width: 768px) {
+  .objectives-page {
+    padding: $ds-spacing-lg $ds-spacing-md;
   }
 
-  p {
-    font-size: 16px;
-    color: #64748b;
-    margin: 0;
+  .filters-card {
+    .filters-content {
+      padding: $ds-spacing-lg;
+    }
+
+    .filters-section {
+      flex-direction: column;
+      align-items: stretch;
+
+      .search-field {
+        min-width: 100%;
+      }
+
+      .status-filter {
+        width: 100%;
+        min-width: 100%;
+      }
+
+      .student-filter {
+        width: 100%;
+        min-width: 100%;
+      }
+    }
+  }
+
+  .empty-state-wrapper {
+    padding: 64px $ds-spacing-lg;
+  }
+}
+
+@media (max-width: 1024px) {
+  .objectives-page {
+    padding: 28px $ds-spacing-lg;
+  }
+
+  .filters-card {
+    .filters-section {
+      .search-field {
+        min-width: 200px;
+      }
+
+      .status-filter {
+        width: 180px;
+        min-width: 180px;
+      }
+
+      .student-filter {
+        width: 180px;
+        min-width: 180px;
+      }
+    }
   }
 }
