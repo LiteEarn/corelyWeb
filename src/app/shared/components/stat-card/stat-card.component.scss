@@ -34,6 +34,14 @@
     background: var(--primary-color);
   }
 
+  &.color-accent {
+    background: #7c3aed;
+  }
+
+  &.color-warn {
+    background: #f59e0b;
+  }
+
   &.color-warning {
     background: #f59e0b;
   }

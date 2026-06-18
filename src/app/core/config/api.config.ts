@@ -9,6 +9,7 @@ export const API_CONFIG = {
     attendance: '/attendance',
     objectives: '/objectives',
     evaluations: '/evaluations',
-    evolutions: '/evolutions'
+    evolutions: '/evolutions',
+    dashboard: '/dashboard'
   }
 };

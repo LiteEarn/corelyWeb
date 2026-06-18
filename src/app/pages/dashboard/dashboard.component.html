@@ -1,38 +1,168 @@
-<div class="dashboard-content">
-  <h1>Dashboard</h1>
+<div class="dashboard-container">
+  <ds-page-header
+    title="Dashboard"
+    subtitle="Visão geral do seu estúdio">
+  </ds-page-header>
 
-  <div class="stats-grid">
-    <app-stat-card
-      title="Total de Alunos"
-      value="150"
-      icon="people"
-      color="primary">
-    </app-stat-card>
-
-    <app-stat-card
-      title="Avaliações Pendentes"
-      value="12"
-      icon="assignment"
-      color="warning">
-    </app-stat-card>
-
-    <app-stat-card
-      title="Objetivos Concluídos"
-      value="85%"
-      icon="check_circle"
-      color="success">
-    </app-stat-card>
+  <div *ngIf="loading" class="dashboard-loading">
+    <app-loading></app-loading>
   </div>
 
-  <div class="dashboard-widgets">
-    <!-- Cards e widgets específicos do dashboard -->
-    <mat-card class="dashboard-widget">
-      <mat-card-header>
-        <mat-card-title>Atividades Recentes</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>Conteúdo das atividades recentes...</p>
-      </mat-card-content>
-    </mat-card>
+  <div *ngIf="error" class="dashboard-error">
+    <ds-empty-state
+      icon="error_outline"
+      title="Não foi possível carregar o dashboard"
+      description="Tente novamente mais tarde."
+      [showAction]="true"
+      actionText="Tentar novamente"
+      actionIcon="refresh"
+      (actionClick)="retry()">
+    </ds-empty-state>
+  </div>
+
+  <div *ngIf="!loading && !error && !dashboardData" class="dashboard-empty">
+    <ds-empty-state
+      icon="dashboard"
+      title="Bem-vindo ao Corely"
+      description="Cadastre alunos, instrutores e turmas para começar.">
+    </ds-empty-state>
+  </div>
+
+  <div *ngIf="!loading && !error && dashboardData" class="dashboard-content">
+    <!-- Main Stats Cards -->
+    <div class="stats-grid main-stats">
+      <app-stat-card
+        title="Alunos Ativos"
+        [value]="dashboardData.activeStudents ?? 0"
+        icon="school"
+        color="primary">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Instrutores"
+        [value]="dashboardData.activeInstructors ?? 0"
+        icon="person"
+        color="accent">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Turmas"
+        [value]="dashboardData.activeClassGroups ?? 0"
+        icon="groups"
+        color="primary">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Matrículas"
+        [value]="dashboardData.totalEnrollments ?? 0"
+        icon="badge"
+        color="warn">
+      </app-stat-card>
+    </div>
+
+    <!-- Secondary Stats Cards -->
+    <div class="stats-grid secondary-stats">
+      <app-stat-card
+        title="Presenças Semana"
+        [value]="dashboardData.attendanceThisWeek ?? 0"
+        icon="event_available"
+        color="primary">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Presenças Mês"
+        [value]="dashboardData.attendanceThisMonth ?? 0"
+        icon="calendar_month"
+        color="accent">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Objetivos Ativos"
+        [value]="dashboardData.activeObjectives ?? 0"
+        icon="flag"
+        color="primary">
+      </app-stat-card>
+
+      <app-stat-card
+        title="Objetivos Concluídos"
+        [value]="dashboardData.completedObjectives ?? 0"
+        icon="check_circle"
+        color="accent">
+      </app-stat-card>
+    </div>
+
+    <!-- Indicators -->
+    <div class="indicators-grid">
+      <ds-page-card class="indicator-card">
+        <div class="indicator-content">
+          <div class="indicator-header">
+            <mat-icon class="indicator-icon">bar_chart</mat-icon>
+            <h3 class="indicator-title">Taxa de Ocupação</h3>
+          </div>
+          <div class="indicator-value">
+            <span class="percentage">{{ dashboardData.occupancyRate ?? 0 }}%</span>
+          </div>
+          <mat-progress-bar
+            class="progress-bar"
+            [color]="getOccupancyRateColor()"
+            [value]="dashboardData.occupancyRate ?? 0"
+            mode="determinate">
+          </mat-progress-bar>
+        </div>
+      </ds-page-card>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="activities-grid">
+      <ds-page-card class="activity-card">
+        <div class="activity-header">
+          <mat-icon class="activity-icon">assessment</mat-icon>
+          <h3 class="activity-title">Últimas Avaliações</h3>
+        </div>
+        <div class="activity-list" *ngIf="dashboardData.recentEvaluations?.length">
+          <div class="activity-item" *ngFor="let evaluation of dashboardData.recentEvaluations">
+            <div class="activity-item-content">
+              <p class="activity-item-name">{{ evaluation.studentName || 'N/A' }}</p>
+              <p class="activity-item-date">{{ formatDate(evaluation.date || '') }}</p>
+            </div>
+            <div class="activity-item-details">
+              <span class="detail-item">
+                <mat-icon class="detail-icon">monitor_weight</mat-icon>
+                {{ evaluation.weight ?? 0 }}kg
+              </span>
+              <span class="detail-item">
+                <mat-icon class="detail-icon">straighten</mat-icon>
+                {{ evaluation.height ?? 0 }}m
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="activity-empty" *ngIf="!dashboardData.recentEvaluations?.length">
+          <p>Nenhuma avaliação recente</p>
+        </div>
+      </ds-page-card>
+
+      <ds-page-card class="activity-card">
+        <div class="activity-header">
+          <mat-icon class="activity-icon">trending_up</mat-icon>
+          <h3 class="activity-title">Últimas Evoluções</h3>
+        </div>
+        <div class="activity-list" *ngIf="dashboardData.recentEvolutions?.length">
+          <div class="activity-item" *ngFor="let evolution of dashboardData.recentEvolutions">
+            <div class="activity-item-content">
+              <p class="activity-item-name">{{ evolution.studentName || 'N/A' }}</p>
+              <p class="activity-item-date">{{ formatDate(evolution.date || '') }}</p>
+            </div>
+            <div class="activity-item-details">
+              <p class="evolution-title">{{ evolution.title || 'Sem título' }}</p>
+              <p class="evolution-description">{{ truncateDescription(evolution.description || '') }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="activity-empty" *ngIf="!dashboardData.recentEvolutions?.length">
+          <p>Nenhuma evolução recente</p>
+        </div>
+      </ds-page-card>
+    </div>
   </div>
 </div>
