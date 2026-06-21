@@ -15,7 +15,7 @@ import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ClassGroupService } from '../../features/class-groups/class-group.service';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
-import {ReactiveFormsModule} from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 
 @Component({
   selector: 'app-enrollments',
@@ -54,7 +54,7 @@ export class EnrollmentsComponent implements OnInit {
     private studentService: StudentService,
     private classGroupService: ClassGroupService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadEnrollments();

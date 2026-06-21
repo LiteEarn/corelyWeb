@@ -1,10 +1,6 @@
 <div class="enrollments-page">
-  <ds-page-header
-    title="Matrículas"
-    subtitle="Gerencie as matrículas dos alunos nas turmas"
-    [showActionButton]="true"
-    actionButtonText="Nova Matrícula"
-    (actionButtonClick)="navigateToNew()">
+  <ds-page-header title="Matrículas" subtitle="Gerencie as matrículas dos alunos nas turmas" [showActionButton]="true"
+    actionButtonText="Nova Matrícula" (actionButtonClick)="navigateToNew()">
   </ds-page-header>
 
   <mat-card class="filters-card">
@@ -86,13 +82,11 @@
       </table>
 
       <div *ngIf="filteredEnrollments.length === 0" class="empty-state-wrapper">
-        <ds-empty-state
-          icon="assignment_ind"
+        <ds-empty-state icon="assignment_ind"
           [title]="studentFilter !== 'all' || classGroupFilter !== 'all' || statusFilter !== 'all' ? 'Nenhuma matrícula encontrada' : 'Nenhuma matrícula cadastrada'"
           [description]="studentFilter !== 'all' || classGroupFilter !== 'all' || statusFilter !== 'all' ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando a primeira matrícula da instituição.'"
           [showAction]="studentFilter === 'all' && classGroupFilter === 'all' && statusFilter === 'all'"
-          actionText="Cadastrar Primeira Matrícula"
-          (actionClick)="navigateToNew()">
+          actionText="Cadastrar Primeira Matrícula" (actionClick)="navigateToNew()">
         </ds-empty-state>
       </div>
     </mat-card-content>
