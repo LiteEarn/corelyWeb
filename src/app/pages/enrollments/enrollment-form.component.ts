@@ -19,6 +19,7 @@ import { ClassGroupService } from '../../features/class-groups/class-group.servi
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { CustomValidators } from '../../shared/utils';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-enrollment-form',
@@ -58,7 +59,8 @@ export class EnrollmentFormComponent implements OnInit {
     private classGroupService: ClassGroupService,
     private route: ActivatedRoute,
     private router: Router,
-    private currentStudioService: CurrentStudioService
+    private currentStudioService: CurrentStudioService,
+    private toastService: ToastService
   ) {
     this.enrollmentForm = this.createForm();
   }
@@ -86,7 +88,8 @@ export class EnrollmentFormComponent implements OnInit {
   loadStudents(): void {
     this.studentService.getAll({ active: true }).subscribe({
       next: (data) => {
-        this.students = data;
+        // Defensive: only keep active students even if the backend returns inactive ones
+        this.students = data.filter(student => student.active !== false);
       },
       error: (error) => {
         console.error('Error loading students:', error);
@@ -132,6 +135,11 @@ export class EnrollmentFormComponent implements OnInit {
       return;
     }
 
+    if (!this.isEditMode && !this.isSelectedStudentActive()) {
+      this.toastService.error('Não é possível matricular um aluno inativo.');
+      return;
+    }
+
     const formValue = this.enrollmentForm.getRawValue();
     const payload = {
       ...formValue,
@@ -144,6 +152,7 @@ export class EnrollmentFormComponent implements OnInit {
     if (this.isEditMode && this.enrollmentId) {
       this.enrollmentService.update(this.enrollmentId, payload).subscribe({
         next: () => {
+          this.toastService.success('Matrícula atualizada com sucesso.');
           this.isLoading = false;
           this.router.navigate(['/enrollments']);
         },
@@ -155,6 +164,7 @@ export class EnrollmentFormComponent implements OnInit {
     } else {
       this.enrollmentService.create(payload).subscribe({
         next: () => {
+          this.toastService.success('Matrícula criada com sucesso.');
           this.isLoading = false;
           this.router.navigate(['/enrollments']);
         },
@@ -168,6 +178,13 @@ export class EnrollmentFormComponent implements OnInit {
 
   onCancel(): void {
     this.router.navigate(['/enrollments']);
+  }
+
+  // Defensive guard: the selected student must be present in the active students list
+  private isSelectedStudentActive(): boolean {
+    const studentId = this.enrollmentForm.get('studentId')?.value;
+    const student = this.students.find(s => s.id === studentId);
+    return !!student && student.active !== false;
   }
 
   get pageTitle(): string {
