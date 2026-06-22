@@ -205,4 +205,11 @@ export class AttendanceComponent implements OnInit {
     if (!phone) return '-';
     return phone;
   }
+
+  hasNoInstructor(): boolean {
+    const classGroupId = this.filterForm.get('classGroupId')?.value;
+    if (!classGroupId) return false;
+    const classGroup = this.classGroups.find(cg => cg.id === classGroupId);
+    return !classGroup || !classGroup.instructorId || classGroup.instructorId.trim() === '';
+  }
 }

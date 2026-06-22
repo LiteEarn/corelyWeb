@@ -21,7 +21,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         if (error.status === 400 && error.error?.code === 'BUSINESS_RULE') {
           // Display the business rule message from the API
           const message = error.error.message || 'Erro de regra de negócio.';
-          toastService.error(message);
+          // Use longer duration for business rule errors with detailed information
+          toastService.error(message, 10000);
         } else if (error.status === 409) {
           // Conflict error (e.g., duplicate, constraint violation)
           const message = error.error?.message || 'Conflito de dados. Por favor, verifique as informações.';

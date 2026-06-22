@@ -18,6 +18,10 @@
 
   <div class="form-content">
     <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <div *ngIf="isEditMode && hasNoInstructor()" class="warning-banner">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <span class="warning-text">Sem Instrutor</span>
+      </div>
       <mat-tab-group>
         <mat-tab label="Informações da Turma">
           <form [formGroup]="classGroupForm">
@@ -102,7 +106,7 @@
           <div class="enrolled-students-section">
             <div class="enrolled-students-header">
               <h2 class="section-title">Alunos Matriculados</h2>
-              <button mat-raised-button color="primary" (click)="addEnrollment()">
+              <button mat-raised-button color="primary" (click)="addEnrollment()" [disabled]="hasNoInstructor()">
                 <mat-icon>add</mat-icon>
                 Adicionar Aluno
               </button>

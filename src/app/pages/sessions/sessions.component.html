@@ -60,7 +60,10 @@
 
         <ng-container matColumnDef="instructor">
           <th mat-header-cell *matHeaderCellDef>Instrutor</th>
-          <td mat-cell *matCellDef="let session">{{ getInstructorName(session.instructorId) }}</td>
+          <td mat-cell *matCellDef="let session">
+            <span *ngIf="hasNoInstructor(session)" class="warning-badge">Sem Instrutor</span>
+            <span *ngIf="!hasNoInstructor(session)">{{ getInstructorName(session.instructorId) }}</span>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="maxStudents">

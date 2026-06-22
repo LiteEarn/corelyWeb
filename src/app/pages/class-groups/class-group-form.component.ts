@@ -290,4 +290,9 @@ export class ClassGroupFormComponent implements OnInit {
     }
     return fieldName === 'startTime' || fieldName === 'endTime';
   }
+
+  hasNoInstructor(): boolean {
+    const instructorId = this.classGroupForm.get('instructorId')?.value;
+    return !instructorId || instructorId.trim() === '';
+  }
 }

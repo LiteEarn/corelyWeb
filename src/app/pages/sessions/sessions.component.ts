@@ -136,6 +136,10 @@ export class SessionsComponent implements OnInit {
     return d.toLocaleDateString('pt-BR');
   }
 
+  hasNoInstructor(session: Session): boolean {
+    return !session.instructorId || session.instructorId.trim() === '';
+  }
+
   navigateToNew(): void {
     this.router.navigate(['/sessions/new']);
   }

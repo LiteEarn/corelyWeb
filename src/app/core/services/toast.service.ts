@@ -15,6 +15,10 @@ export class ToastService {
     this.show(message, 'error', duration);
   }
 
+  errorLong(message: string, duration: number = 10000): void {
+    this.show(message, 'error', duration);
+  }
+
   warning(message: string, duration: number = 4000): void {
     this.show(message, 'warning', duration);
   }

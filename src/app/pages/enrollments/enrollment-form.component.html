@@ -2,7 +2,7 @@
   [cancelText]="'Cancelar'"
   [submitText]="submitButtonText"
   [loading]="isLoading"
-  [disabled]="enrollmentForm.invalid"
+  [disabled]="enrollmentForm.invalid || hasNoInstructor()"
   (cancel)="onCancel()"
   (submit)="onSubmit()">
 

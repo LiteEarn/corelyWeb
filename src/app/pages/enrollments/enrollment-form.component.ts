@@ -223,4 +223,11 @@ export class EnrollmentFormComponent implements OnInit {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
+
+  hasNoInstructor(): boolean {
+    const classGroupId = this.enrollmentForm.get('classGroupId')?.value;
+    if (!classGroupId) return false;
+    const classGroup = this.classGroups.find(cg => cg.id === classGroupId);
+    return !classGroup || !classGroup.instructorId || classGroup.instructorId.trim() === '';
+  }
 }

@@ -24,7 +24,7 @@
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <button mat-raised-button color="primary" class="load-students-button" (click)="loadStudents()" [disabled]="isLoading">
+        <button mat-raised-button color="primary" class="load-students-button" (click)="loadStudents()" [disabled]="isLoading || hasNoInstructor()">
           <mat-icon>people</mat-icon>
           Carregar Alunos
         </button>
@@ -43,7 +43,7 @@
   <div *ngIf="hasLoadedStudents && studentsAttendance.length > 0" class="students-list">
     <div class="students-header">
       <h3>Lista de Alunos</h3>
-      <button mat-raised-button color="primary" class="save-button" (click)="saveAttendance()">
+      <button mat-raised-button color="primary" class="save-button" (click)="saveAttendance()" [disabled]="hasNoInstructor()">
         <mat-icon>save</mat-icon>
         Salvar Presença
       </button>

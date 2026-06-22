@@ -134,6 +134,10 @@ export class ClassGroupsComponent implements OnInit {
     return `${startTime} - ${endTime}`;
   }
 
+  hasNoInstructor(classGroup: ClassGroup): boolean {
+    return !classGroup.instructorId || classGroup.instructorId.trim() === '';
+  }
+
   navigateToNew(): void {
     this.router.navigate(['/class-groups/new']);
   }

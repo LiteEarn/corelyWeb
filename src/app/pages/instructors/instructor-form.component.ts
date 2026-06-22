@@ -138,6 +138,7 @@ export class InstructorFormComponent implements OnInit {
           console.error('Error saving instructor:', error);
           this.saving = false;
           this.isSubmitting = false;
+          // Error is handled by the error interceptor which shows the toast message
         }
       });
     }

@@ -48,7 +48,10 @@
 
         <ng-container matColumnDef="instructor">
           <th mat-header-cell *matHeaderCellDef>Instrutor</th>
-          <td mat-cell *matCellDef="let classGroup">{{ getInstructorName(classGroup.instructorId, classGroup) }}</td>
+          <td mat-cell *matCellDef="let classGroup">
+            <span *ngIf="hasNoInstructor(classGroup)" class="warning-badge">Sem Instrutor</span>
+            <span *ngIf="!hasNoInstructor(classGroup)">{{ getInstructorName(classGroup.instructorId, classGroup) }}</span>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="days">
