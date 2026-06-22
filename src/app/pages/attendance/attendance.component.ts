@@ -103,11 +103,23 @@ export class AttendanceComponent implements OnInit {
     this.selectedDate = attendanceDate;
     this.isLoading = true;
 
-    // Load enrolled students
-    this.enrollmentService.getByClassGroupId(classGroupId).subscribe({
+    // Load enrolled students - uses dedicated endpoint to get only students from selected class group
+    this.enrollmentService.getStudentsByClassGroupId(classGroupId).subscribe({
       next: (enrollments) => {
+        console.log('ENROLLMENTS', enrollments);
+        console.log('First enrollment sample:', enrollments.length > 0 ? enrollments[0] : 'none');
+        // Defensive filtering: only keep active students with active enrollments
+        // Note: EnrollmentService.getByClassGroupId already filters by active: true on backend
+        // We check enrollment.active (boolean) instead of enrollment.status (string)
+        const activeEnrollments = enrollments.filter(enrollment => {
+          const studentActive = enrollment.studentActive !== false;
+          const enrollmentActive = enrollment.active !== false;
+          return studentActive && enrollmentActive;
+        });
+        console.log('Active enrollments count:', activeEnrollments.length);
+
         // Initialize students with default attendance (present = true)
-        this.studentsAttendance = enrollments.map(enrollment => ({
+        this.studentsAttendance = activeEnrollments.map(enrollment => ({
           studentId: enrollment.studentId,
           studentName: enrollment.studentName || '',
           studentPhone: enrollment.studentPhone || '',

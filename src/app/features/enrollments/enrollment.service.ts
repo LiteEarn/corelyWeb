@@ -23,6 +23,9 @@ export class EnrollmentService {
     if (filters?.status) {
       params = params.set('status', filters.status);
     }
+    if (filters?.active !== undefined) {
+      params = params.set('active', filters.active.toString());
+    }
     return this.http.get<Enrollment[]>(this.apiUrl, { params });
   }
 
@@ -43,6 +46,16 @@ export class EnrollmentService {
   }
 
   getByClassGroupId(classGroupId: string): Observable<Enrollment[]> {
-    return this.getAll({ classGroupId });
+    return this.getAll({ classGroupId, active: true });
+  }
+
+  /**
+   * Get students enrolled in a specific class group.
+   * Uses the dedicated endpoint that returns only students from the selected class group.
+   * @param classGroupId The ID of the class group
+   * @returns Observable of Enrollment array containing only students from that class group
+   */
+  getStudentsByClassGroupId(classGroupId: string): Observable<Enrollment[]> {
+    return this.http.get<Enrollment[]>(`${this.apiUrl}/class-groups/${classGroupId}/students`);
   }
 }
