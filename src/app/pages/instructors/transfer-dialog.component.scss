@@ -1,0 +1,83 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.instructor-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #1976d2;
+  }
+
+  .label {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .value {
+    margin: 4px 0 0 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.class-groups-section {
+  margin-bottom: 20px;
+
+  .section-title {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  mat-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+  }
+
+  .class-group-info {
+    .class-name {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .class-schedule {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  .no-class-groups {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+  }
+}
+
+.target-section {
+  .full-width {
+    width: 100%;
+  }
+}

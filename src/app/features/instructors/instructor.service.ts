@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Instructor, InstructorFilters } from './instructor.model';
+import { ClassGroup } from '../class-groups/class-group.model';
 import { API_CONFIG } from '../../core/config/api.config';
 
 @Injectable({
@@ -41,5 +42,13 @@ export class InstructorService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  transferClassGroups(sourceInstructorId: string, targetInstructorId: string): Observable<{ updatedCount: number }> {
+    return this.http.put<{ updatedCount: number }>(`${this.apiUrl}/${sourceInstructorId}/reassign`, { targetInstructorId });
+  }
+
+  getClassGroups(instructorId: string): Observable<ClassGroup[]> {
+    return this.http.get<ClassGroup[]>(`${this.apiUrl}/${instructorId}/class-groups`);
   }
 }

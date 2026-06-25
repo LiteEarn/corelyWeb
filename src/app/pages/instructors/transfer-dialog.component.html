@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>Transferir Turmas</h2>
+<mat-dialog-content>
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="!loading">
+    <div class="instructor-info">
+      <mat-icon>person</mat-icon>
+      <div>
+        <p class="label">Instrutor de origem:</p>
+        <p class="value">{{ sourceInstructor.fullName }}</p>
+      </div>
+    </div>
+
+    <div class="class-groups-section">
+      <p class="section-title">Turmas ativas ({{ activeClassGroups.length }})</p>
+      <mat-list *ngIf="activeClassGroups.length > 0">
+        <mat-list-item *ngFor="let group of activeClassGroups">
+          <mat-icon matListIcon>class</mat-icon>
+          <div class="class-group-info">
+            <p class="class-name">{{ group.name }}</p>
+            <p class="class-schedule">{{ group.startTime }} - {{ group.endTime }}</p>
+          </div>
+        </mat-list-item>
+      </mat-list>
+      <p *ngIf="activeClassGroups.length === 0" class="no-class-groups">
+        Este instrutor não possui turmas ativas.
+      </p>
+    </div>
+
+    <div class="target-section">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Selecionar instrutor de destino</mat-label>
+        <mat-select [formControl]="targetInstructorControl" [errorStateMatcher]="errorStateMatcher">
+          <mat-option *ngFor="let instructor of activeInstructors" [value]="instructor.id">
+            {{ instructor.fullName }}
+          </mat-option>
+        </mat-select>
+        <mat-error>{{ getErrorMessage() }}</mat-error>
+      </mat-form-field>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onConfirm()"
+    [disabled]="loading || activeClassGroups.length === 0">
+    Confirmar Transferência
+  </button>
+</mat-dialog-actions>

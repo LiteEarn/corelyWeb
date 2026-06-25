@@ -62,6 +62,9 @@
             <button mat-icon-button class="action-button" [routerLink]="['/instructors', instructor.id, 'edit']">
               <mat-icon>edit</mat-icon>
             </button>
+            <button mat-icon-button class="action-button" (click)="openTransferDialog(instructor)" [disabled]="!instructor.active">
+              <mat-icon>swap_horiz</mat-icon>
+            </button>
           </td>
         </ng-container>
 

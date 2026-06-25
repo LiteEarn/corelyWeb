@@ -8,10 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog } from '@angular/material/dialog';
 import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
 import {ReactiveFormsModule} from "@angular/forms";
+import { TransferDialogComponent } from './transfer-dialog.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-instructors-list',
@@ -42,7 +45,12 @@ export class InstructorsListComponent implements OnInit {
   searchValue: string = '';
   statusFilter: string = 'all';
 
-  constructor(private instructorService: InstructorService, private router: Router) {}
+  constructor(
+    private instructorService: InstructorService,
+    private router: Router,
+    private dialog: MatDialog,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadInstructors();
@@ -92,5 +100,32 @@ export class InstructorsListComponent implements OnInit {
 
   navigateToNew(): void {
     this.router.navigate(['/instructors/new']);
+  }
+
+  openTransferDialog(instructor: Instructor): void {
+    const dialogRef = this.dialog.open(TransferDialogComponent, {
+      width: '500px',
+      data: { instructor }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.executeTransfer(result.sourceInstructorId, result.targetInstructorId);
+      }
+    });
+  }
+
+  executeTransfer(sourceInstructorId: string, targetInstructorId: string): void {
+    this.instructorService.transferClassGroups(sourceInstructorId, targetInstructorId).subscribe({
+      next: (response) => {
+        console.log('Transfer response:', response);
+        this.toastService.success(`${response.updatedCount} turma(s) transferida(s) com sucesso!`);
+        this.loadInstructors();
+      },
+      error: (error) => {
+        console.error('Error transferring class groups:', error);
+        this.toastService.error('Erro ao transferir turmas. Tente novamente.');
+      }
+    });
   }
 }
