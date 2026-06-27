@@ -25,8 +25,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           toastService.error(message, 10000);
         } else if (error.status === 409) {
           // Conflict error (e.g., duplicate, constraint violation)
-          const message = error.error?.message || 'Conflito de dados. Por favor, verifique as informações.';
-          toastService.error(message);
+          // If confirmationRequired is true, the component will handle the dialog
+          if (error.error?.confirmationRequired) {
+            // Skip toast, component will show confirmation dialog
+            console.log('Confirmation required, skipping toast');
+          } else {
+            const message = error.error?.message || 'Conflito de dados. Por favor, verifique as informações.';
+            toastService.error(message);
+          }
         } else if (error.status === 404) {
           // Not found error
           toastService.error('Recurso não encontrado.');

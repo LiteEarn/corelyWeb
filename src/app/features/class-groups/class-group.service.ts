@@ -1,8 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
 import { ClassGroup, ClassGroupFilters } from './class-group.model';
 import { API_CONFIG } from '../../core/config/api.config';
+
+export interface InactivateResponse {
+  confirmationRequired?: boolean;
+  activeEnrollments?: number;
+  message?: string;
+}
+
+export interface InactivateRequest {
+  cascadeEnrollments: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -41,5 +51,10 @@ export class ClassGroupService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  inactivate(id: string, body?: InactivateRequest): Observable<InactivateResponse | void> {
+    const requestBody = body !== undefined ? body : {};
+    return this.http.post<void | InactivateResponse>(`${this.apiUrl}/${id}/inactivate`, requestBody);
   }
 }

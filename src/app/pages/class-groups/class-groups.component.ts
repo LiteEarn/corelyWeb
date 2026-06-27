@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -8,12 +8,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
-import { ClassGroupService } from '../../features/class-groups/class-group.service';
+import { ClassGroupService, InactivateResponse } from '../../features/class-groups/class-group.service';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
-import {ReactiveFormsModule} from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
+import { ToastService } from '../../core/services/toast.service';
+import { DeactivateDialogComponent } from './deactivate-dialog.component';
 
 @Component({
   selector: 'app-class-groups',
@@ -28,6 +32,7 @@ import {ReactiveFormsModule} from "@angular/forms";
     MatInputModule,
     MatSelectModule,
     MatFormFieldModule,
+    MatDialogModule,
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
@@ -45,6 +50,9 @@ export class ClassGroupsComponent implements OnInit {
   searchValue: string = '';
   instructorFilter: string = 'all';
   activeFilter: string = 'all';
+
+  private dialog = inject(MatDialog);
+  private toastService = inject(ToastService);
 
   constructor(
     private classGroupService: ClassGroupService,
@@ -140,5 +148,45 @@ export class ClassGroupsComponent implements OnInit {
 
   navigateToNew(): void {
     this.router.navigate(['/class-groups/new']);
+  }
+
+  deactivateClassGroup(classGroup: ClassGroup): void {
+    const id = classGroup.id;
+    if (!id) return;
+
+    this.classGroupService.inactivate(id).subscribe({
+      next: () => {
+        // Class group without active enrollments - success
+        this.toastService.success('Turma desativada com sucesso.');
+        this.loadClassGroups();
+      },
+      error: (error: HttpErrorResponse) => {
+        if (error.status === 409 && error.error?.confirmationRequired) {
+          this.openDeactivateDialog(id, error.error as InactivateResponse);
+        } else if (error.status === 409) {
+          this.toastService.error(error.error?.message || 'Conflito de dados.');
+        } else {
+          this.toastService.error('Erro ao desativar turma. Tente novamente.');
+        }
+      }
+    });
+  }
+
+  private openDeactivateDialog(id: string, response: InactivateResponse): void {
+    const dialogRef = this.dialog.open(DeactivateDialogComponent, {
+      width: '480px',
+      disableClose: true,
+      data: {
+        activeEnrollments: response.activeEnrollments || 0,
+        classGroupId: id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.success) {
+        this.toastService.success('Turma desativada com sucesso.');
+        this.loadClassGroups();
+      }
+    });
   }
 }
