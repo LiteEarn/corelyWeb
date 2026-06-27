@@ -154,31 +154,43 @@ export class ClassGroupsComponent implements OnInit {
     const id = classGroup.id;
     if (!id) return;
 
-    this.classGroupService.inactivate(id).subscribe({
+    console.log('[CG-002] First API call - inactivate with cascadeEnrollments: false, id:', id);
+
+    this.classGroupService.inactivate(id, { cascadeEnrollments: false }).subscribe({
       next: () => {
         // Class group without active enrollments - success
+        console.log('[CG-002] First API call - success (no active enrollments)');
         this.toastService.success('Turma desativada com sucesso.');
         this.loadClassGroups();
       },
       error: (error: HttpErrorResponse) => {
+        console.log('[CG-002] First API call - error:', error);
+        console.log('[CG-002] Error status:', error.status);
+        console.log('[CG-002] Error error:', error.error);
+        console.log('[CG-002] confirmationRequired:', error.error?.confirmationRequired);
+
         if (error.status === 409 && error.error?.confirmationRequired) {
-          this.openDeactivateDialog(id, error.error as InactivateResponse);
+          console.log('[CG-002] Opening confirmation dialog');
+          this.openDeactivateDialog(id, classGroup.name, error.error as InactivateResponse);
         } else if (error.status === 409) {
+          console.log('[CG-002] 409 but no confirmationRequired');
           this.toastService.error(error.error?.message || 'Conflito de dados.');
         } else {
+          console.log('[CG-002] Other error:', error.status);
           this.toastService.error('Erro ao desativar turma. Tente novamente.');
         }
       }
     });
   }
 
-  private openDeactivateDialog(id: string, response: InactivateResponse): void {
+  private openDeactivateDialog(id: string, name: string, response: InactivateResponse): void {
     const dialogRef = this.dialog.open(DeactivateDialogComponent, {
       width: '480px',
       disableClose: true,
       data: {
         activeEnrollments: response.activeEnrollments || 0,
-        classGroupId: id
+        classGroupId: id,
+        classGroupName: name
       }
     });
 

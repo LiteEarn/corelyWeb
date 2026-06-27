@@ -12,6 +12,7 @@ export interface InactivateResponse {
 
 export interface InactivateRequest {
   cascadeEnrollments: boolean;
+  enrollmentIds?: string[];
 }
 
 @Injectable({
@@ -53,8 +54,8 @@ export class ClassGroupService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  inactivate(id: string, body?: InactivateRequest): Observable<InactivateResponse | void> {
-    const requestBody = body !== undefined ? body : {};
-    return this.http.post<void | InactivateResponse>(`${this.apiUrl}/${id}/inactivate`, requestBody);
+  inactivate(id: string, request: InactivateRequest): Observable<InactivateResponse | void> {
+    console.log('[CG-002] Service - inactivate called with id:', id, 'request:', request);
+    return this.http.post<void | InactivateResponse>(`${this.apiUrl}/${id}/inactivate`, request);
   }
 }

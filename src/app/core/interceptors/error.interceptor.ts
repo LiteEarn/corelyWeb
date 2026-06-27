@@ -1,5 +1,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { ToastService } from '../services/toast.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
@@ -7,7 +9,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     // Handle errors
-    // @ts-ignore - RxJS pipe typing issue
     catchError((error: HttpErrorResponse) => {
       if (error.error instanceof ErrorEvent) {
         // Client-side error
@@ -53,9 +54,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       // Re-throw the error for the component to handle if needed
-      throw error;
+      return throwError(() => error);
     })
   );
 };
-
-import { catchError } from 'rxjs/operators';

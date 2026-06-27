@@ -10,6 +10,7 @@ import { ToastService } from '../../core/services/toast.service';
 export interface DeactivateDialogData {
   activeEnrollments: number;
   classGroupId: string;
+  classGroupName: string;
 }
 
 @Component({
@@ -22,18 +23,17 @@ export interface DeactivateDialogData {
     MatProgressSpinnerModule
   ],
   template: `
-    <h2 mat-dialog-title>Deactivate Class Group</h2>
+    <h2 mat-dialog-title>Desativar Turma</h2>
     <mat-dialog-content>
       <p>
-        This class group has <strong>{{ data.activeEnrollments }}</strong> active
-        enrollment{{ data.activeEnrollments === 1 ? '' : 's' }}.
+        Esta turma possui <strong>{{ data.activeEnrollments }}</strong>
+        matrícula{{ data.activeEnrollments === 1 ? '' : 's' }} ativa{{ data.activeEnrollments === 1 ? '' : 's' }}.
       </p>
-      <p>If you continue:</p>
+      <p>Ao continuar:</p>
       <ul>
-        <li>The class group will be deactivated.</li>
-        <li>All active enrollments will also be deactivated.</li>
-        <li>Students will NOT be removed.</li>
-        <li>Attendance history will be preserved.</li>
+        <li>A turma será desativada.</li>
+        <li>As matrículas ativas também serão desativadas.</li>
+        <li>O histórico de presenças será preservado.</li>
       </ul>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -41,16 +41,16 @@ export interface DeactivateDialogData {
         mat-stroked-button
         (click)="onCancel()"
         [disabled]="deactivating">
-        Cancel
+        Cancelar
       </button>
       <button
         mat-raised-button
         color="primary"
         (click)="onConfirm()"
         [disabled]="deactivating">
-        <span *ngIf="!deactivating">Deactivate Class Group</span>
+        <span *ngIf="!deactivating">Desativar Turma</span>
         <span *ngIf="deactivating" class="button-with-spinner">
-          Deactivating
+          Desativando
           <mat-spinner diameter="16" class="button-spinner"></mat-spinner>
         </span>
       </button>
@@ -89,13 +89,17 @@ export class DeactivateDialogComponent {
   }
 
   onConfirm(): void {
+    console.log('[CG-002] Dialog - onConfirm clicked, classGroupId:', this.data.classGroupId);
     this.deactivating = true;
 
+    console.log('[CG-002] Second API call - inactivate with cascadeEnrollments: true');
     this.classGroupService.inactivate(this.data.classGroupId, { cascadeEnrollments: true }).subscribe({
       next: () => {
+        console.log('[CG-002] Second API call - success');
         this.dialogRef.close({ success: true });
       },
       error: (error: HttpErrorResponse) => {
+        console.log('[CG-002] Second API call - error:', error);
         this.deactivating = false;
         this.toastService.error(error.error?.message || 'Erro ao desativar turma. Tente novamente.');
       }
