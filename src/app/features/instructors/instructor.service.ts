@@ -44,8 +44,8 @@ export class InstructorService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  transferClassGroups(sourceInstructorId: string, targetInstructorId: string): Observable<{ updatedCount: number }> {
-    return this.http.put<{ updatedCount: number }>(`${this.apiUrl}/${sourceInstructorId}/reassign`, { targetInstructorId });
+  transferClassGroups(sourceInstructorId: string, targetInstructorId: string, classGroupIds: string[]): Observable<{ updatedCount: number }> {
+    return this.http.put<{ updatedCount: number }>(`${this.apiUrl}/${sourceInstructorId}/reassign`, { targetInstructorId, classGroupIds });
   }
 
   getClassGroups(instructorId: string): Observable<ClassGroup[]> {

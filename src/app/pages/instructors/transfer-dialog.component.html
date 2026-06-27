@@ -4,7 +4,7 @@
     <mat-spinner diameter="40"></mat-spinner>
   </div>
 
-  <div *ngIf="!loading">
+  <div *ngIf="!loading" class="dialog-content">
     <div class="instructor-info">
       <mat-icon>person</mat-icon>
       <div>
@@ -14,18 +14,46 @@
     </div>
 
     <div class="class-groups-section">
-      <p class="section-title">Turmas ativas ({{ activeClassGroups.length }})</p>
-      <mat-list *ngIf="activeClassGroups.length > 0">
-        <mat-list-item *ngFor="let group of activeClassGroups">
-          <mat-icon matListIcon>class</mat-icon>
-          <div class="class-group-info">
-            <p class="class-name">{{ group.name }}</p>
-            <p class="class-schedule">{{ group.startTime }} - {{ group.endTime }}</p>
+      <div class="section-header">
+        <div class="counter-wrapper">
+          <p class="counter-label">Selecionado</p>
+          <p class="counter-value">{{ selectedCount }} de {{ totalCount }} turmas</p>
+        </div>
+        <div class="selection-controls">
+          <button mat-stroked-button (click)="selectAllClassGroups()" [disabled]="isAllSelected">Selecionar Todas</button>
+          <button mat-stroked-button (click)="clearSelection()" [disabled]="selectedCount === 0">Limpar</button>
+        </div>
+      </div>
+
+      <div *ngIf="activeClassGroups.length > 0" class="class-groups-cards">
+        <div
+          *ngFor="let group of activeClassGroups"
+          class="class-group-card"
+          [class.selected]="isClassGroupSelected(group.id)"
+          (click)="toggleClassGroupSelection(group.id)">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="toggleClassGroupSelection(group.id)"
+            [checked]="isClassGroupSelected(group.id)"
+            class="card-checkbox">
+          </mat-checkbox>
+          <div class="card-content">
+            <div class="card-header">
+              <mat-icon class="card-icon">class</mat-icon>
+              <p class="class-name">{{ group.name }}</p>
+            </div>
+            <div class="card-details">
+              <p class="class-schedule">{{ group.startTime }} - {{ group.endTime }}</p>
+            </div>
           </div>
-        </mat-list-item>
-      </mat-list>
+        </div>
+      </div>
+
       <p *ngIf="activeClassGroups.length === 0" class="no-class-groups">
         Este instrutor não possui turmas ativas.
+      </p>
+      <p *ngIf="selectedCount === 0 && activeClassGroups.length > 0" class="validation-message">
+        Selecione pelo menos uma turma.
       </p>
     </div>
 
@@ -43,12 +71,16 @@
   </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()" [disabled]="loading">Cancelar</button>
+  <button mat-stroked-button (click)="onCancel()" [disabled]="loading || transferring">Cancelar</button>
   <button
     mat-raised-button
     color="primary"
     (click)="onConfirm()"
-    [disabled]="loading || activeClassGroups.length === 0">
-    Confirmar Transferência
+    [disabled]="isConfirmDisabled">
+    <span *ngIf="!transferring">Transferir</span>
+    <span *ngIf="transferring" class="button-with-spinner">
+      Transferindo
+      <mat-spinner diameter="16" class="button-spinner"></mat-spinner>
+    </span>
   </button>
 </mat-dialog-actions>

@@ -8,11 +8,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-transfer-dialog',
@@ -27,6 +29,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
     MatListModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
+    MatSnackBarModule,
     ReactiveFormsModule
   ],
   templateUrl: './transfer-dialog.component.html',
@@ -37,13 +40,16 @@ export class TransferDialogComponent implements OnInit {
   activeClassGroups: ClassGroup[] = [];
   activeInstructors: Instructor[] = [];
   loading = true;
+  transferring = false;
   targetInstructorControl = new FormControl('', Validators.required);
   errorStateMatcher: ErrorStateMatcher = new ErrorStateMatcher();
+  selectedClassGroupIds: Set<string> = new Set<string>();
 
   constructor(
     public dialogRef: MatDialogRef<TransferDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { instructor: Instructor },
-    private instructorService: InstructorService
+    private instructorService: InstructorService,
+    private snackBar: MatSnackBar
   ) {
     this.sourceInstructor = data.instructor;
   }
@@ -65,6 +71,12 @@ export class TransferDialogComponent implements OnInit {
     this.instructorService.getClassGroups(this.sourceInstructor.id).subscribe({
       next: (classGroups) => {
         this.activeClassGroups = classGroups.filter(cg => cg.active);
+        // Select all class groups by default (filter out undefined IDs)
+        this.selectedClassGroupIds = new Set(
+          this.activeClassGroups
+            .map(cg => cg.id)
+            .filter((id): id is string => id !== undefined)
+        );
         console.log('Active class groups:', this.activeClassGroups);
       },
       error: (error) => {
@@ -93,10 +105,37 @@ export class TransferDialogComponent implements OnInit {
       return;
     }
 
+    if (this.selectedClassGroupIds.size === 0) {
+      this.snackBar.open('Selecione pelo menos uma turma.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
     const targetInstructorId = this.targetInstructorControl.value;
-    this.dialogRef.close({
-      sourceInstructorId: this.sourceInstructor.id,
-      targetInstructorId: targetInstructorId
+    const sourceInstructorId = this.sourceInstructor.id;
+
+    if (!sourceInstructorId || !targetInstructorId) {
+      this.snackBar.open('Erro: IDs de instrutor inválidos.', 'Fechar', { duration: 3000 });
+      return;
+    }
+
+    this.transferring = true;
+
+    this.instructorService.transferClassGroups(
+      sourceInstructorId,
+      targetInstructorId,
+      Array.from(this.selectedClassGroupIds)
+    ).subscribe({
+      next: (response) => {
+        this.transferring = false;
+        this.snackBar.open('Turmas transferidas com sucesso!', 'Fechar', { duration: 3000 });
+        this.dialogRef.close({ success: true, updatedCount: response.updatedCount });
+      },
+      error: (error) => {
+        this.transferring = false;
+        console.error('Error transferring class groups:', error);
+        const errorMessage = error.error?.message || error.message || 'Erro ao transferir turmas.';
+        this.snackBar.open(errorMessage, 'Fechar', { duration: 5000 });
+      }
     });
   }
 
@@ -115,5 +154,46 @@ export class TransferDialogComponent implements OnInit {
       return 'Selecione um instrutor de destino';
     }
     return '';
+  }
+
+  toggleClassGroupSelection(classGroupId: string | undefined): void {
+    if (!classGroupId) return;
+    if (this.selectedClassGroupIds.has(classGroupId)) {
+      this.selectedClassGroupIds.delete(classGroupId);
+    } else {
+      this.selectedClassGroupIds.add(classGroupId);
+    }
+  }
+
+  isClassGroupSelected(classGroupId: string | undefined): boolean {
+    return classGroupId ? this.selectedClassGroupIds.has(classGroupId) : false;
+  }
+
+  selectAllClassGroups(): void {
+    this.selectedClassGroupIds = new Set(
+      this.activeClassGroups
+        .map(cg => cg.id)
+        .filter((id): id is string => id !== undefined)
+    );
+  }
+
+  clearSelection(): void {
+    this.selectedClassGroupIds.clear();
+  }
+
+  get selectedCount(): number {
+    return this.selectedClassGroupIds.size;
+  }
+
+  get totalCount(): number {
+    return this.activeClassGroups.length;
+  }
+
+  get isAllSelected(): boolean {
+    return this.selectedClassGroupIds.size === this.activeClassGroups.length && this.activeClassGroups.length > 0;
+  }
+
+  get isConfirmDisabled(): boolean {
+    return this.loading || this.transferring || this.targetInstructorControl.invalid || this.selectedClassGroupIds.size === 0;
   }
 }

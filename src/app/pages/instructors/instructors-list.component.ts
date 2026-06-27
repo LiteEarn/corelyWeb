@@ -104,27 +104,14 @@ export class InstructorsListComponent implements OnInit {
 
   openTransferDialog(instructor: Instructor): void {
     const dialogRef = this.dialog.open(TransferDialogComponent, {
-      width: '500px',
+      width: '700px',
+      maxWidth: '90vw',
       data: { instructor }
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.executeTransfer(result.sourceInstructorId, result.targetInstructorId);
-      }
-    });
-  }
-
-  executeTransfer(sourceInstructorId: string, targetInstructorId: string): void {
-    this.instructorService.transferClassGroups(sourceInstructorId, targetInstructorId).subscribe({
-      next: (response) => {
-        console.log('Transfer response:', response);
-        this.toastService.success(`${response.updatedCount} turma(s) transferida(s) com sucesso!`);
+      if (result && result.success) {
         this.loadInstructors();
-      },
-      error: (error) => {
-        console.error('Error transferring class groups:', error);
-        this.toastService.error('Erro ao transferir turmas. Tente novamente.');
       }
     });
   }
