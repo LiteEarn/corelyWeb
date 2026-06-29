@@ -24,7 +24,7 @@ export class SidebarComponent {
     { icon: 'groups', label: 'Turmas', route: '/class-groups' },
     { icon: 'assignment_ind', label: 'Matrículas', route: '/enrollments' },
     { icon: 'fact_check', label: 'Presença', route: '/attendance' },
-    { icon: 'event', label: 'Agenda', route: '/sessions' },
+    { icon: 'event', label: 'Agenda do Dia', route: '/daily-agenda' },
     { icon: 'flag', label: 'Objetivos', route: '/objectives' },
     { icon: 'assignment', label: 'Avaliações', route: '/evaluations' },
     { icon: 'timeline', label: 'Evoluções', route: '/evolutions' },

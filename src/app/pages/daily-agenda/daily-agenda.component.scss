@@ -1,0 +1,356 @@
+@import '../../shared/design-system/variables';
+
+.daily-agenda-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $ds-spacing-xxl $ds-spacing-lg;
+}
+
+.filters-card {
+  border-radius: $ds-borderRadius-lg;
+  border: 1px solid $ds-border;
+  box-shadow: $ds-shadow-card;
+  margin-bottom: $ds-spacing-xl;
+  background: $ds-white;
+
+  .filters-content { padding: $ds-spacing-lg; }
+
+  .filters-row {
+    display: flex;
+    gap: $ds-spacing-lg;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .date-field { width: 200px; }
+    .today-button { height: 48px; white-space: nowrap; }
+    .instructor-filter { width: 220px; min-width: 220px; }
+
+    .date-field, .instructor-filter {
+      ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+      ::ng-deep .mat-mdc-text-field-wrapper { padding: 0; }
+      ::ng-deep .mat-mdc-form-field-infix { padding: $ds-spacing-md $ds-spacing-lg; min-height: 48px; }
+    }
+  }
+}
+
+.agenda-content {
+  .date-header {
+    display: flex;
+    align-items: center;
+    gap: $ds-spacing-md;
+    margin-bottom: $ds-spacing-xl;
+
+    .date-title {
+      font-size: $ds-fontSize-4xl;
+      font-weight: $ds-fontWeight-semibold;
+      color: $ds-text;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: $ds-spacing-md;
+    }
+
+    .today-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 12px;
+      background: $ds-primary;
+      color: $ds-white;
+      border-radius: $ds-borderRadius-full;
+      font-size: $ds-fontSize-xs;
+      font-weight: $ds-fontWeight-medium;
+    }
+
+    .session-count {
+      font-size: $ds-fontSize-md;
+      color: $ds-textSecondary;
+      margin-left: auto;
+    }
+  }
+
+  .error-state, .empty-state {
+    display: flex;
+    justify-content: center;
+    padding: 64px $ds-spacing-xxl;
+  }
+}
+
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: $ds-spacing-md;
+}
+
+.session-card {
+  border-radius: $ds-borderRadius-md;
+  border: 1px solid $ds-border;
+  box-shadow: $ds-shadow-card;
+  overflow: hidden;
+  transition: box-shadow $ds-transition-normal, border-color $ds-transition-normal;
+
+  &:hover {
+    box-shadow: $ds-shadow-hover;
+    border-color: $ds-neutral300;
+  }
+
+  &.card-expanded { border-color: $ds-primary; box-shadow: $ds-shadow-hover; }
+  &.card-past { opacity: 0.8; }
+
+  .card-main {
+    display: flex;
+    align-items: center;
+    padding: $ds-spacing-lg $ds-spacing-xl;
+    gap: $ds-spacing-xl;
+    cursor: pointer;
+    transition: background-color $ds-transition-fast;
+
+    &:hover { background-color: $ds-neutral100; }
+  }
+
+  .card-time {
+    min-width: 120px;
+
+    .time-value {
+      font-size: $ds-fontSize-lg;
+      font-weight: $ds-fontWeight-semibold;
+      color: $ds-text;
+      white-space: nowrap;
+    }
+  }
+
+  .card-info {
+    flex: 1;
+    min-width: 0;
+
+    .card-title {
+      font-size: $ds-fontSize-xl;
+      font-weight: $ds-fontWeight-semibold;
+      color: $ds-text;
+      margin: 0 0 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-instructor {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: $ds-fontSize-sm;
+      color: $ds-textSecondary;
+
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    }
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: $ds-spacing-sm;
+
+    .card-students {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: $ds-fontSize-sm;
+      color: $ds-textSecondary;
+
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    }
+  }
+
+  .card-status { min-width: 100px; text-align: center; }
+  .card-expand-icon { color: $ds-textTertiary; display: flex; align-items: center; }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: $ds-borderRadius-sm;
+  font-size: $ds-fontSize-xs;
+  font-weight: $ds-fontWeight-medium;
+  white-space: nowrap;
+
+  &.status-scheduled { background-color: $ds-infoLight; color: $ds-infoDark; }
+  &.status-completed { background-color: $ds-successLight; color: $ds-successDark; }
+  &.status-cancelled { background-color: $ds-errorLight; color: $ds-errorDark; }
+}
+
+.card-detail {
+  border-top: 1px solid $ds-border;
+  background-color: $ds-background;
+
+  .detail-section {
+    padding: $ds-spacing-xl;
+
+    & + .detail-section { border-top: 1px solid $ds-border; }
+  }
+
+  .detail-title {
+    font-size: $ds-fontSize-lg;
+    font-weight: $ds-fontWeight-semibold;
+    color: $ds-text;
+    margin: 0 0 $ds-spacing-lg;
+    display: flex;
+    align-items: center;
+    gap: $ds-spacing-sm;
+  }
+
+  .student-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    background: $ds-primary;
+    color: $ds-white;
+    border-radius: $ds-borderRadius-full;
+    font-size: $ds-fontSize-xs;
+    font-weight: $ds-fontWeight-medium;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $ds-spacing-lg;
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .detail-label {
+        font-size: $ds-fontSize-xs;
+        color: $ds-textTertiary;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        font-weight: $ds-fontWeight-medium;
+      }
+
+      .detail-value {
+        font-size: $ds-fontSize-md;
+        color: $ds-text;
+        font-weight: $ds-fontWeight-medium;
+      }
+    }
+  }
+
+  .no-students {
+    display: flex;
+    align-items: center;
+    gap: $ds-spacing-sm;
+    padding: $ds-spacing-xl;
+    color: $ds-textSecondary;
+    font-size: $ds-fontSize-md;
+    justify-content: center;
+
+    mat-icon { color: $ds-textTertiary; }
+  }
+
+  .students-list { display: flex; flex-direction: column; gap: $ds-spacing-sm; }
+
+  .student-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $ds-spacing-md $ds-spacing-lg;
+    background: $ds-white;
+    border-radius: $ds-borderRadius-sm;
+    border: 1px solid $ds-border;
+    gap: $ds-spacing-lg;
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: $ds-spacing-md;
+      flex: 1;
+      min-width: 0;
+
+      .student-name {
+        font-size: $ds-fontSize-md;
+        font-weight: $ds-fontWeight-medium;
+        color: $ds-text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .student-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: $ds-borderRadius-full;
+        font-size: $ds-fontSize-xs;
+        font-weight: $ds-fontWeight-medium;
+        white-space: nowrap;
+
+        &.status-active { background: $ds-successLight; color: $ds-successDark; }
+        &.status-inactive { background: $ds-neutral100; color: $ds-neutral600; }
+      }
+    }
+
+    .attendance-buttons {
+      display: flex;
+      gap: $ds-spacing-sm;
+      flex-shrink: 0;
+
+      .att-btn {
+        width: 36px; height: 36px;
+
+        mat-icon { font-size: 20px; }
+
+        &.att-present { color: $ds-success; }
+        &.att-absent { color: $ds-danger; }
+        &.att-justified { color: $ds-warningDark; }
+        &[disabled] { opacity: .4; }
+      }
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .daily-agenda-page { padding: 28px $ds-spacing-lg; }
+
+  .filters-card .filters-row {
+    .date-field { width: 180px; }
+    .instructor-filter { width: 180px; min-width: 180px; }
+  }
+}
+
+@media (max-width: 768px) {
+  .daily-agenda-page { padding: $ds-spacing-lg $ds-spacing-md; }
+
+  .filters-card .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+
+    .date-field, .instructor-filter { width: 100%; min-width: 100%; }
+    .today-button { width: 100%; }
+  }
+
+  .agenda-content .date-header .date-title { font-size: $ds-fontSize-3xl; }
+
+  .session-card {
+    .card-main { flex-wrap: wrap; gap: $ds-spacing-md; padding: $ds-spacing-md; }
+    .card-time, .card-info { width: 100%; }
+    .card-time { min-width: auto; }
+  }
+
+  .card-detail {
+    .detail-grid { grid-template-columns: 1fr; }
+
+    .student-row {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .attendance-buttons {
+        width: 100%;
+        justify-content: center;
+        padding-top: $ds-spacing-sm;
+        border-top: 1px solid $ds-border;
+      }
+    }
+  }
+}
