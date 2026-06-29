@@ -2,7 +2,7 @@
   [cancelText]="'Cancelar'"
   [submitText]="submitButtonText"
   [loading]="isLoading"
-  [disabled]="enrollmentForm.invalid || hasNoInstructor()"
+  [disabled]="enrollmentForm.invalid"
   (cancel)="onCancel()"
   (submit)="onSubmit()">
 
@@ -11,7 +11,7 @@
       [showBackButton]="true"
       [backButtonText]="'Voltar para matrículas'"
       [title]="pageTitle"
-      subtitle="Cadastre uma nova matrícula para vincular alunos às turmas."
+      [subtitle]="subtitle"
       (backButtonClick)="onCancel()">
     </ds-page-header>
   </div>
@@ -39,8 +39,8 @@
               <mat-label>Turma</mat-label>
               <mat-select formControlName="classGroupId">
                 <mat-option value="">Selecione uma turma</mat-option>
-                <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
-                  {{ classGroup.name }}
+                <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id" [disabled]="classGroup.id && isClassGroupInactive(classGroup.id) && enrollmentForm.get('classGroupId')?.value !== classGroup.id">
+                  {{ getClassGroupLabel(classGroup) }}
                 </mat-option>
               </mat-select>
               <mat-error *ngIf="shouldShowError('classGroupId')">
@@ -67,6 +67,10 @@
                 <mat-option value="completed">Concluída</mat-option>
               </mat-select>
             </mat-form-field>
+          </div>
+          <div *ngIf="hasNoInstructor()" class="warning-message">
+            <mat-icon class="warning-icon">warning</mat-icon>
+            <span>A turma selecionada não possui instrutor. Recomenda-se atribuir um instrutor à turma.</span>
           </div>
         </div>
       </form>
