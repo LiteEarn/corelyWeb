@@ -80,6 +80,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   instructorFilter: string = 'all';
   loading: boolean = false;
   error: string | null = null;
+  sessionActionLoading: Record<string, 'start' | 'complete' | null> = {};
 
   private allSessions: Session[] = [];
   private classGroups: { id: string; name: string }[] = [];
@@ -318,6 +319,44 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     });
   }
 
+  startSession(card: SessionCard): void {
+    const sessionId = card.session.id;
+    if (!sessionId || this.sessionActionLoading[sessionId]) return;
+
+    this.sessionActionLoading[sessionId] = 'start';
+
+    this.sessionService.start(sessionId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (updated) => {
+        card.session.status = updated.status;
+        this.sessionActionLoading[sessionId] = null;
+        this.toastService.success('Aula iniciada.');
+      },
+      error: () => {
+        this.sessionActionLoading[sessionId] = null;
+        this.toastService.error('Não foi possível iniciar a aula.');
+      },
+    });
+  }
+
+  completeSession(card: SessionCard): void {
+    const sessionId = card.session.id;
+    if (!sessionId || this.sessionActionLoading[sessionId]) return;
+
+    this.sessionActionLoading[sessionId] = 'complete';
+
+    this.sessionService.complete(sessionId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (updated) => {
+        card.session.status = updated.status;
+        this.sessionActionLoading[sessionId] = null;
+        this.toastService.success('Aula finalizada.');
+      },
+      error: () => {
+        this.sessionActionLoading[sessionId] = null;
+        this.toastService.error('Não foi possível finalizar a aula.');
+      },
+    });
+  }
+
   getSessionStudents(card: SessionCard): SessionStudent[] {
     return card._students || [];
   }
@@ -337,6 +376,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   getStatusChip(status: string): { status: ChipStatus; label: string } {
     const map: Record<string, { status: ChipStatus; label: string }> = {
       SCHEDULED: { status: 'completed', label: 'Agendada' },
+      IN_PROGRESS: { status: 'warning', label: 'Em andamento' },
       COMPLETED: { status: 'success', label: 'Concluída' },
       CANCELLED: { status: 'cancelled', label: 'Cancelada' },
     };

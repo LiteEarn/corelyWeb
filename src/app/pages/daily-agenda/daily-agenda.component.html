@@ -124,7 +124,7 @@
           </div>
         </div>
 
-        <div *ngIf="card.expanded" class="card-detail">
+          <div *ngIf="card.expanded" class="card-detail">
           <div class="detail-section">
             <h4 class="detail-title">Detalhes da Aula</h4>
 
@@ -147,6 +147,33 @@
                   [status]="getStatusChip(card.session.status).status"
                   [label]="getStatusChip(card.session.status).label"
                 ></ds-status-chip>
+              </div>
+            </div>
+
+            <div class="card-actions" *ngIf="card.session.status === 'SCHEDULED' || card.session.status === 'IN_PROGRESS'">
+              <div (click)="$event.stopPropagation()">
+                <ds-button
+                  *ngIf="card.session.status === 'SCHEDULED'"
+                  variant="primary"
+                  size="sm"
+                  label="Iniciar Aula"
+                  icon="play_arrow"
+                  [loading]="sessionActionLoading[card.session.id!] === 'start'"
+                  [disabled]="!!sessionActionLoading[card.session.id!]"
+                  (click)="startSession(card)"
+                ></ds-button>
+              </div>
+              <div (click)="$event.stopPropagation()">
+                <ds-button
+                  *ngIf="card.session.status === 'IN_PROGRESS'"
+                  variant="primary"
+                  size="sm"
+                  label="Finalizar Aula"
+                  icon="stop"
+                  [loading]="sessionActionLoading[card.session.id!] === 'complete'"
+                  [disabled]="!!sessionActionLoading[card.session.id!]"
+                  (click)="completeSession(card)"
+                ></ds-button>
               </div>
             </div>
           </div>
@@ -178,7 +205,7 @@
                     type="button"
                     class="att-toggle att-present"
                     [class.selected]="student.attendanceStatus === 'PRESENT'"
-                    [disabled]="student.saving"
+                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
                     (click)="setAttendance(student, 'PRESENT', card); $event.stopPropagation()"
                   >
                     <mat-icon>check_circle</mat-icon>
@@ -188,7 +215,7 @@
                     type="button"
                     class="att-toggle att-absent"
                     [class.selected]="student.attendanceStatus === 'ABSENT'"
-                    [disabled]="student.saving"
+                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
                     (click)="setAttendance(student, 'ABSENT', card); $event.stopPropagation()"
                   >
                     <mat-icon>cancel</mat-icon>
@@ -198,7 +225,7 @@
                     type="button"
                     class="att-toggle att-justified"
                     [class.selected]="student.attendanceStatus === 'JUSTIFIED'"
-                    [disabled]="student.saving"
+                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
                     (click)="setAttendance(student, 'JUSTIFIED', card); $event.stopPropagation()"
                   >
                     <mat-icon>assignment_late</mat-icon>
