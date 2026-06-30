@@ -16,4 +16,6 @@ export interface SessionFilters {
   search?: string;
   status?: string;
   instructorId?: string;
+  classGroupId?: string;
+  sessionDate?: string;
 }

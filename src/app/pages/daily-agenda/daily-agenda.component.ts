@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -8,8 +8,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { DsPageHeaderComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import {
+  DsPageHeaderComponent,
+  DsEmptyStateComponent,
+} from '../../shared/design-system';
+import { DsStatusChipComponent, ChipStatus } from '../../shared/design-system/status-chip/status-chip.component';
+import { DsButtonComponent } from '../../shared/design-system/button/button.component';
 import { LoadingComponent } from '../../shared/components';
 import { SessionService } from '../../features/sessions/session.service';
 import { Session } from '../../features/sessions/session.model';
@@ -48,9 +54,12 @@ interface SessionStudent {
     MatFormFieldModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatInputModule,
     MatTooltipModule,
     DsPageHeaderComponent,
     DsEmptyStateComponent,
+    DsStatusChipComponent,
+    DsButtonComponent,
     LoadingComponent,
   ],
   templateUrl: './daily-agenda.component.html',
@@ -73,7 +82,8 @@ export class DailyAgendaComponent implements OnInit {
     private instructorService: InstructorService,
     private classGroupService: ClassGroupService,
     private enrollmentService: EnrollmentService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    @Inject(LOCALE_ID) private locale: string
   ) {}
 
   ngOnInit(): void {
@@ -86,16 +96,24 @@ export class DailyAgendaComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.sessionService.getAll().subscribe({
+    const filters: { sessionDate: string; instructorId?: string } = {
+      sessionDate: this.formatDate(this.selectedDate),
+    };
+
+    if (this.instructorFilter !== 'all') {
+      filters.instructorId = this.instructorFilter;
+    }
+
+    this.sessionService.getAll(filters).subscribe({
       next: (sessions) => {
         this.allSessions = sessions;
         this.buildSessionCards();
         this.loading = false;
       },
-      error: (err) => {
+      error: () => {
         this.loading = false;
-        this.error = 'Erro ao carregar aulas. Tente novamente.';
-        this.toastService.error('Erro ao carregar aulas.');
+        this.error = 'Erro ao carregar as aulas. Tente novamente.';
+        this.toastService.error('Erro ao carregar as aulas. Tente novamente.');
       },
     });
   }
@@ -151,6 +169,9 @@ export class DailyAgendaComponent implements OnInit {
             );
             card.enrolledCount = activeEnrollments.length;
           },
+          error: () => {
+            this.toastService.error('Erro ao carregar a ocupação das turmas.');
+          },
         });
       }
     }
@@ -159,19 +180,24 @@ export class DailyAgendaComponent implements OnInit {
   onDateChange(date: Date): void {
     this.selectedDate = date;
     this.collapseAll();
-    this.buildSessionCards();
+    this.loadSessions();
   }
 
   goToToday(): void {
     this.selectedDate = new Date();
     this.collapseAll();
-    this.buildSessionCards();
+    this.loadSessions();
+  }
+
+  clearFilters(): void {
+    this.instructorFilter = 'all';
+    this.goToToday();
   }
 
   onInstructorFilterChange(value: string): void {
     this.instructorFilter = value;
     this.collapseAll();
-    this.applyFilter();
+    this.loadSessions();
   }
 
   private applyFilter(): void {
@@ -199,8 +225,6 @@ export class DailyAgendaComponent implements OnInit {
 
   private loadStudentsForCard(card: SessionCard): void {
     if (!card.classGroupId) return;
-
-    const dateStr = this.formatDate(this.selectedDate);
 
     this.enrollmentService.getStudentsByClassGroupId(card.classGroupId).subscribe({
       next: (enrollments) => {
@@ -236,6 +260,7 @@ export class DailyAgendaComponent implements OnInit {
       },
       error: () => {
         card._students = [];
+        this.toastService.error('Erro ao carregar os alunos da aula.');
       },
     });
   }
@@ -244,24 +269,31 @@ export class DailyAgendaComponent implements OnInit {
     return card._students || [];
   }
 
-  getStatusLabel(status: string): string {
-    const map: { [key: string]: string } = {
-      SCHEDULED: 'Agendada',
-      COMPLETED: 'Concluída',
-      CANCELLED: 'Cancelada',
-      scheduled: 'Agendada',
-      completed: 'Concluída',
-      cancelled: 'Cancelada',
-    };
-    return map[status] || status;
+  getDayName(date: Date): string {
+    return date.toLocaleDateString('pt-BR', { weekday: 'long' }).toUpperCase();
   }
 
-  getStatusClass(status: string): string {
-    const s = status.toUpperCase();
-    if (s === 'SCHEDULED') return 'status-scheduled';
-    if (s === 'COMPLETED') return 'status-completed';
-    if (s === 'CANCELLED') return 'status-cancelled';
-    return 'status-scheduled';
+  getFormattedDate(date: Date): string {
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  getStatusChip(status: string): { status: ChipStatus; label: string } {
+    const map: Record<string, { status: ChipStatus; label: string }> = {
+      SCHEDULED: { status: 'completed', label: 'Agendada' },
+      COMPLETED: { status: 'success', label: 'Concluída' },
+      CANCELLED: { status: 'cancelled', label: 'Cancelada' },
+    };
+    return map[status.toUpperCase()] || { status: 'pending', label: status };
+  }
+
+  getOccupancyLabel(card: SessionCard): string {
+    const enrolled = card.enrolledCount ?? 0;
+    const capacity = card.session.maxStudents ?? 0;
+    return `${enrolled}/${capacity} alunos`;
   }
 
   formatTime(startTime: string, endTime: string): string {
@@ -273,10 +305,6 @@ export class DailyAgendaComponent implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  formatDateDisplay(date: Date): string {
-    return date.toLocaleDateString('pt-BR');
   }
 
   isToday(): boolean {

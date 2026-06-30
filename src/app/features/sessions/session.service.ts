@@ -23,6 +23,12 @@ export class SessionService {
     if (filters?.instructorId) {
       params = params.set('instructorId', filters.instructorId);
     }
+    if (filters?.classGroupId) {
+      params = params.set('classGroupId', filters.classGroupId);
+    }
+    if (filters?.sessionDate) {
+      params = params.set('sessionDate', filters.sessionDate);
+    }
     return this.http.get<Session[]>(this.apiUrl, { params });
   }
 

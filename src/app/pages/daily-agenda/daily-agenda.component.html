@@ -1,13 +1,13 @@
 <div class="daily-agenda-page">
   <ds-page-header
     title="Agenda do Dia"
-    subtitle="Visualize as aulas do dia e gerencie a presença dos alunos."
+    subtitle="Visualize e acompanhe todas as aulas programadas para o dia."
   ></ds-page-header>
 
   <mat-card class="filters-card">
     <mat-card-content class="filters-content">
       <div class="filters-row">
-        <mat-form-field appearance="outline" class="date-field">
+        <mat-form-field appearance="outline" class="filter-field date-field">
           <mat-label>Data</mat-label>
           <input
             matInput
@@ -21,7 +21,7 @@
 
         <button
           mat-stroked-button
-          class="today-button"
+          class="filter-field today-btn"
           (click)="goToToday()"
           [disabled]="isToday()"
         >
@@ -29,7 +29,7 @@
           Hoje
         </button>
 
-        <mat-form-field appearance="outline" class="instructor-filter">
+        <mat-form-field appearance="outline" class="filter-field instructor-field">
           <mat-label>Instrutor</mat-label>
           <mat-select
             [value]="instructorFilter"
@@ -47,10 +47,13 @@
 
   <div class="agenda-content">
     <div class="date-header">
-      <h2 class="date-title">
-        {{ formatDateDisplay(selectedDate) }}
-        <span *ngIf="isToday()" class="today-badge">Hoje</span>
-      </h2>
+      <div class="date-info">
+        <h2 class="date-day-name">{{ getDayName(selectedDate) }}</h2>
+        <div class="date-row">
+          <span class="date-full">{{ getFormattedDate(selectedDate) }}</span>
+          <span *ngIf="isToday()" class="today-badge">Hoje</span>
+        </div>
+      </div>
       <span *ngIf="!loading && !error" class="session-count">
         {{ filteredCards.length }}
         {{ filteredCards.length === 1 ? 'aula' : 'aulas' }}
@@ -59,7 +62,7 @@
 
     <app-loading *ngIf="loading"></app-loading>
 
-    <div *ngIf="!loading && error" class="error-state">
+    <div *ngIf="!loading && error" class="state-container">
       <ds-empty-state
         icon="error_outline"
         title="Erro ao carregar"
@@ -71,11 +74,15 @@
       ></ds-empty-state>
     </div>
 
-    <div *ngIf="!loading && !error && filteredCards.length === 0" class="empty-state">
+    <div *ngIf="!loading && !error && filteredCards.length === 0" class="state-container">
       <ds-empty-state
         icon="event_busy"
-        title="Não existem aulas para esta data."
-        description="Selecione outra data ou crie uma nova aula na agenda."
+        title="Nenhuma aula encontrada"
+        description="Não existem aulas programadas para os filtros selecionados."
+        [showAction]="true"
+        actionText="Hoje"
+        actionIcon="today"
+        (actionClick)="clearFilters()"
       ></ds-empty-state>
     </div>
 
@@ -85,8 +92,9 @@
         class="session-card"
         [class.card-expanded]="card.expanded"
         [class.card-past]="isPast()"
+        (click)="toggleCard(card)"
       >
-        <div class="card-main" (click)="toggleCard(card)">
+        <div class="card-main">
           <div class="card-time">
             <span class="time-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
           </div>
@@ -99,21 +107,16 @@
             </span>
           </div>
 
-          <div class="card-meta">
-            <div class="card-students" *ngIf="card.enrolledCount !== undefined">
-              <mat-icon>people</mat-icon>
-              <span>{{ card.enrolledCount }}</span>
-            </div>
-            <div class="card-students" *ngIf="card.enrolledCount === undefined">
-              <mat-icon>people</mat-icon>
-              <span>-</span>
-            </div>
+          <div class="card-occupancy">
+            <mat-icon>people</mat-icon>
+            <span>{{ getOccupancyLabel(card) }}</span>
           </div>
 
           <div class="card-status">
-            <span class="status-badge" [ngClass]="getStatusClass(card.session.status)">
-              {{ getStatusLabel(card.session.status) }}
-            </span>
+            <ds-status-chip
+              [status]="getStatusChip(card.session.status).status"
+              [label]="getStatusChip(card.session.status).label"
+            ></ds-status-chip>
           </div>
 
           <div class="card-expand-icon">
@@ -140,9 +143,10 @@
               </div>
               <div class="detail-item">
                 <span class="detail-label">Status</span>
-                <span class="status-badge" [ngClass]="getStatusClass(card.session.status)">
-                  {{ getStatusLabel(card.session.status) }}
-                </span>
+                <ds-status-chip
+                  [status]="getStatusChip(card.session.status).status"
+                  [label]="getStatusChip(card.session.status).label"
+                ></ds-status-chip>
               </div>
             </div>
           </div>
@@ -164,9 +168,10 @@
               <div *ngFor="let student of getSessionStudents(card)" class="student-row">
                 <div class="student-info">
                   <span class="student-name">{{ student.studentName }}</span>
-                  <span class="student-status" [ngClass]="student.enrollmentStatus === 'ACTIVE' ? 'status-active' : 'status-inactive'">
-                    {{ student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo' }}
-                  </span>
+                  <ds-status-chip
+                    [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
+                    [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                  ></ds-status-chip>
                 </div>
                 <div class="attendance-buttons">
                   <button

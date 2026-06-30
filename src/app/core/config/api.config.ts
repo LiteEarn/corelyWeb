@@ -3,7 +3,7 @@ export const API_CONFIG = {
   endpoints: {
     students: '/students',
     instructors: '/instructors',
-    sessions: '/sessions',
+    sessions: '/class-sessions',
     classGroups: '/class-groups',
     enrollments: '/enrollments',
     attendance: '/attendance',
