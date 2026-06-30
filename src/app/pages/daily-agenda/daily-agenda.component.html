@@ -165,7 +165,7 @@
             </div>
 
             <div *ngIf="getSessionStudents(card).length > 0" class="students-list">
-              <div *ngFor="let student of getSessionStudents(card)" class="student-row">
+              <div *ngFor="let student of getSessionStudents(card)" class="student-row" [class.saving]="student.saving">
                 <div class="student-info">
                   <span class="student-name">{{ student.studentName }}</span>
                   <ds-status-chip
@@ -173,31 +173,38 @@
                     [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
                   ></ds-status-chip>
                 </div>
-                <div class="attendance-buttons">
+                <div class="attendance-toggle-group">
                   <button
-                    mat-mini-fab
-                    class="att-btn att-present"
-                    disabled
-                    matTooltip="Marcar Presença"
+                    type="button"
+                    class="att-toggle att-present"
+                    [class.selected]="student.attendanceStatus === 'PRESENT'"
+                    [disabled]="student.saving"
+                    (click)="setAttendance(student, 'PRESENT', card); $event.stopPropagation()"
                   >
                     <mat-icon>check_circle</mat-icon>
+                    <span>Presente</span>
                   </button>
                   <button
-                    mat-mini-fab
-                    class="att-btn att-absent"
-                    disabled
-                    matTooltip="Marcar Ausência"
+                    type="button"
+                    class="att-toggle att-absent"
+                    [class.selected]="student.attendanceStatus === 'ABSENT'"
+                    [disabled]="student.saving"
+                    (click)="setAttendance(student, 'ABSENT', card); $event.stopPropagation()"
                   >
                     <mat-icon>cancel</mat-icon>
+                    <span>Falta</span>
                   </button>
                   <button
-                    mat-mini-fab
-                    class="att-btn att-justified"
-                    disabled
-                    matTooltip="Justificar Falta"
+                    type="button"
+                    class="att-toggle att-justified"
+                    [class.selected]="student.attendanceStatus === 'JUSTIFIED'"
+                    [disabled]="student.saving"
+                    (click)="setAttendance(student, 'JUSTIFIED', card); $event.stopPropagation()"
                   >
                     <mat-icon>assignment_late</mat-icon>
+                    <span>Justificada</span>
                   </button>
+                  <mat-spinner *ngIf="student.saving" diameter="16" class="att-spinner"></mat-spinner>
                 </div>
               </div>
             </div>

@@ -349,34 +349,77 @@
   }
 }
 
-.attendance-buttons {
-  display: flex;
-  gap: $ds-spacing-sm;
+.attendance-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: $ds-spacing-xs;
   flex-shrink: 0;
 
-  .att-btn {
-    width: 36px;
-    height: 36px;
+  .att-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid $ds-border;
+    border-radius: $ds-borderRadius-sm;
+    background: $ds-white;
+    cursor: pointer;
+    font-size: $ds-fontSize-xs;
+    font-weight: $ds-fontWeight-medium;
+    color: $ds-textSecondary;
+    transition: all $ds-transition-fast;
+    white-space: nowrap;
+    line-height: 1;
 
     mat-icon {
-      font-size: 20px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover:not(:disabled) {
+      background: $ds-background;
+      border-color: $ds-neutral300;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     &.att-present {
-      color: $ds-success;
+      &.selected {
+        background: $ds-successLight;
+        border-color: $ds-success;
+        color: $ds-successDark;
+      }
     }
 
     &.att-absent {
-      color: $ds-danger;
+      &.selected {
+        background: #fef2f2;
+        border-color: $ds-danger;
+        color: $ds-danger;
+      }
     }
 
     &.att-justified {
-      color: $ds-warningDark;
+      &.selected {
+        background: #fffbeb;
+        border-color: $ds-warningDark;
+        color: $ds-warningDark;
+      }
     }
+  }
 
-    &[disabled] {
-      opacity: 0.4;
-    }
+  .att-spinner {
+    margin-left: $ds-spacing-xs;
+  }
+}
+
+.student-row.saving {
+  .attendance-toggle-group .att-toggle {
+    pointer-events: none;
   }
 }
 
@@ -466,7 +509,7 @@
     flex-direction: column;
     align-items: flex-start;
 
-    .attendance-buttons {
+    .attendance-toggle-group {
       width: 100%;
       justify-content: center;
       padding-top: $ds-spacing-sm;
