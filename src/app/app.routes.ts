@@ -21,7 +21,8 @@ import {
   EvaluationsComponent,
   EvaluationFormComponent,
   EvolutionsComponent,
-  EvolutionFormComponent
+  EvolutionFormComponent,
+  DailyAgendaComponent
 } from './pages';
 
 export const routes: Routes = [
@@ -46,7 +47,8 @@ export const routes: Routes = [
       { path: 'enrollments/new', component: EnrollmentFormComponent },
       { path: 'enrollments/:id/edit', component: EnrollmentFormComponent },
       { path: 'attendance', component: AttendanceComponent },
-      { path: 'sessions', component: SessionsComponent },
+        { path: 'daily-agenda', component: DailyAgendaComponent },
+        { path: 'sessions', component: SessionsComponent },
       { path: 'sessions/new', component: SessionFormComponent },
       { path: 'sessions/:id/edit', component: SessionFormComponent },
       { path: 'objectives', component: ObjectivesComponent },
