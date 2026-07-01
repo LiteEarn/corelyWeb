@@ -47,4 +47,12 @@ export class SessionService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  start(id: string): Observable<Session> {
+    return this.http.patch<Session>(`${this.apiUrl}/${id}/start`, {});
+  }
+
+  complete(id: string): Observable<Session> {
+    return this.http.patch<Session>(`${this.apiUrl}/${id}/complete`, {});
+  }
 }

@@ -315,6 +315,12 @@
   }
 }
 
+.card-actions {
+  display: flex;
+  gap: $ds-spacing-md;
+  margin-top: $ds-spacing-lg;
+}
+
 .students-list {
   display: flex;
   flex-direction: column;
