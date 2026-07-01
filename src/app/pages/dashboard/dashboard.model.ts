@@ -1,29 +1,39 @@
-export interface DashboardData {
-  activeStudents?: number;
-  activeInstructors?: number;
-  activeClassGroups?: number;
-  totalEnrollments?: number;
-  attendanceThisWeek?: number;
-  attendanceThisMonth?: number;
-  activeObjectives?: number;
-  completedObjectives?: number;
-  occupancyRate?: number;
-  recentEvaluations?: RecentEvaluation[];
-  recentEvolutions?: RecentEvolution[];
+export interface OperationalDashboard {
+  todayClasses: number;
+  ongoingClasses: number;
+  presentStudents: number;
+  pendingMakeups: number;
+  upcomingSessions: UpcomingSession[];
+  pendingMakeupRequests: PendingMakeupRequest[];
+  classOccupancy: ClassOccupancy[];
+  alerts: DashboardAlert[];
 }
 
-export interface RecentEvaluation {
-  studentId?: string;
-  studentName?: string;
-  date?: string;
-  weight?: number;
-  height?: number;
+export interface UpcomingSession {
+  id: string;
+  startTime: string;
+  endTime: string;
+  className: string;
+  instructorName: string;
+  enrolledCount: number;
+  capacity: number;
+  status: string;
 }
 
-export interface RecentEvolution {
-  studentId?: string;
-  studentName?: string;
-  date?: string;
-  title?: string;
-  description?: string;
+export interface PendingMakeupRequest {
+  id: string;
+  studentName: string;
+  className: string;
+  absenceDate: string;
+}
+
+export interface ClassOccupancy {
+  className: string;
+  enrolledCount: number;
+  capacity: number;
+}
+
+export interface DashboardAlert {
+  type: 'full_class' | 'pending_makeup' | 'ongoing_class';
+  message: string;
 }
