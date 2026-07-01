@@ -15,3 +15,4 @@ export * from './evaluations/evaluation-form/evaluation-form.component';
 export * from './evolutions/evolutions.component';
 export * from './evolutions/evolution-form/evolution-form.component';
 export * from './daily-agenda/daily-agenda.component';
+export * from './makeup-approval/makeup-approval.component';
