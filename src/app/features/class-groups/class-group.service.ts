@@ -58,4 +58,8 @@ export class ClassGroupService {
     console.log('[CG-002] Service - inactivate called with id:', id, 'request:', request);
     return this.http.post<void | InactivateResponse>(`${this.apiUrl}/${id}/inactivate`, request);
   }
+
+  reactivate(id: string): Observable<ClassGroup> {
+    return this.http.post<ClassGroup>(`${this.apiUrl}/${id}/reactivate`, {});
+  }
 }

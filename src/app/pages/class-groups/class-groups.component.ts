@@ -9,9 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { HttpErrorResponse } from '@angular/common/http';
 import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
-import { ClassGroupService, InactivateResponse } from '../../features/class-groups/class-group.service';
+import { ClassGroupService } from '../../features/class-groups/class-group.service';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
@@ -154,50 +153,35 @@ export class ClassGroupsComponent implements OnInit {
     const id = classGroup.id;
     if (!id) return;
 
-    console.log('[CG-002] First API call - inactivate with cascadeEnrollments: false, id:', id);
-
-    this.classGroupService.inactivate(id, { cascadeEnrollments: false }).subscribe({
-      next: () => {
-        // Class group without active enrollments - success
-        console.log('[CG-002] First API call - success (no active enrollments)');
-        this.toastService.success('Turma desativada com sucesso.');
-        this.loadClassGroups();
-      },
-      error: (error: HttpErrorResponse) => {
-        console.log('[CG-002] First API call - error:', error);
-        console.log('[CG-002] Error status:', error.status);
-        console.log('[CG-002] Error error:', error.error);
-        console.log('[CG-002] confirmationRequired:', error.error?.confirmationRequired);
-
-        if (error.status === 409 && error.error?.confirmationRequired) {
-          console.log('[CG-002] Opening confirmation dialog');
-          this.openDeactivateDialog(id, classGroup.name, error.error as InactivateResponse);
-        } else if (error.status === 409) {
-          console.log('[CG-002] 409 but no confirmationRequired');
-          this.toastService.error(error.error?.message || 'Conflito de dados.');
-        } else {
-          console.log('[CG-002] Other error:', error.status);
-          this.toastService.error('Erro ao desativar turma. Tente novamente.');
-        }
-      }
-    });
+    this.openDeactivateDialog(id);
   }
 
-  private openDeactivateDialog(id: string, name: string, response: InactivateResponse): void {
+  private openDeactivateDialog(id: string): void {
     const dialogRef = this.dialog.open(DeactivateDialogComponent, {
       width: '480px',
       disableClose: true,
-      data: {
-        activeEnrollments: response.activeEnrollments || 0,
-        classGroupId: id,
-        classGroupName: name
-      }
+      data: { classGroupId: id }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result?.success) {
         this.toastService.success('Turma desativada com sucesso.');
         this.loadClassGroups();
+      }
+    });
+  }
+
+  reactivateClassGroup(classGroup: ClassGroup): void {
+    const id = classGroup.id;
+    if (!id) return;
+
+    this.classGroupService.reactivate(id).subscribe({
+      next: () => {
+        this.toastService.success('Turma reativada.\nAs próximas aulas foram geradas automaticamente.');
+        this.loadClassGroups();
+      },
+      error: () => {
+        this.toastService.error('Erro ao reativar turma. Tente novamente.');
       }
     });
   }

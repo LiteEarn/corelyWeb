@@ -8,9 +8,7 @@ import { ClassGroupService } from '../../features/class-groups/class-group.servi
 import { ToastService } from '../../core/services/toast.service';
 
 export interface DeactivateDialogData {
-  activeEnrollments: number;
   classGroupId: string;
-  classGroupName: string;
 }
 
 @Component({
@@ -26,15 +24,11 @@ export interface DeactivateDialogData {
     <h2 mat-dialog-title>Desativar Turma</h2>
     <mat-dialog-content>
       <p>
-        Esta turma possui <strong>{{ data.activeEnrollments }}</strong>
-        matrícula{{ data.activeEnrollments === 1 ? '' : 's' }} ativa{{ data.activeEnrollments === 1 ? '' : 's' }}.
+        Ao inativar esta turma todas as aulas futuras ainda não realizadas
+        serão canceladas automaticamente.
       </p>
-      <p>Ao continuar:</p>
-      <ul>
-        <li>A turma será desativada.</li>
-        <li>As matrículas ativas também serão desativadas.</li>
-        <li>O histórico de presenças será preservado.</li>
-      </ul>
+      <p>O histórico das aulas concluídas será preservado.</p>
+      <p><strong>Deseja continuar?</strong></p>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button
@@ -57,12 +51,9 @@ export interface DeactivateDialogData {
     </mat-dialog-actions>
   `,
   styles: [`
-    ul {
-      margin: 8px 0;
-      padding-left: 20px;
-    }
-    li {
-      margin-bottom: 4px;
+    p {
+      margin-bottom: 12px;
+      line-height: 1.5;
     }
     .button-with-spinner {
       display: inline-flex;
