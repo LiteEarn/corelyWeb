@@ -198,7 +198,7 @@ export class ClassGroupFormComponent implements OnInit {
     if (this.isEditMode && this.classGroupId) {
       this.classGroupService.update(this.classGroupId, classGroup).subscribe({
         next: () => {
-          this.toastService.success('Turma atualizada com sucesso.');
+          this.toastService.success('As aulas futuras foram atualizadas automaticamente.');
           this.isLoading = false;
           this.isSubmitting = false;
           this.router.navigate(['/class-groups']);
@@ -212,7 +212,7 @@ export class ClassGroupFormComponent implements OnInit {
     } else {
       this.classGroupService.create(classGroup).subscribe({
         next: () => {
-          this.toastService.success('Turma criada com sucesso.');
+          this.toastService.success('Turma criada com sucesso.\nAs aulas dos próximos 60 dias foram geradas automaticamente.');
           this.isLoading = false;
           this.isSubmitting = false;
           this.router.navigate(['/class-groups']);

@@ -85,8 +85,11 @@
             <button mat-icon-button class="action-button" [routerLink]="['/class-groups', classGroup.id, 'edit']">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button class="action-button" (click)="deactivateClassGroup(classGroup)" [disabled]="!classGroup.active">
+            <button mat-icon-button class="action-button" (click)="deactivateClassGroup(classGroup)" *ngIf="classGroup.active">
               <mat-icon>toggle_off</mat-icon>
+            </button>
+            <button mat-icon-button class="action-button" (click)="reactivateClassGroup(classGroup)" *ngIf="!classGroup.active">
+              <mat-icon>toggle_on</mat-icon>
             </button>
           </td>
         </ng-container>
