@@ -25,6 +25,7 @@ export class SidebarComponent {
     { icon: 'assignment_ind', label: 'Matrículas', route: '/enrollments' },
     { icon: 'fact_check', label: 'Presença', route: '/attendance' },
     { icon: 'event', label: 'Agenda do Dia', route: '/daily-agenda' },
+    { icon: 'event_repeat', label: 'Reposições', route: '/makeup-approval' },
     { icon: 'flag', label: 'Objetivos', route: '/objectives' },
     { icon: 'assignment', label: 'Avaliações', route: '/evaluations' },
     { icon: 'timeline', label: 'Evoluções', route: '/evolutions' },

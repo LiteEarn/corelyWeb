@@ -1,0 +1,171 @@
+<div class="makeup-approval-page">
+  <ds-page-header
+    title="Reposições"
+    subtitle="Gerencie solicitações de reposição de aulas."
+  ></ds-page-header>
+
+  <mat-card class="filters-card">
+    <mat-card-content class="filters-content">
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos</mat-option>
+            <mat-option value="REQUESTED">Solicitada</mat-option>
+            <mat-option value="APPROVED">Aprovada</mat-option>
+            <mat-option value="REJECTED">Rejeitada</mat-option>
+            <mat-option value="USED">Utilizada</mat-option>
+            <mat-option value="EXPIRED">Expirada</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Aluno</mat-label>
+          <input
+            matInput
+            [(ngModel)]="studentFilter"
+            placeholder="ID do aluno"
+            (blur)="onFilterChange()"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Instrutor</mat-label>
+          <mat-select [(ngModel)]="instructorFilter" (selectionChange)="onFilterChange()">
+            <mat-option value="">Todos</mat-option>
+            <mat-option *ngFor="let i of instructors" [value]="i.id">
+              {{ i.fullName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field date-field">
+          <mat-label>Data</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [(ngModel)]="dateModel"
+            (dateChange)="onDateChange($event.value)"
+          />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          class="filter-field clear-btn"
+          (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
+        >
+          <mat-icon>clear</mat-icon>
+          Limpar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <app-loading *ngIf="loading"></app-loading>
+
+  <div *ngIf="!loading && error" class="state-container">
+    <ds-empty-state
+      icon="error_outline"
+      title="Erro ao carregar"
+      [description]="error"
+      [showAction]="true"
+      actionText="Tentar novamente"
+      actionIcon="refresh"
+      (actionClick)="loadRequests()"
+    ></ds-empty-state>
+  </div>
+
+  <div
+    *ngIf="!loading && !error && filteredRequests.length === 0"
+    class="state-container"
+  >
+    <ds-empty-state
+      icon="assignment_late"
+      title="Nenhuma solicitação encontrada"
+      description="Nenhuma solicitação de reposição para os filtros selecionados."
+      [showAction]="hasActiveFilters()"
+      actionText="Limpar filtros"
+      actionIcon="clear"
+      (actionClick)="clearFilters()"
+    ></ds-empty-state>
+  </div>
+
+  <div *ngIf="!loading && !error && filteredRequests.length > 0" class="requests-list">
+    <mat-card
+      *ngFor="let request of filteredRequests"
+      class="request-card"
+    >
+      <div class="card-content">
+        <div class="card-main">
+          <div class="card-info">
+            <div class="info-row">
+              <span class="info-label">Aluno</span>
+              <span class="info-value">{{ request.studentName || '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Turma</span>
+              <span class="info-value">{{ request.className || '—' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Data da falta</span>
+              <span class="info-value">{{ formatDate(request.absenceDate) }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Instrutor</span>
+              <span class="info-value">{{ request.instructorName || '—' }}</span>
+            </div>
+            <div class="info-row info-row-reason">
+              <span class="info-label">Motivo</span>
+              <span class="info-value">{{ request.reason }}</span>
+            </div>
+          </div>
+
+          <div class="card-side">
+            <div class="card-status">
+              <ds-status-chip
+                [status]="getStatusChip(request.status).status"
+                [label]="getStatusChip(request.status).label"
+              ></ds-status-chip>
+            </div>
+
+            <div class="card-actions" *ngIf="request.status === 'REQUESTED'">
+              <div (click)="$event.stopPropagation()">
+                <ds-button
+                  label="Aprovar"
+                  icon="check"
+                  size="sm"
+                  variant="primary"
+                  [loading]="isActionLoading(request.id, 'approve')"
+                  [disabled]="!!actionLoading[request.id || '']"
+                  (click)="openApproveDialog(request)"
+                ></ds-button>
+              </div>
+              <div (click)="$event.stopPropagation()">
+                <ds-button
+                  label="Rejeitar"
+                  icon="close"
+                  size="sm"
+                  variant="danger"
+                  [loading]="isActionLoading(request.id, 'reject')"
+                  [disabled]="!!actionLoading[request.id || '']"
+                  (click)="openRejectDialog(request)"
+                ></ds-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="request.status === 'REJECTED' && request.rejectionReason"
+          class="card-rejection"
+        >
+          <mat-icon>info</mat-icon>
+          <span>{{ request.rejectionReason }}</span>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>
