@@ -7,7 +7,7 @@ import { of, throwError } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { DashboardService } from './dashboard.service';
 import { ToastService } from '../../core/services/toast.service';
-import { OperationalDashboard } from './dashboard.model';
+import { DashboardOperationalResponse } from './dashboard.model';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -16,7 +16,7 @@ describe('DashboardComponent', () => {
   let toastService: jasmine.SpyObj<ToastService>;
   let router: jasmine.SpyObj<Router>;
 
-  const mockDashboard: OperationalDashboard = {
+  const mockDashboard: DashboardOperationalResponse = {
     todayClasses: 5,
     ongoingClasses: 2,
     presentStudents: 18,
@@ -52,8 +52,8 @@ describe('DashboardComponent', () => {
       },
     ],
     classOccupancy: [
-      { className: 'Pilates Funcional', enrolledCount: 6, capacity: 8 },
-      { className: 'Yoga', enrolledCount: 8, capacity: 8 },
+      { classGroupId: 'cg-1', className: 'Pilates Funcional', capacity: 8, enrolled: 6, occupancyPercent: 75 },
+      { classGroupId: 'cg-2', className: 'Yoga', capacity: 8, enrolled: 8, occupancyPercent: 100 },
     ],
     alerts: [
       { type: 'full_class', message: 'Turma "Yoga" lotada (8/8)' },
@@ -62,7 +62,7 @@ describe('DashboardComponent', () => {
     ],
   };
 
-  const emptyDashboard: OperationalDashboard = {
+  const emptyDashboard: DashboardOperationalResponse = {
     todayClasses: 0,
     ongoingClasses: 0,
     presentStudents: 0,
@@ -290,11 +290,6 @@ describe('DashboardComponent', () => {
       expect(component.getSessionStatusLabel('IN_PROGRESS')).toBe('Em andamento');
       expect(component.getSessionStatusLabel('COMPLETED')).toBe('Concluída');
       expect(component.getSessionStatusLabel('CANCELLED')).toBe('Cancelada');
-    });
-
-    it('calculates occupancy percentage', () => {
-      expect(component.getOccupancyPercentage(6, 8)).toBe(75);
-      expect(component.getOccupancyPercentage(0, 10)).toBe(0);
     });
 
     it('returns correct color for occupancy', () => {

@@ -116,13 +116,13 @@
           <div *ngFor="let item of data.classOccupancy" class="occupancy-row">
             <div class="occupancy-info">
               <span class="occupancy-name">{{ item.className }}</span>
-              <span class="occupancy-count">{{ item.enrolledCount }}/{{ item.capacity }} alunos</span>
-              <span class="occupancy-percent">{{ getOccupancyPercentage(item.enrolledCount, item.capacity) }}%</span>
+              <span class="occupancy-count">{{ item.enrolled }}/{{ item.capacity }} alunos</span>
+              <span class="occupancy-percent">{{ item.occupancyPercent }}%</span>
             </div>
             <mat-progress-bar
               class="occupancy-bar"
-              [color]="getOccupancyColor(getOccupancyPercentage(item.enrolledCount, item.capacity))"
-              [value]="getOccupancyPercentage(item.enrolledCount, item.capacity)"
+              [color]="getOccupancyColor(item.occupancyPercent)"
+              [value]="item.occupancyPercent"
               mode="determinate">
             </mat-progress-bar>
           </div>

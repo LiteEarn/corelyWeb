@@ -17,7 +17,7 @@ import {
 } from '../../shared/design-system';
 import { ChipStatus } from '../../shared/design-system/status-chip/status-chip.component';
 import { DashboardService } from './dashboard.service';
-import { OperationalDashboard } from './dashboard.model';
+import { DashboardOperationalResponse } from './dashboard.model';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
@@ -40,7 +40,7 @@ import { ToastService } from '../../core/services/toast.service';
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  data: OperationalDashboard | null = null;
+  data: DashboardOperationalResponse | null = null;
   loading = true;
   error = false;
 
@@ -107,11 +107,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       CANCELLED: 'Cancelada',
     };
     return map[status.toUpperCase()] || status;
-  }
-
-  getOccupancyPercentage(enrolled: number, capacity: number): number {
-    if (!capacity) return 0;
-    return Math.round((enrolled / capacity) * 100);
   }
 
   getOccupancyColor(percentage: number): string {

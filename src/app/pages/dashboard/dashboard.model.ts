@@ -1,4 +1,4 @@
-export interface OperationalDashboard {
+export interface DashboardOperationalResponse {
   todayClasses: number;
   ongoingClasses: number;
   presentStudents: number;
@@ -28,9 +28,11 @@ export interface PendingMakeupRequest {
 }
 
 export interface ClassOccupancy {
+  classGroupId: string;
   className: string;
-  enrolledCount: number;
   capacity: number;
+  enrolled: number;
+  occupancyPercent: number;
 }
 
 export interface DashboardAlert {
