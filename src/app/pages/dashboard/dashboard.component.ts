@@ -70,6 +70,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (dashboard) => {
+          console.log('[Dashboard] API response:', JSON.stringify(dashboard, null, 2));
+          console.log('[Dashboard] todayClasses:', dashboard.todayClasses, typeof dashboard.todayClasses);
           this.data = dashboard;
           this.loading = false;
         },
