@@ -18,9 +18,65 @@
   gap: 24px;
 }
 
-.cards-grid {
+.kpi-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.indicators-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.indicator-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.indicator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: #f0fdf4;
+  color: #0F766E;
+}
+
+.indicator-icon.indicator-warn {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.indicator-icon.indicator-primary {
+  background-color: #f0fdf4;
+  color: #0F766E;
+}
+
+.indicator-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.indicator-label {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.indicator-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-color, #1e293b);
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
@@ -50,10 +106,17 @@
   font-size: 14px;
 }
 
+.section-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
 .sessions-list,
 .makeups-list,
-.occupancy-list,
-.alerts-list {
+.occupancy-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -159,11 +222,17 @@
   border-radius: 4px;
 }
 
-.alert-row {
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 16px;
   border-radius: 8px;
   border: 1px solid;
 }
@@ -212,7 +281,12 @@
     padding: 0 16px 16px;
   }
 
-  .cards-grid {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .grid-2col {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
@@ -243,7 +317,17 @@
     padding: 0 12px 12px;
   }
 
-  .cards-grid {
+  .kpi-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .indicators-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .grid-2col {
     grid-template-columns: 1fr;
     gap: 16px;
   }

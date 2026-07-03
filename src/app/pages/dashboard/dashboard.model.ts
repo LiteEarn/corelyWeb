@@ -7,6 +7,8 @@ export interface DashboardOperationalResponse {
   pendingMakeupRequests: PendingMakeupRequest[];
   classOccupancy: ClassOccupancy[];
   alerts: DashboardAlert[];
+  averageOccupancy?: number;
+  todayAttendanceRate?: number;
 }
 
 export interface UpcomingSession {

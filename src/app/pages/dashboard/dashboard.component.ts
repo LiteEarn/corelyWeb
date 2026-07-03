@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
@@ -23,9 +22,9 @@ import { ToastService } from '../../core/services/toast.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    MatCardModule,
     MatIconModule,
     MatProgressBarModule,
     StatCardComponent,
@@ -70,8 +69,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (dashboard) => {
-          console.log('[Dashboard] API response:', JSON.stringify(dashboard, null, 2));
-          console.log('[Dashboard] todayClasses:', dashboard.todayClasses, typeof dashboard.todayClasses);
           this.data = dashboard;
           this.loading = false;
         },
@@ -83,12 +80,48 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  get computedAverageOccupancy(): number {
+    if (!this.data?.classOccupancy?.length) {
+      return this.data?.averageOccupancy ?? 0;
+    }
+    const total = this.data.classOccupancy.reduce((sum, item) => sum + item.occupancyPercent, 0);
+    return Math.round(total / this.data.classOccupancy.length);
+  }
+
+  get computedAttendanceRate(): number {
+    return this.data?.todayAttendanceRate ?? 0;
+  }
+
+  get displayUpcomingSessions() {
+    return this.data?.upcomingSessions?.slice(0, 5) ?? [];
+  }
+
+  get displayPendingMakeups() {
+    return this.data?.pendingMakeupRequests?.slice(0, 5) ?? [];
+  }
+
+  get displayClassOccupancy() {
+    return this.data?.classOccupancy?.slice(0, 5) ?? [];
+  }
+
   retry(): void {
     this.loadDashboard();
   }
 
+  navigateToSchedule(): void {
+    this.router.navigate(['/schedule']);
+  }
+
   navigateToMakeupApproval(): void {
     this.router.navigate(['/makeup-approval']);
+  }
+
+  navigateToMakeups(): void {
+    this.router.navigate(['/makeup-approval']);
+  }
+
+  navigateToClasses(): void {
+    this.router.navigate(['/class-groups']);
   }
 
   getSessionStatus(status: string): ChipStatus {
@@ -115,6 +148,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (percentage >= 80) return 'warn';
     if (percentage >= 50) return 'accent';
     return 'primary';
+  }
+
+  getAlertIcon(type: string): string {
+    const map: Record<string, string> = {
+      full_class: 'group',
+      pending_makeup: 'assignment',
+      ongoing_class: 'play_circle',
+    };
+    return map[type] || 'info';
   }
 
   formatDate(dateStr: string): string {
