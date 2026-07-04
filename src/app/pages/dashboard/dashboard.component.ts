@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, finalize } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
@@ -17,15 +16,15 @@ import {
 } from '../../shared/design-system';
 import { ChipStatus } from '../../shared/design-system/status-chip/status-chip.component';
 import { DashboardService } from './dashboard.service';
-import { DashboardOperationalResponse } from './dashboard.model';
+import { DashboardOperationalResponse, UpcomingSession, DashboardAlert } from './dashboard.model';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    MatCardModule,
     MatIconModule,
     MatProgressBarModule,
     StatCardComponent,
@@ -50,6 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService: DashboardService,
     private toastService: ToastService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -67,28 +67,68 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.dashboardService
       .getOperationalDashboard()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        }),
+      )
       .subscribe({
         next: (dashboard) => {
-          console.log('[Dashboard] API response:', JSON.stringify(dashboard, null, 2));
-          console.log('[Dashboard] todayClasses:', dashboard.todayClasses, typeof dashboard.todayClasses);
           this.data = dashboard;
-          this.loading = false;
         },
         error: () => {
           this.error = true;
-          this.loading = false;
           this.toastService.error('Erro ao carregar o dashboard.');
         },
       });
+  }
+
+  get computedAverageOccupancy(): number {
+    return this.data?.summary?.averageOccupancy ?? 0;
+  }
+
+  get computedAttendanceRate(): number {
+    return this.data?.summary?.todayAttendanceRate ?? 0;
+  }
+
+  get displayUpcomingSessions(): UpcomingSession[] {
+    return this.data?.upcomingSessions?.slice(0, 5) ?? [];
+  }
+
+  get displayPendingMakeups() {
+    return this.data?.pendingMakeupRequests?.slice(0, 5) ?? [];
+  }
+
+  get displayClassOccupancy() {
+    return this.data?.classOccupancy?.slice(0, 5) ?? [];
   }
 
   retry(): void {
     this.loadDashboard();
   }
 
+  navigateToSchedule(): void {
+    this.router.navigate(['/schedule']);
+  }
+
   navigateToMakeupApproval(): void {
     this.router.navigate(['/makeup-approval']);
+  }
+
+  navigateToMakeups(): void {
+    this.router.navigate(['/makeup-approval']);
+  }
+
+  navigateToClasses(): void {
+    this.router.navigate(['/class-groups']);
+  }
+
+  navigateToAlertRoute(alert: DashboardAlert): void {
+    if (alert.actionRoute) {
+      this.router.navigate([alert.actionRoute]);
+    }
   }
 
   getSessionStatus(status: string): ChipStatus {
@@ -115,6 +155,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (percentage >= 80) return 'warn';
     if (percentage >= 50) return 'accent';
     return 'primary';
+  }
+
+  getAlertIcon(type: string): string {
+    const map: Record<string, string> = {
+      FULL_CLASS: 'group',
+      PENDING_MAKEUP: 'assignment',
+      ONGOING_CLASS: 'play_circle',
+    };
+    return map[type.toUpperCase()] || 'info';
+  }
+
+  getAlertSeverityClass(severity: string): string {
+    const map: Record<string, string> = {
+      ERROR: 'alert-error',
+      WARNING: 'alert-warning',
+      INFO: 'alert-info',
+    };
+    return map[severity.toUpperCase()] || 'alert-info';
   }
 
   formatDate(dateStr: string): string {

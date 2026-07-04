@@ -17,60 +17,123 @@ describe('DashboardComponent', () => {
   let router: jasmine.SpyObj<Router>;
 
   const mockDashboard: DashboardOperationalResponse = {
-    todayClasses: 5,
-    ongoingClasses: 2,
-    presentStudents: 18,
-    pendingMakeups: 3,
+    summary: {
+      kpis: {
+        classesToday: 9,
+        classesInProgress: 5,
+        activeStudents: 76,
+        studentsPresentToday: 23,
+        pendingMakeups: 30,
+      },
+      averageOccupancy: 95,
+      todayAttendanceRate: 52,
+    },
     upcomingSessions: [
       {
         id: 's1',
-        startTime: '08:00',
-        endTime: '09:00',
-        className: 'Pilates',
-        instructorName: 'Ana',
-        enrolledCount: 6,
-        capacity: 10,
-        status: 'SCHEDULED',
+        classGroupId: 'cg-1',
+        className: 'Alongamento',
+        instructorId: 'i1',
+        instructorName: 'Ricardo Souza',
+        startTime: '08:00:00',
+        endTime: '09:00:00',
+        enrolledStudents: 10,
+        status: 'IN_PROGRESS',
       },
       {
         id: 's2',
-        startTime: '09:00',
-        endTime: '10:00',
-        className: 'Yoga',
-        instructorName: 'Carlos',
-        enrolledCount: 8,
-        capacity: 8,
+        classGroupId: 'cg-2',
+        className: 'Pilates Avancado',
+        instructorId: 'i2',
+        instructorName: 'Fernanda Lima',
+        startTime: '08:00:00',
+        endTime: '09:00:00',
+        enrolledStudents: 3,
         status: 'IN_PROGRESS',
       },
     ],
     pendingMakeupRequests: [
       {
         id: 'm1',
-        studentName: 'Maria',
-        className: 'Pilates',
-        absenceDate: '2026-06-20',
+        classGroupId: 'cg-3',
+        studentName: 'Monica Santos Almeida',
+        className: 'Gestantes',
+        absenceDate: '2026-06-26',
+        reason: 'Imprevisto pessoal',
       },
     ],
     classOccupancy: [
-      { classGroupId: 'cg-1', className: 'Pilates Funcional', capacity: 8, enrolled: 6, occupancyPercent: 75 },
-      { classGroupId: 'cg-2', className: 'Yoga', capacity: 8, enrolled: 8, occupancyPercent: 100 },
+      { classGroupId: 'cg-1', className: 'Alongamento', capacity: 10, enrolled: 10, occupancyPercent: 100 },
+      { classGroupId: 'cg-2', className: 'Gestantes', capacity: 6, enrolled: 6, occupancyPercent: 100 },
     ],
     alerts: [
-      { type: 'full_class', message: 'Turma "Yoga" lotada (8/8)' },
-      { type: 'pending_makeup', message: '3 reposição(ões) pendente(s) de aprovação' },
-      { type: 'ongoing_class', message: '2 aula(s) em andamento agora' },
+      {
+        title: 'Turma Lotada',
+        message: "Turma 'Alongamento' está com 100% de ocupação",
+        severity: 'ERROR',
+        type: 'FULL_CLASS',
+        actionLabel: 'Ver turma',
+        actionRoute: '/class-groups',
+        actionId: 'cg-1',
+      },
+      {
+        title: 'Muitas Reposições',
+        message: '30 reposições pendentes aguardando aprovação',
+        severity: 'WARNING',
+        type: 'PENDING_MAKEUP',
+        actionLabel: 'Ver reposições',
+        actionRoute: '/makeup-requests',
+        actionId: null,
+      },
     ],
   };
 
   const emptyDashboard: DashboardOperationalResponse = {
-    todayClasses: 0,
-    ongoingClasses: 0,
-    presentStudents: 0,
-    pendingMakeups: 0,
+    summary: {
+      kpis: {
+        classesToday: 0,
+        classesInProgress: 0,
+        activeStudents: 0,
+        studentsPresentToday: 0,
+        pendingMakeups: 0,
+      },
+      averageOccupancy: 0,
+      todayAttendanceRate: 0,
+    },
     upcomingSessions: [],
     pendingMakeupRequests: [],
     classOccupancy: [],
     alerts: [],
+  };
+
+  const largeDashboard: DashboardOperationalResponse = {
+    ...mockDashboard,
+    upcomingSessions: Array.from({ length: 8 }, (_, i) => ({
+      id: `s${i}`,
+      classGroupId: `cg-${i}`,
+      className: `Turma ${i}`,
+      instructorId: `i${i}`,
+      instructorName: `Instrutor ${i}`,
+      startTime: `0${i}:00:00`,
+      endTime: `0${i + 1}:00:00`,
+      enrolledStudents: 5 + i,
+      status: 'SCHEDULED',
+    })),
+    pendingMakeupRequests: Array.from({ length: 7 }, (_, i) => ({
+      id: `m${i}`,
+      classGroupId: `cg-${i}`,
+      studentName: `Aluno ${i}`,
+      className: `Turma ${i}`,
+      absenceDate: '2026-06-20',
+      reason: `Motivo ${i}`,
+    })),
+    classOccupancy: Array.from({ length: 6 }, (_, i) => ({
+      classGroupId: `cg-${i}`,
+      className: `Turma ${i}`,
+      capacity: 10,
+      enrolled: 5 + i,
+      occupancyPercent: 50 + i * 10,
+    })),
   };
 
   beforeEach(async () => {
@@ -109,29 +172,73 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
       expect(component.loading).toBeFalse();
     });
+
+    it('sets loading to false after error', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(throwError(() => new Error('fail')));
+      fixture.detectChanges();
+      expect(component.loading).toBeFalse();
+    });
   });
 
-  describe('cards', () => {
+  describe('KPIs', () => {
     beforeEach(() => {
       dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
       fixture.detectChanges();
     });
 
-    it('displays stat cards', () => {
+    it('displays 4 stat cards', () => {
       const cards = fixture.debugElement.queryAll(By.css('app-stat-card'));
       expect(cards.length).toBe(4);
     });
 
-    it('shows correct values in cards', () => {
+    it('shows "Aulas Hoje" with correct value', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Aulas Hoje');
-      expect(compiled.textContent).toContain('5');
+      expect(compiled.textContent).toContain('9');
+    });
+
+    it('shows "Aulas em Andamento" with correct value', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Aulas em Andamento');
-      expect(compiled.textContent).toContain('2');
+      expect(compiled.textContent).toContain('5');
+    });
+
+    it('shows "Alunos Presentes" with correct value', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Alunos Presentes');
-      expect(compiled.textContent).toContain('18');
+      expect(compiled.textContent).toContain('23');
+    });
+
+    it('shows "Reposições Pendentes" with correct value', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Reposições Pendentes');
-      expect(compiled.textContent).toContain('3');
+      expect(compiled.textContent).toContain('30');
+    });
+  });
+
+  describe('indicators', () => {
+    it('shows average occupancy from summary', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
+      fixture.detectChanges();
+      expect(component.computedAverageOccupancy).toBe(95);
+    });
+
+    it('shows attendance rate from summary', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
+      fixture.detectChanges();
+      expect(component.computedAttendanceRate).toBe(52);
+    });
+
+    it('returns 0 for average occupancy when no data', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
+      fixture.detectChanges();
+      expect(component.computedAverageOccupancy).toBe(0);
+    });
+
+    it('returns 0 for attendance rate when no data', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
+      fixture.detectChanges();
+      expect(component.computedAttendanceRate).toBe(0);
     });
   });
 
@@ -148,15 +255,76 @@ describe('DashboardComponent', () => {
 
     it('shows session details', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Pilates');
-      expect(compiled.textContent).toContain('Yoga');
-      expect(compiled.textContent).toContain('Ana');
-      expect(compiled.textContent).toContain('Carlos');
+      expect(compiled.textContent).toContain('Alongamento');
+      expect(compiled.textContent).toContain('Pilates Avancado');
+      expect(compiled.textContent).toContain('Ricardo Souza');
+      expect(compiled.textContent).toContain('Fernanda Lima');
+    });
+
+    it('shows enrolled students', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('10 alunos');
+      expect(compiled.textContent).toContain('3 alunos');
     });
 
     it('shows status chip for each session', () => {
       const chips = fixture.debugElement.queryAll(By.css('ds-status-chip'));
       expect(chips.length).toBeGreaterThan(0);
+    });
+
+    it('limits to 5 sessions when more exist', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const rows = fixture.debugElement.queryAll(By.css('.session-row'));
+      expect(rows.length).toBe(5);
+    });
+
+    it('shows "Ver Agenda" footer when more than 5 sessions', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const footer = fixture.debugElement.query(By.css('.section-footer'));
+      expect(footer).toBeTruthy();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Ver Agenda');
+    });
+
+    it('hides footer when 5 or fewer sessions', () => {
+      const footers = fixture.debugElement.queryAll(By.css('.section-footer'));
+      expect(footers.length).toBe(0);
+    });
+  });
+
+  describe('alerts', () => {
+    beforeEach(() => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
+      fixture.detectChanges();
+    });
+
+    it('displays alert cards', () => {
+      const cards = fixture.debugElement.queryAll(By.css('.alert-card'));
+      expect(cards.length).toBe(2);
+    });
+
+    it('shows alert titles', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Turma Lotada');
+      expect(compiled.textContent).toContain('Muitas Reposições');
+    });
+
+    it('shows alert messages', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('100% de ocupação');
+      expect(compiled.textContent).toContain('30 reposições pendentes');
+    });
+
+    it('applies error severity class', () => {
+      const errorAlert = fixture.debugElement.query(By.css('.alert-error'));
+      expect(errorAlert).toBeTruthy();
+    });
+
+    it('applies warning severity class', () => {
+      const warningAlert = fixture.debugElement.query(By.css('.alert-warning'));
+      expect(warningAlert).toBeTruthy();
     });
   });
 
@@ -173,34 +341,80 @@ describe('DashboardComponent', () => {
 
     it('shows student name and class', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Maria');
-      expect(compiled.textContent).toContain('Pilates');
+      expect(compiled.textContent).toContain('Monica Santos Almeida');
+      expect(compiled.textContent).toContain('Gestantes');
+    });
+
+    it('shows formatted date', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('26/06/2026');
+    });
+
+    it('shows approve button', () => {
+      const button = fixture.debugElement.query(By.css('.makeup-row ds-button'));
+      expect(button).toBeTruthy();
     });
 
     it('navigates to makeup-approval on approve click', () => {
       const button = fixture.debugElement.query(By.css('.makeup-row ds-button'));
-      expect(button).toBeTruthy();
       button.triggerEventHandler('click', null);
       expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
     });
+
+    it('limits to 5 makeups when more exist', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const rows = fixture.debugElement.queryAll(By.css('.makeup-row'));
+      expect(rows.length).toBe(5);
+    });
+
+    it('shows "Ver todas" footer when more than 5 makeups', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Ver todas');
+    });
   });
 
-  describe('alerts', () => {
+  describe('class occupancy', () => {
     beforeEach(() => {
       dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
       fixture.detectChanges();
     });
 
-    it('displays alert list', () => {
-      const rows = fixture.debugElement.queryAll(By.css('.alert-row'));
-      expect(rows.length).toBe(3);
+    it('displays class occupancy rows', () => {
+      const rows = fixture.debugElement.queryAll(By.css('.occupancy-row'));
+      expect(rows.length).toBe(2);
     });
 
-    it('shows alert messages', () => {
+    it('shows occupancy percentage', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Turma');
-      expect(compiled.textContent).toContain('lotada');
-      expect(compiled.textContent).toContain('reposição');
+      expect(compiled.textContent).toContain('100%');
+    });
+
+    it('shows enrollment count and capacity', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('10/10 alunos');
+      expect(compiled.textContent).toContain('6/6 alunos');
+    });
+
+    it('shows progress bars', () => {
+      const bars = fixture.debugElement.queryAll(By.css('mat-progress-bar'));
+      expect(bars.length).toBe(2);
+    });
+
+    it('limits to 5 classes when more exist', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const rows = fixture.debugElement.queryAll(By.css('.occupancy-row'));
+      expect(rows.length).toBe(5);
+    });
+
+    it('shows "Ver todas" footer when more than 5 classes', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Ver todas');
     });
   });
 
@@ -247,28 +461,15 @@ describe('DashboardComponent', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Nenhum alerta');
     });
-  });
 
-  describe('occupancy', () => {
-    beforeEach(() => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
-      fixture.detectChanges();
-    });
-
-    it('displays class occupancy rows', () => {
-      const rows = fixture.debugElement.queryAll(By.css('.occupancy-row'));
-      expect(rows.length).toBe(2);
-    });
-
-    it('shows occupancy percentage', () => {
+    it('shows empty message for classes', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('75%');
-      expect(compiled.textContent).toContain('100%');
+      expect(compiled.textContent).toContain('Nenhuma turma cadastrada');
     });
 
-    it('shows progress bars', () => {
-      const bars = fixture.debugElement.queryAll(By.css('mat-progress-bar'));
-      expect(bars.length).toBe(2);
+    it('shows zero values in KPIs', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('0');
     });
   });
 
@@ -298,6 +499,19 @@ describe('DashboardComponent', () => {
       expect(component.getOccupancyColor(30)).toBe('primary');
     });
 
+    it('returns correct alert icon', () => {
+      expect(component.getAlertIcon('FULL_CLASS')).toBe('group');
+      expect(component.getAlertIcon('PENDING_MAKEUP')).toBe('assignment');
+      expect(component.getAlertIcon('ONGOING_CLASS')).toBe('play_circle');
+      expect(component.getAlertIcon('unknown')).toBe('info');
+    });
+
+    it('returns correct alert severity class', () => {
+      expect(component.getAlertSeverityClass('ERROR')).toBe('alert-error');
+      expect(component.getAlertSeverityClass('WARNING')).toBe('alert-warning');
+      expect(component.getAlertSeverityClass('INFO')).toBe('alert-info');
+    });
+
     it('formats date to pt-BR', () => {
       expect(component.formatDate('2026-06-20')).toBe('20/06/2026');
       expect(component.formatDate('')).toBe('');
@@ -307,6 +521,26 @@ describe('DashboardComponent', () => {
       spyOn(component, 'loadDashboard');
       component.retry();
       expect(component.loadDashboard).toHaveBeenCalled();
+    });
+
+    it('navigateToSchedule navigates to /schedule', () => {
+      component.navigateToSchedule();
+      expect(router.navigate).toHaveBeenCalledWith(['/schedule']);
+    });
+
+    it('navigateToMakeupApproval navigates to /makeup-approval', () => {
+      component.navigateToMakeupApproval();
+      expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
+    });
+
+    it('navigateToMakeups navigates to /makeup-approval', () => {
+      component.navigateToMakeups();
+      expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
+    });
+
+    it('navigateToClasses navigates to /class-groups', () => {
+      component.navigateToClasses();
+      expect(router.navigate).toHaveBeenCalledWith(['/class-groups']);
     });
   });
 });
