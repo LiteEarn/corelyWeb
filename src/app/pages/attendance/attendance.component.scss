@@ -1,157 +1,631 @@
+@import '../../shared/design-system/variables';
+
 .attendance-page {
-  padding: 24px;
-  max-width: 1200px;
+  padding: $ds-spacing-xl;
+  max-width: 1100px;
   margin: 0 auto;
+  padding-bottom: 100px;
 }
 
-.filters-card {
-  margin-bottom: 24px;
-}
+// ── Summary bar ──
 
-.filters-content {
-  padding: 16px;
-}
-
-.filters-section {
+.attendance-summary {
   display: flex;
-  gap: 16px;
-  align-items: flex-end;
+  align-items: center;
+  gap: $ds-spacing-lg;
+  padding: $ds-spacing-md 0;
+  margin-bottom: $ds-spacing-lg;
   flex-wrap: wrap;
 }
 
-.class-group-filter {
-  flex: 1;
-  min-width: 250px;
-}
-
-.date-filter {
-  flex: 0 0 200px;
-}
-
-.load-students-button {
-  height: 56px;
+.summary-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: $ds-spacing-sm;
 }
 
-.empty-state-wrapper {
-  margin-top: 48px;
+.summary-label {
+  font-size: $ds-fontSize-sm;
+  color: $ds-textSecondary;
+  font-weight: $ds-fontWeight-medium;
 }
 
-.students-list {
-  margin-top: 24px;
+.summary-value {
+  font-size: $ds-fontSize-sm;
+  color: $ds-text;
+  font-weight: $ds-fontWeight-semibold;
 }
 
-.students-header {
+.summary-divider {
+  width: 1px;
+  height: 20px;
+  background: $ds-border;
+}
+
+// ── Filters bar ──
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: $ds-spacing-md;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 44px;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 44px;
+    align-items: center;
+  }
+}
+
+.filter-date {
+  flex: 0 0 180px;
+  margin-bottom: 0;
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    height: 44px;
+  }
+
+  ::ng-deep .mat-mdc-form-field-flex {
+    height: 44px;
+    align-items: center;
+  }
+}
+
+.filter-search {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+  position: relative;
+  margin-left: auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: $ds-textTertiary;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px 0 40px;
+  border: 1px solid $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  font-size: $ds-fontSize-md;
+  color: $ds-text;
+  background: $ds-white;
+  outline: none;
+  transition: border-color $ds-transition-fast, box-shadow $ds-transition-fast;
+
+  &::placeholder {
+    color: $ds-textTertiary;
+  }
+
+  &:focus {
+    border-color: $ds-primary;
+    box-shadow: 0 0 0 3px rgba($ds-primary, 0.1);
+  }
+}
+
+// ── Progress section ──
+
+.progress-section {
+  margin-top: $ds-spacing-lg;
+  margin-bottom: $ds-spacing-md;
+}
+
+.progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: $ds-spacing-sm;
 }
 
-.students-header h3 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 500;
+.progress-title {
+  font-size: $ds-fontSize-sm;
+  font-weight: $ds-fontWeight-medium;
+  color: $ds-textSecondary;
 }
 
-.save-button {
+.progress-count {
+  font-size: $ds-fontSize-sm;
+  font-weight: $ds-fontWeight-semibold;
+  color: $ds-primary;
+}
+
+.attendance-progress-bar {
+  height: 6px;
+  border-radius: $ds-borderRadius-full;
+
+  ::ng-deep .mdc-linear-progress__bar {
+    border-radius: $ds-borderRadius-full;
+  }
+
+  ::ng-deep .mdc-linear-progress__bar-inner {
+    border-color: $ds-primary;
+  }
+
+  ::ng-deep .mdc-linear-progress__track {
+    background: $ds-neutral100;
+    border-radius: $ds-borderRadius-full;
+  }
+}
+
+// ── Bulk actions ──
+
+.bulk-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.students-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.student-card {
-  margin: 0;
-}
-
-.student-card-content {
-  padding: 16px;
-}
-
-.student-info {
-  margin-bottom: 16px;
-}
-
-.student-name {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.student-phone {
-  font-size: 14px;
-  color: #666;
-}
-
-.attendance-controls {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  gap: $ds-spacing-sm;
+  margin-bottom: $ds-spacing-lg;
   flex-wrap: wrap;
 }
 
-.present-checkbox {
-  flex: 0 0 auto;
+// ── Student cards ──
+
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: $ds-spacing-sm;
 }
 
-.observation-field {
-  flex: 1;
-  min-width: 250px;
+.student-card {
+  background: $ds-white;
+  border: 1px solid $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  transition: border-color $ds-transition-fast, box-shadow $ds-transition-fast;
+
+  &:hover {
+    border-color: $ds-neutral300;
+    box-shadow: $ds-shadow-hover;
+  }
+
+  &:focus-within {
+    border-color: $ds-primary;
+    box-shadow: 0 0 0 2px rgba($ds-primary, 0.15);
+  }
 }
 
-// Responsividade
+.student-card-body {
+  display: flex;
+  align-items: center;
+  gap: $ds-spacing-lg;
+  padding: $ds-spacing-md $ds-spacing-lg;
+  flex-wrap: nowrap;
+}
+
+// ── Avatar ──
+
+.student-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: $ds-borderRadius-full;
+  background: linear-gradient(135deg, $ds-primary, $ds-secondary);
+  color: $ds-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $ds-fontSize-sm;
+  font-weight: $ds-fontWeight-bold;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+// ── Student info ──
+
+.student-main {
+  min-width: 160px;
+  flex-shrink: 0;
+}
+
+.student-name {
+  font-size: $ds-fontSize-md;
+  font-weight: $ds-fontWeight-medium;
+  color: $ds-text;
+  line-height: $ds-lineHeight-tight;
+}
+
+.student-phone {
+  font-size: $ds-fontSize-xs;
+  color: $ds-textTertiary;
+  margin-top: 2px;
+}
+
+// ── Status button group ──
+
+.student-status-group {
+  display: inline-flex;
+  border: 1px solid $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.status-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: $ds-fontSize-sm;
+  font-weight: $ds-fontWeight-medium;
+  border: none;
+  background: $ds-white;
+  color: $ds-neutral600;
+  cursor: pointer;
+  transition: all $ds-transition-fast;
+  outline: none;
+  white-space: nowrap;
+  position: relative;
+
+  + .status-btn {
+    border-left: 1px solid $ds-border;
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px rgba($ds-primary, 0.4);
+    z-index: 1;
+  }
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $ds-borderRadius-full;
+  transition: background $ds-transition-fast;
+  flex-shrink: 0;
+}
+
+.status-present {
+  .status-dot {
+    background: $ds-border;
+  }
+
+  &.active {
+    background: $ds-successLight;
+    color: $ds-successDark;
+
+    .status-dot {
+      background: $ds-success;
+    }
+  }
+}
+
+.status-absent {
+  .status-dot {
+    background: $ds-border;
+  }
+
+  &.active {
+    background: $ds-errorLight;
+    color: $ds-errorDark;
+
+    .status-dot {
+      background: $ds-error;
+    }
+  }
+}
+
+.status-reposition {
+  .status-dot {
+    background: $ds-border;
+  }
+
+  &.active {
+    background: $ds-warningLight;
+    color: $ds-warningDark;
+
+    .status-dot {
+      background: $ds-warning;
+    }
+  }
+}
+
+// ── Observation ──
+
+.student-observation {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.observation-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: $ds-fontSize-xs;
+  font-weight: $ds-fontWeight-medium;
+  color: $ds-textTertiary;
+  background: none;
+  border: 1px dashed $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  cursor: pointer;
+  transition: all $ds-transition-fast;
+  outline: none;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: $ds-primary;
+    border-color: $ds-primary;
+    background: rgba($ds-primary, 0.04);
+  }
+
+  &:focus-visible {
+    color: $ds-primary;
+    border-color: $ds-primary;
+    box-shadow: 0 0 0 2px rgba($ds-primary, 0.2);
+  }
+}
+
+.observation-field-expanded {
+  display: flex;
+  align-items: center;
+  gap: $ds-spacing-sm;
+}
+
+.observation-input {
+  width: 200px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  font-size: $ds-fontSize-sm;
+  color: $ds-text;
+  background: $ds-neutral100;
+  outline: none;
+  transition: border-color $ds-transition-fast, box-shadow $ds-transition-fast;
+
+  &::placeholder {
+    color: $ds-textTertiary;
+  }
+
+  &:focus {
+    border-color: $ds-primary;
+    background: $ds-white;
+    box-shadow: 0 0 0 2px rgba($ds-primary, 0.1);
+  }
+}
+
+.observation-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: $ds-textTertiary;
+  cursor: pointer;
+  border-radius: $ds-borderRadius-full;
+  transition: all $ds-transition-fast;
+  outline: none;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: $ds-neutral100;
+    color: $ds-text;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba($ds-primary, 0.2);
+  }
+}
+
+// ── Empty states ──
+
+.empty-state-wrapper {
+  margin-top: $ds-spacing-xxxl;
+}
+
+.empty-search {
+  margin-bottom: $ds-spacing-lg;
+}
+
+// ── Fixed save button ──
+
+.save-fab-container {
+  position: fixed;
+  bottom: $ds-spacing-xl;
+  right: $ds-spacing-xl;
+  z-index: $ds-zIndex-fixed;
+}
+
+.save-fab {
+  display: inline-flex;
+  align-items: center;
+  gap: $ds-spacing-sm;
+  padding: 14px 28px;
+  background: $ds-primary;
+  color: $ds-white;
+  border: none;
+  border-radius: $ds-borderRadius-md;
+  font-size: $ds-fontSize-md;
+  font-weight: $ds-fontWeight-semibold;
+  cursor: pointer;
+  box-shadow: $ds-shadow-modal;
+  transition: all $ds-transition-normal;
+  outline: none;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: darken($ds-primary, 6%);
+    box-shadow: $ds-shadow-modal;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($ds-primary, 0.3), $ds-shadow-modal;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: $ds-shadow-card;
+  }
+}
+
+.save-fab-label {
+  white-space: nowrap;
+}
+
+.save-fab-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background: rgba($ds-white, 0.2);
+  border-radius: $ds-borderRadius-full;
+  font-size: $ds-fontSize-xs;
+  font-weight: $ds-fontWeight-medium;
+}
+
+// ── Responsive ──
+
+@media (max-width: 1024px) {
+  .student-card-body {
+    gap: $ds-spacing-md;
+    padding: $ds-spacing-sm $ds-spacing-md;
+    flex-wrap: wrap;
+  }
+
+  .student-main {
+    min-width: 120px;
+  }
+
+  .student-status-group {
+    .status-btn {
+      padding: 5px 10px;
+      font-size: $ds-fontSize-xs;
+    }
+  }
+
+  .observation-input {
+    width: 150px;
+  }
+}
+
 @media (max-width: 768px) {
   .attendance-page {
-    padding: 16px;
+    padding: $ds-spacing-lg;
   }
 
-  .filters-section {
+  .attendance-summary {
+    gap: $ds-spacing-sm;
+  }
+
+  .summary-item {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+  }
+
+  .summary-divider {
+    display: none;
+  }
+
+  .filters-bar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .class-group-filter,
-  .date-filter {
-    flex: 1;
+  .filter-select,
+  .filter-date {
     min-width: 100%;
   }
 
-  .load-students-button {
-    width: 100%;
-    justify-content: center;
+  .filter-date {
+    flex: 1;
   }
 
-  .students-header {
+  .filter-search {
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .student-card-body {
     flex-direction: column;
     align-items: flex-start;
-    gap: 16px;
+    gap: $ds-spacing-md;
+    padding: $ds-spacing-md;
   }
 
-  .save-button {
+  .student-main {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .student-status-group {
+    width: 100%;
+
+    .status-btn {
+      flex: 1;
+      justify-content: center;
+      padding: 8px 6px;
+      font-size: $ds-fontSize-xs;
+    }
+  }
+
+  .student-observation {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .observation-field-expanded {
+    width: 100%;
+  }
+
+  .observation-input {
+    width: 100%;
+    flex: 1;
+  }
+
+  .bulk-actions {
+    flex-direction: column;
+
+    ds-button {
+      width: 100%;
+    }
+  }
+
+  .save-fab-container {
+    left: $ds-spacing-lg;
+    right: $ds-spacing-lg;
+    bottom: $ds-spacing-lg;
+  }
+
+  .save-fab {
     width: 100%;
     justify-content: center;
-  }
-
-  .attendance-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .observation-field {
-    min-width: 100%;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .students-cards {
-    grid-template-columns: 1fr;
   }
 }

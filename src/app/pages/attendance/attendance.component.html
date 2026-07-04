@@ -1,36 +1,94 @@
 <div class="attendance-page">
   <ds-page-header
     title="Presença"
-    subtitle="Registre a presença dos alunos das turmas.">
+    subtitle="Registre a presença dos alunos.">
   </ds-page-header>
 
-  <mat-card class="filters-card">
-    <mat-card-content class="filters-content">
-      <div class="filters-section" [formGroup]="filterForm">
-        <mat-form-field appearance="outline" class="class-group-filter">
-          <mat-label>Turma</mat-label>
-          <mat-select formControlName="classGroupId">
-            <mat-option value="">Selecione uma turma</mat-option>
-            <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
-              {{ classGroup.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+  <div *ngIf="selectedClassGroup && hasLoadedStudents" class="attendance-summary">
+    <div class="summary-item">
+      <span class="summary-label">Turma</span>
+      <span class="summary-value">{{ selectedClassGroup.name }}</span>
+    </div>
+    <span class="summary-divider"></span>
+    <div class="summary-item">
+      <span class="summary-label">Instrutor</span>
+      <span class="summary-value">{{ selectedClassGroup.instructorName || '-' }}</span>
+    </div>
+    <span class="summary-divider"></span>
+    <div class="summary-item">
+      <span class="summary-label">Data</span>
+      <span class="summary-value">{{ formatDateDisplay(selectedDate) }}</span>
+    </div>
+    <span class="summary-divider"></span>
+    <div class="summary-item">
+      <span class="summary-label">Horário</span>
+      <span class="summary-value">{{ selectedClassGroup.startTime }} às {{ selectedClassGroup.endTime }}</span>
+    </div>
+    <span class="summary-divider"></span>
+    <div class="summary-item">
+      <span class="summary-label">Alunos</span>
+      <span class="summary-value">{{ totalCount }} aluno{{ totalCount !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
 
-        <mat-form-field appearance="outline" class="date-filter">
-          <mat-label>Data</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="attendanceDate">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
+  <ds-page-card maxWidth="100%" padding="12px 24px">
+    <div class="filters-bar" [formGroup]="filterForm">
+      <mat-form-field appearance="outline" class="filter-select">
+        <mat-label>Turma</mat-label>
+        <mat-select formControlName="classGroupId">
+          <mat-option value="">Selecione</mat-option>
+          <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
+            {{ classGroup.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-        <button mat-raised-button color="primary" class="load-students-button" (click)="loadStudents()" [disabled]="isLoading || hasNoInstructor()">
-          <mat-icon>people</mat-icon>
-          Carregar Alunos
-        </button>
+      <mat-form-field appearance="outline" class="filter-date">
+        <mat-label>Data</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="attendanceDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <ds-button
+        label="Carregar"
+        icon="people"
+        size="md"
+        [disabled]="isLoading || hasNoInstructor()"
+        (click)="loadStudents()">
+      </ds-button>
+
+      <div class="filter-search" *ngIf="hasLoadedStudents">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Pesquisar aluno..."
+          [ngModel]="searchQuery"
+          [ngModelOptions]="{standalone: true}"
+          (ngModelChange)="searchQuery = $event; onSearchInput()"
+          aria-label="Pesquisar aluno por nome">
       </div>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </ds-page-card>
+
+  <div *ngIf="hasLoadedStudents && totalCount > 0" class="progress-section">
+    <div class="progress-header">
+      <span class="progress-title">Presenças registradas</span>
+      <span class="progress-count">{{ presentCount + repositionCount }} de {{ totalCount }} aluno{{ totalCount !== 1 ? 's' : '' }}</span>
+    </div>
+    <mat-progress-bar
+      mode="determinate"
+      [value]="progressPercent"
+      class="attendance-progress-bar">
+    </mat-progress-bar>
+  </div>
+
+  <div *ngIf="hasLoadedStudents && totalCount > 0" class="bulk-actions">
+    <ds-button label="Todos presentes" icon="check_circle" variant="secondary" size="sm" (click)="markAllPresent()"></ds-button>
+    <ds-button label="Todos faltaram" icon="cancel" variant="secondary" size="sm" (click)="markAllAbsent()"></ds-button>
+    <ds-button label="Limpar seleção" icon="refresh" variant="secondary" size="sm" (click)="clearAll()"></ds-button>
+  </div>
 
   <div *ngIf="!hasLoadedStudents" class="empty-state-wrapper">
     <ds-empty-state
@@ -40,46 +98,111 @@
     </ds-empty-state>
   </div>
 
-  <div *ngIf="hasLoadedStudents && studentsAttendance.length > 0" class="students-list">
-    <div class="students-header">
-      <h3>Lista de Alunos</h3>
-      <button mat-raised-button color="primary" class="save-button" (click)="saveAttendance()" [disabled]="hasNoInstructor()">
-        <mat-icon>save</mat-icon>
-        Salvar Presença
-      </button>
+  <div *ngIf="hasLoadedStudents && totalCount > 0" class="students-list">
+    <div *ngIf="filteredStudents.length === 0" class="empty-search">
+      <ds-empty-state
+        icon="search_off"
+        title="Nenhum aluno encontrado"
+        description="Tente alterar o termo da pesquisa.">
+      </ds-empty-state>
     </div>
 
-    <div class="students-cards">
-      <mat-card *ngFor="let student of studentsAttendance" class="student-card">
-        <mat-card-content class="student-card-content">
-          <div class="student-info">
-            <div class="student-name">{{ student.studentName }}</div>
-            <div class="student-phone">{{ formatPhone(student.studentPhone) }}</div>
-          </div>
+    <div *ngFor="let student of filteredStudents" class="student-card">
+      <div class="student-card-body">
+        <div class="student-avatar" [attr.aria-label]="'Avatar de ' + student.studentName">
+          {{ getInitials(student.studentName) }}
+        </div>
 
-          <div class="attendance-controls">
-            <mat-checkbox
-              [checked]="student.present"
-              (change)="student.present = $event.checked"
-              class="present-checkbox">
-              Presente
-            </mat-checkbox>
+        <div class="student-main">
+          <div class="student-name">{{ student.studentName }}</div>
+          <div class="student-phone">{{ formatPhone(student.studentPhone) }}</div>
+        </div>
 
-            <mat-form-field appearance="outline" class="observation-field">
-              <mat-label>Observação</mat-label>
-              <input matInput [(ngModel)]="student.observation" placeholder="Adicione uma observação...">
-            </mat-form-field>
+        <div class="student-status-group" role="radiogroup" [attr.aria-label]="'Status de presença de ' + student.studentName">
+          <button
+            type="button"
+            class="status-btn status-present"
+            [class.active]="student.status === 'present'"
+            (click)="setStatus(student, 'present')"
+            [attr.aria-pressed]="student.status === 'present'"
+            [attr.aria-label]="student.studentName + ' - Presente'">
+            <span class="status-dot"></span>
+            Presente
+          </button>
+          <button
+            type="button"
+            class="status-btn status-absent"
+            [class.active]="student.status === 'absent'"
+            (click)="setStatus(student, 'absent')"
+            [attr.aria-pressed]="student.status === 'absent'"
+            [attr.aria-label]="student.studentName + ' - Falta'">
+            <span class="status-dot"></span>
+            Falta
+          </button>
+          <button
+            type="button"
+            class="status-btn status-reposition"
+            [class.active]="student.status === 'reposition'"
+            (click)="setStatus(student, 'reposition')"
+            [attr.aria-pressed]="student.status === 'reposition'"
+            [attr.aria-label]="student.studentName + ' - Reposição'">
+            <span class="status-dot"></span>
+            Reposição
+          </button>
+        </div>
+
+        <div class="student-observation">
+          <button
+            *ngIf="!student.observationExpanded"
+            type="button"
+            class="observation-toggle"
+            (click)="toggleObservation(student)"
+            [attr.aria-label]="'Adicionar observação para ' + student.studentName">
+            <mat-icon>add</mat-icon>
+            Adicionar observação
+          </button>
+          <div *ngIf="student.observationExpanded" class="observation-field-expanded">
+            <input
+              type="text"
+              class="observation-input"
+              placeholder="Digite a observação..."
+              [ngModel]="student.observation"
+              [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="student.observation = $event; onSearchInput()"
+              [attr.aria-label]="'Observação para ' + student.studentName">
+            <button
+              type="button"
+              class="observation-close"
+              (click)="toggleObservation(student)"
+              aria-label="Fechar observação">
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div *ngIf="hasLoadedStudents && studentsAttendance.length === 0" class="empty-state-wrapper">
+  <div *ngIf="hasLoadedStudents && totalCount === 0" class="empty-state-wrapper">
     <ds-empty-state
       icon="person_off"
       title="Nenhum aluno matriculado"
       description="Esta turma não possui alunos matriculados.">
     </ds-empty-state>
+  </div>
+
+  <div class="save-fab-container" *ngIf="hasLoadedStudents && totalCount > 0">
+    <button
+      type="button"
+      class="save-fab"
+      (click)="saveAttendance()"
+      [disabled]="hasNoInstructor()"
+      aria-label="Salvar presença">
+      <mat-icon>check</mat-icon>
+      <span class="save-fab-label">Salvar Presença</span>
+      <span class="save-fab-badge" *ngIf="pendingChangesCount > 0">
+        {{ pendingChangesCount }} pendente{{ pendingChangesCount > 1 ? 's' : '' }}
+      </span>
+    </button>
   </div>
 </div>
