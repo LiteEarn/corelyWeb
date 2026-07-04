@@ -24,25 +24,25 @@
     <div class="kpi-row">
       <app-stat-card
         title="Aulas Hoje"
-        [value]="data.todayClasses"
+        [value]="data.summary.kpis.classesToday"
         icon="today"
         color="primary">
       </app-stat-card>
       <app-stat-card
         title="Aulas em Andamento"
-        [value]="data.ongoingClasses"
+        [value]="data.summary.kpis.classesInProgress"
         icon="play_circle"
         color="accent">
       </app-stat-card>
       <app-stat-card
         title="Alunos Presentes"
-        [value]="data.presentStudents"
+        [value]="data.summary.kpis.studentsPresentToday"
         icon="person"
         color="primary">
       </app-stat-card>
       <app-stat-card
         title="Reposições Pendentes"
-        [value]="data.pendingMakeups"
+        [value]="data.summary.kpis.pendingMakeups"
         icon="refresh"
         color="warn">
       </app-stat-card>

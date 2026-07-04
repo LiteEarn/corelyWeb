@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, finalize } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -66,23 +66,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     this.dashboardService
       .getOperationalDashboard()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => { this.loading = false; }),
+      )
       .subscribe({
         next: (dashboard) => {
           this.data = dashboard;
-          this.loading = false;
         },
         error: () => {
           this.error = true;
-          this.loading = false;
           this.toastService.error('Erro ao carregar o dashboard.');
         },
       });
   }
 
   get computedAverageOccupancy(): number {
+    if (this.data?.averageOccupancy != null) {
+      return this.data.averageOccupancy;
+    }
     if (!this.data?.classOccupancy?.length) {
-      return this.data?.averageOccupancy ?? 0;
+      return 0;
     }
     const total = this.data.classOccupancy.reduce((sum, item) => sum + item.occupancyPercent, 0);
     return Math.round(total / this.data.classOccupancy.length);

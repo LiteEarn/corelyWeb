@@ -1,14 +1,23 @@
 export interface DashboardOperationalResponse {
-  todayClasses: number;
-  ongoingClasses: number;
-  presentStudents: number;
-  pendingMakeups: number;
+  summary: DashboardSummary;
+  averageOccupancy: number;
+  todayAttendanceRate: number;
   upcomingSessions: UpcomingSession[];
   pendingMakeupRequests: PendingMakeupRequest[];
   classOccupancy: ClassOccupancy[];
   alerts: DashboardAlert[];
-  averageOccupancy?: number;
-  todayAttendanceRate?: number;
+}
+
+export interface DashboardSummary {
+  kpis: DashboardKpis;
+}
+
+export interface DashboardKpis {
+  classesToday: number;
+  classesInProgress: number;
+  activeStudents: number;
+  studentsPresentToday: number;
+  pendingMakeups: number;
 }
 
 export interface UpcomingSession {

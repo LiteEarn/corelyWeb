@@ -9,10 +9,17 @@ describe('DashboardService', () => {
   let httpMock: HttpTestingController;
 
   const mockResponse: DashboardOperationalResponse = {
-    todayClasses: 5,
-    ongoingClasses: 2,
-    presentStudents: 18,
-    pendingMakeups: 3,
+    summary: {
+      kpis: {
+        classesToday: 5,
+        classesInProgress: 2,
+        activeStudents: 20,
+        studentsPresentToday: 18,
+        pendingMakeups: 3,
+      },
+    },
+    averageOccupancy: 75,
+    todayAttendanceRate: 80,
     upcomingSessions: [
       {
         id: 's1',
@@ -72,10 +79,13 @@ describe('DashboardService', () => {
 
     it('retorna os dados do dashboard corretamente', (done) => {
       service.getOperationalDashboard().subscribe((data) => {
-        expect(data.todayClasses).toBe(5);
-        expect(data.ongoingClasses).toBe(2);
-        expect(data.presentStudents).toBe(18);
-        expect(data.pendingMakeups).toBe(3);
+        expect(data.summary.kpis.classesToday).toBe(5);
+        expect(data.summary.kpis.classesInProgress).toBe(2);
+        expect(data.summary.kpis.studentsPresentToday).toBe(18);
+        expect(data.summary.kpis.pendingMakeups).toBe(3);
+        expect(data.summary.kpis.activeStudents).toBe(20);
+        expect(data.averageOccupancy).toBe(75);
+        expect(data.todayAttendanceRate).toBe(80);
         expect(data.upcomingSessions.length).toBe(1);
         expect(data.pendingMakeupRequests.length).toBe(1);
         expect(data.classOccupancy.length).toBe(1);

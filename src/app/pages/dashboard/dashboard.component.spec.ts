@@ -17,10 +17,15 @@ describe('DashboardComponent', () => {
   let router: jasmine.SpyObj<Router>;
 
   const mockDashboard: DashboardOperationalResponse = {
-    todayClasses: 5,
-    ongoingClasses: 2,
-    presentStudents: 18,
-    pendingMakeups: 3,
+    summary: {
+      kpis: {
+        classesToday: 5,
+        classesInProgress: 2,
+        activeStudents: 20,
+        studentsPresentToday: 18,
+        pendingMakeups: 3,
+      },
+    },
     averageOccupancy: 82,
     todayAttendanceRate: 75,
     upcomingSessions: [
@@ -65,10 +70,17 @@ describe('DashboardComponent', () => {
   };
 
   const emptyDashboard: DashboardOperationalResponse = {
-    todayClasses: 0,
-    ongoingClasses: 0,
-    presentStudents: 0,
-    pendingMakeups: 0,
+    summary: {
+      kpis: {
+        classesToday: 0,
+        classesInProgress: 0,
+        activeStudents: 0,
+        studentsPresentToday: 0,
+        pendingMakeups: 0,
+      },
+    },
+    averageOccupancy: 0,
+    todayAttendanceRate: 0,
     upcomingSessions: [],
     pendingMakeupRequests: [],
     classOccupancy: [],
@@ -138,6 +150,12 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
       expect(component.loading).toBeFalse();
     });
+
+    it('sets loading to false after error', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(throwError(() => new Error('fail')));
+      fixture.detectChanges();
+      expect(component.loading).toBeFalse();
+    });
   });
 
   describe('KPIs', () => {
@@ -183,9 +201,12 @@ describe('DashboardComponent', () => {
       expect(component.computedAverageOccupancy).toBe(82);
     });
 
-    it('computes average occupancy from classOccupancy when API field is absent', () => {
-      const dataWithoutAvg: DashboardOperationalResponse = { ...mockDashboard, averageOccupancy: undefined };
-      dashboardService.getOperationalDashboard.and.returnValue(of(dataWithoutAvg));
+    it('computes average occupancy from classOccupancy when API field is 0', () => {
+      const dataWithZeroAvg: DashboardOperationalResponse = {
+        ...mockDashboard,
+        averageOccupancy: 0,
+      };
+      dashboardService.getOperationalDashboard.and.returnValue(of(dataWithZeroAvg));
       fixture.detectChanges();
       expect(component.computedAverageOccupancy).toBe(88);
     });
@@ -203,8 +224,7 @@ describe('DashboardComponent', () => {
     });
 
     it('returns 0 for attendance rate when absent', () => {
-      const dataWithoutRate: DashboardOperationalResponse = { ...mockDashboard, todayAttendanceRate: undefined };
-      dashboardService.getOperationalDashboard.and.returnValue(of(dataWithoutRate));
+      dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
       fixture.detectChanges();
       expect(component.computedAttendanceRate).toBe(0);
     });
