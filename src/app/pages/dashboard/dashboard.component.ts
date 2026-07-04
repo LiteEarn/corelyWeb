@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subject, finalize } from 'rxjs';
@@ -16,7 +16,7 @@ import {
 } from '../../shared/design-system';
 import { ChipStatus } from '../../shared/design-system/status-chip/status-chip.component';
 import { DashboardService } from './dashboard.service';
-import { DashboardOperationalResponse } from './dashboard.model';
+import { DashboardOperationalResponse, UpcomingSession, DashboardAlert } from './dashboard.model';
 import { ToastService } from '../../core/services/toast.service';
 
 @Component({
@@ -49,6 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService: DashboardService,
     private toastService: ToastService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +69,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .getOperationalDashboard()
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => { this.loading = false; }),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        }),
       )
       .subscribe({
         next: (dashboard) => {
@@ -82,21 +86,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get computedAverageOccupancy(): number {
-    if (this.data?.averageOccupancy != null) {
-      return this.data.averageOccupancy;
-    }
-    if (!this.data?.classOccupancy?.length) {
-      return 0;
-    }
-    const total = this.data.classOccupancy.reduce((sum, item) => sum + item.occupancyPercent, 0);
-    return Math.round(total / this.data.classOccupancy.length);
+    return this.data?.summary?.averageOccupancy ?? 0;
   }
 
   get computedAttendanceRate(): number {
-    return this.data?.todayAttendanceRate ?? 0;
+    return this.data?.summary?.todayAttendanceRate ?? 0;
   }
 
-  get displayUpcomingSessions() {
+  get displayUpcomingSessions(): UpcomingSession[] {
     return this.data?.upcomingSessions?.slice(0, 5) ?? [];
   }
 
@@ -128,6 +125,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/class-groups']);
   }
 
+  navigateToAlertRoute(alert: DashboardAlert): void {
+    if (alert.actionRoute) {
+      this.router.navigate([alert.actionRoute]);
+    }
+  }
+
   getSessionStatus(status: string): ChipStatus {
     const map: Record<string, ChipStatus> = {
       SCHEDULED: 'completed',
@@ -156,11 +159,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getAlertIcon(type: string): string {
     const map: Record<string, string> = {
-      full_class: 'group',
-      pending_makeup: 'assignment',
-      ongoing_class: 'play_circle',
+      FULL_CLASS: 'group',
+      PENDING_MAKEUP: 'assignment',
+      ONGOING_CLASS: 'play_circle',
     };
-    return map[type] || 'info';
+    return map[type.toUpperCase()] || 'info';
+  }
+
+  getAlertSeverityClass(severity: string): string {
+    const map: Record<string, string> = {
+      ERROR: 'alert-error',
+      WARNING: 'alert-warning',
+      INFO: 'alert-info',
+    };
+    return map[severity.toUpperCase()] || 'alert-info';
   }
 
   formatDate(dateStr: string): string {

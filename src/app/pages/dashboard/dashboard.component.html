@@ -8,7 +8,7 @@
     <app-loading></app-loading>
   </div>
 
-  <div *ngIf="error" class="dashboard-error">
+  <div *ngIf="!loading && error" class="dashboard-error">
     <ds-empty-state
       icon="error_outline"
       title="Não foi possível carregar o dashboard"
@@ -20,7 +20,7 @@
     </ds-empty-state>
   </div>
 
-  <div *ngIf="data" class="dashboard-content">
+  <div *ngIf="!loading && data" class="dashboard-content">
     <div class="kpi-row">
       <app-stat-card
         title="Aulas Hoje"
@@ -89,7 +89,7 @@
             <span class="session-time">{{ session.startTime }} - {{ session.endTime }}</span>
             <span class="session-class">{{ session.className }}</span>
             <span class="session-instructor">{{ session.instructorName }}</span>
-            <span class="session-occupancy">{{ session.enrolledCount }}/{{ session.capacity }} alunos</span>
+            <span class="session-occupancy">{{ session.enrolledStudents }} alunos</span>
             <ds-status-chip
               [status]="getSessionStatus(session.status)"
               [label]="getSessionStatusLabel(session.status)">
@@ -123,11 +123,14 @@
         </div>
 
         <div *ngIf="data.alerts.length > 0" class="alerts-list">
-          <div *ngFor="let alert of data.alerts" class="alert-card" [ngClass]="'alert-' + alert.type">
+          <div *ngFor="let alert of data.alerts" class="alert-card" [ngClass]="getAlertSeverityClass(alert.severity)">
             <mat-icon class="alert-icon">
               {{ getAlertIcon(alert.type) }}
             </mat-icon>
-            <span class="alert-message">{{ alert.message }}</span>
+            <div class="alert-content">
+              <span class="alert-title">{{ alert.title }}</span>
+              <span class="alert-message">{{ alert.message }}</span>
+            </div>
           </div>
         </div>
       </ds-page-card>

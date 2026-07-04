@@ -19,53 +19,72 @@ describe('DashboardComponent', () => {
   const mockDashboard: DashboardOperationalResponse = {
     summary: {
       kpis: {
-        classesToday: 5,
-        classesInProgress: 2,
-        activeStudents: 20,
-        studentsPresentToday: 18,
-        pendingMakeups: 3,
+        classesToday: 9,
+        classesInProgress: 5,
+        activeStudents: 76,
+        studentsPresentToday: 23,
+        pendingMakeups: 30,
       },
+      averageOccupancy: 95,
+      todayAttendanceRate: 52,
     },
-    averageOccupancy: 82,
-    todayAttendanceRate: 75,
     upcomingSessions: [
       {
         id: 's1',
-        startTime: '08:00',
-        endTime: '09:00',
-        className: 'Pilates',
-        instructorName: 'Ana',
-        enrolledCount: 6,
-        capacity: 10,
-        status: 'SCHEDULED',
+        classGroupId: 'cg-1',
+        className: 'Alongamento',
+        instructorId: 'i1',
+        instructorName: 'Ricardo Souza',
+        startTime: '08:00:00',
+        endTime: '09:00:00',
+        enrolledStudents: 10,
+        status: 'IN_PROGRESS',
       },
       {
         id: 's2',
-        startTime: '09:00',
-        endTime: '10:00',
-        className: 'Yoga',
-        instructorName: 'Carlos',
-        enrolledCount: 8,
-        capacity: 8,
+        classGroupId: 'cg-2',
+        className: 'Pilates Avancado',
+        instructorId: 'i2',
+        instructorName: 'Fernanda Lima',
+        startTime: '08:00:00',
+        endTime: '09:00:00',
+        enrolledStudents: 3,
         status: 'IN_PROGRESS',
       },
     ],
     pendingMakeupRequests: [
       {
         id: 'm1',
-        studentName: 'Maria',
-        className: 'Pilates',
-        absenceDate: '2026-06-20',
+        classGroupId: 'cg-3',
+        studentName: 'Monica Santos Almeida',
+        className: 'Gestantes',
+        absenceDate: '2026-06-26',
+        reason: 'Imprevisto pessoal',
       },
     ],
     classOccupancy: [
-      { classGroupId: 'cg-1', className: 'Pilates Funcional', capacity: 8, enrolled: 6, occupancyPercent: 75 },
-      { classGroupId: 'cg-2', className: 'Yoga', capacity: 8, enrolled: 8, occupancyPercent: 100 },
+      { classGroupId: 'cg-1', className: 'Alongamento', capacity: 10, enrolled: 10, occupancyPercent: 100 },
+      { classGroupId: 'cg-2', className: 'Gestantes', capacity: 6, enrolled: 6, occupancyPercent: 100 },
     ],
     alerts: [
-      { type: 'full_class', message: 'Turma "Yoga" lotada (8/8)' },
-      { type: 'pending_makeup', message: '3 reposição(ões) pendente(s) de aprovação' },
-      { type: 'ongoing_class', message: '2 aula(s) em andamento agora' },
+      {
+        title: 'Turma Lotada',
+        message: "Turma 'Alongamento' está com 100% de ocupação",
+        severity: 'ERROR',
+        type: 'FULL_CLASS',
+        actionLabel: 'Ver turma',
+        actionRoute: '/class-groups',
+        actionId: 'cg-1',
+      },
+      {
+        title: 'Muitas Reposições',
+        message: '30 reposições pendentes aguardando aprovação',
+        severity: 'WARNING',
+        type: 'PENDING_MAKEUP',
+        actionLabel: 'Ver reposições',
+        actionRoute: '/makeup-requests',
+        actionId: null,
+      },
     ],
   };
 
@@ -78,9 +97,9 @@ describe('DashboardComponent', () => {
         studentsPresentToday: 0,
         pendingMakeups: 0,
       },
+      averageOccupancy: 0,
+      todayAttendanceRate: 0,
     },
-    averageOccupancy: 0,
-    todayAttendanceRate: 0,
     upcomingSessions: [],
     pendingMakeupRequests: [],
     classOccupancy: [],
@@ -91,19 +110,22 @@ describe('DashboardComponent', () => {
     ...mockDashboard,
     upcomingSessions: Array.from({ length: 8 }, (_, i) => ({
       id: `s${i}`,
-      startTime: `0${i}:00`,
-      endTime: `0${i + 1}:00`,
+      classGroupId: `cg-${i}`,
       className: `Turma ${i}`,
+      instructorId: `i${i}`,
       instructorName: `Instrutor ${i}`,
-      enrolledCount: 5 + i,
-      capacity: 10,
+      startTime: `0${i}:00:00`,
+      endTime: `0${i + 1}:00:00`,
+      enrolledStudents: 5 + i,
       status: 'SCHEDULED',
     })),
     pendingMakeupRequests: Array.from({ length: 7 }, (_, i) => ({
       id: `m${i}`,
+      classGroupId: `cg-${i}`,
       studentName: `Aluno ${i}`,
       className: `Turma ${i}`,
       absenceDate: '2026-06-20',
+      reason: `Motivo ${i}`,
     })),
     classOccupancy: Array.from({ length: 6 }, (_, i) => ({
       classGroupId: `cg-${i}`,
@@ -172,43 +194,39 @@ describe('DashboardComponent', () => {
     it('shows "Aulas Hoje" with correct value', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Aulas Hoje');
-      expect(compiled.textContent).toContain('5');
+      expect(compiled.textContent).toContain('9');
     });
 
     it('shows "Aulas em Andamento" with correct value', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Aulas em Andamento');
-      expect(compiled.textContent).toContain('2');
+      expect(compiled.textContent).toContain('5');
     });
 
     it('shows "Alunos Presentes" with correct value', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Alunos Presentes');
-      expect(compiled.textContent).toContain('18');
+      expect(compiled.textContent).toContain('23');
     });
 
     it('shows "Reposições Pendentes" with correct value', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Reposições Pendentes');
-      expect(compiled.textContent).toContain('3');
+      expect(compiled.textContent).toContain('30');
     });
   });
 
   describe('indicators', () => {
-    it('shows average occupancy from API response', () => {
+    it('shows average occupancy from summary', () => {
       dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
       fixture.detectChanges();
-      expect(component.computedAverageOccupancy).toBe(82);
+      expect(component.computedAverageOccupancy).toBe(95);
     });
 
-    it('computes average occupancy from classOccupancy when API field is 0', () => {
-      const dataWithZeroAvg: DashboardOperationalResponse = {
-        ...mockDashboard,
-        averageOccupancy: 0,
-      };
-      dashboardService.getOperationalDashboard.and.returnValue(of(dataWithZeroAvg));
+    it('shows attendance rate from summary', () => {
+      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
       fixture.detectChanges();
-      expect(component.computedAverageOccupancy).toBe(88);
+      expect(component.computedAttendanceRate).toBe(52);
     });
 
     it('returns 0 for average occupancy when no data', () => {
@@ -217,13 +235,7 @@ describe('DashboardComponent', () => {
       expect(component.computedAverageOccupancy).toBe(0);
     });
 
-    it('shows attendance rate from API response', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
-      fixture.detectChanges();
-      expect(component.computedAttendanceRate).toBe(75);
-    });
-
-    it('returns 0 for attendance rate when absent', () => {
+    it('returns 0 for attendance rate when no data', () => {
       dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
       fixture.detectChanges();
       expect(component.computedAttendanceRate).toBe(0);
@@ -243,16 +255,16 @@ describe('DashboardComponent', () => {
 
     it('shows session details', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Pilates');
-      expect(compiled.textContent).toContain('Yoga');
-      expect(compiled.textContent).toContain('Ana');
-      expect(compiled.textContent).toContain('Carlos');
+      expect(compiled.textContent).toContain('Alongamento');
+      expect(compiled.textContent).toContain('Pilates Avancado');
+      expect(compiled.textContent).toContain('Ricardo Souza');
+      expect(compiled.textContent).toContain('Fernanda Lima');
     });
 
-    it('shows enrollment count and capacity', () => {
+    it('shows enrolled students', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('6/10 alunos');
-      expect(compiled.textContent).toContain('8/8 alunos');
+      expect(compiled.textContent).toContain('10 alunos');
+      expect(compiled.textContent).toContain('3 alunos');
     });
 
     it('shows status chip for each session', () => {
@@ -290,29 +302,29 @@ describe('DashboardComponent', () => {
 
     it('displays alert cards', () => {
       const cards = fixture.debugElement.queryAll(By.css('.alert-card'));
-      expect(cards.length).toBe(3);
+      expect(cards.length).toBe(2);
+    });
+
+    it('shows alert titles', () => {
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.textContent).toContain('Turma Lotada');
+      expect(compiled.textContent).toContain('Muitas Reposições');
     });
 
     it('shows alert messages', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Turma');
-      expect(compiled.textContent).toContain('lotada');
-      expect(compiled.textContent).toContain('reposição');
+      expect(compiled.textContent).toContain('100% de ocupação');
+      expect(compiled.textContent).toContain('30 reposições pendentes');
     });
 
-    it('applies correct CSS class for full_class alerts', () => {
-      const fullClassAlert = fixture.debugElement.query(By.css('.alert-full_class'));
-      expect(fullClassAlert).toBeTruthy();
+    it('applies error severity class', () => {
+      const errorAlert = fixture.debugElement.query(By.css('.alert-error'));
+      expect(errorAlert).toBeTruthy();
     });
 
-    it('applies correct CSS class for pending_makeup alerts', () => {
-      const pendingAlert = fixture.debugElement.query(By.css('.alert-pending_makeup'));
-      expect(pendingAlert).toBeTruthy();
-    });
-
-    it('applies correct CSS class for ongoing_class alerts', () => {
-      const ongoingAlert = fixture.debugElement.query(By.css('.alert-ongoing_class'));
-      expect(ongoingAlert).toBeTruthy();
+    it('applies warning severity class', () => {
+      const warningAlert = fixture.debugElement.query(By.css('.alert-warning'));
+      expect(warningAlert).toBeTruthy();
     });
   });
 
@@ -329,13 +341,13 @@ describe('DashboardComponent', () => {
 
     it('shows student name and class', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Maria');
-      expect(compiled.textContent).toContain('Pilates');
+      expect(compiled.textContent).toContain('Monica Santos Almeida');
+      expect(compiled.textContent).toContain('Gestantes');
     });
 
     it('shows formatted date', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('20/06/2026');
+      expect(compiled.textContent).toContain('26/06/2026');
     });
 
     it('shows approve button', () => {
@@ -377,14 +389,13 @@ describe('DashboardComponent', () => {
 
     it('shows occupancy percentage', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('75%');
       expect(compiled.textContent).toContain('100%');
     });
 
     it('shows enrollment count and capacity', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('6/8 alunos');
-      expect(compiled.textContent).toContain('8/8 alunos');
+      expect(compiled.textContent).toContain('10/10 alunos');
+      expect(compiled.textContent).toContain('6/6 alunos');
     });
 
     it('shows progress bars', () => {
@@ -489,10 +500,16 @@ describe('DashboardComponent', () => {
     });
 
     it('returns correct alert icon', () => {
-      expect(component.getAlertIcon('full_class')).toBe('group');
-      expect(component.getAlertIcon('pending_makeup')).toBe('assignment');
-      expect(component.getAlertIcon('ongoing_class')).toBe('play_circle');
+      expect(component.getAlertIcon('FULL_CLASS')).toBe('group');
+      expect(component.getAlertIcon('PENDING_MAKEUP')).toBe('assignment');
+      expect(component.getAlertIcon('ONGOING_CLASS')).toBe('play_circle');
       expect(component.getAlertIcon('unknown')).toBe('info');
+    });
+
+    it('returns correct alert severity class', () => {
+      expect(component.getAlertSeverityClass('ERROR')).toBe('alert-error');
+      expect(component.getAlertSeverityClass('WARNING')).toBe('alert-warning');
+      expect(component.getAlertSeverityClass('INFO')).toBe('alert-info');
     });
 
     it('formats date to pt-BR', () => {

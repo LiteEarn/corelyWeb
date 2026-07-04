@@ -11,40 +11,51 @@ describe('DashboardService', () => {
   const mockResponse: DashboardOperationalResponse = {
     summary: {
       kpis: {
-        classesToday: 5,
-        classesInProgress: 2,
-        activeStudents: 20,
-        studentsPresentToday: 18,
-        pendingMakeups: 3,
+        classesToday: 9,
+        classesInProgress: 5,
+        activeStudents: 76,
+        studentsPresentToday: 23,
+        pendingMakeups: 30,
       },
+      averageOccupancy: 95,
+      todayAttendanceRate: 52,
     },
-    averageOccupancy: 75,
-    todayAttendanceRate: 80,
     upcomingSessions: [
       {
         id: 's1',
-        startTime: '08:00',
-        endTime: '09:00',
-        className: 'Pilates',
-        instructorName: 'Ana',
-        enrolledCount: 6,
-        capacity: 10,
-        status: 'SCHEDULED',
+        classGroupId: 'cg-1',
+        className: 'Alongamento',
+        instructorId: 'i1',
+        instructorName: 'Ricardo Souza',
+        startTime: '08:00:00',
+        endTime: '09:00:00',
+        enrolledStudents: 10,
+        status: 'IN_PROGRESS',
       },
     ],
     pendingMakeupRequests: [
       {
         id: 'm1',
-        studentName: 'Maria',
-        className: 'Pilates',
-        absenceDate: '2026-06-20',
+        classGroupId: 'cg-3',
+        studentName: 'Monica Santos Almeida',
+        className: 'Gestantes',
+        absenceDate: '2026-06-26',
+        reason: 'Imprevisto pessoal',
       },
     ],
     classOccupancy: [
-      { classGroupId: 'cg-1', className: 'Pilates Funcional', capacity: 8, enrolled: 6, occupancyPercent: 75 },
+      { classGroupId: 'cg-1', className: 'Alongamento', capacity: 10, enrolled: 10, occupancyPercent: 100 },
     ],
     alerts: [
-      { type: 'full_class', message: 'Turma "Yoga" lotada (8/8)' },
+      {
+        title: 'Turma Lotada',
+        message: "Turma 'Alongamento' está com 100% de ocupação",
+        severity: 'ERROR',
+        type: 'FULL_CLASS',
+        actionLabel: 'Ver turma',
+        actionRoute: '/class-groups',
+        actionId: 'cg-1',
+      },
     ],
   };
 
@@ -79,13 +90,13 @@ describe('DashboardService', () => {
 
     it('retorna os dados do dashboard corretamente', (done) => {
       service.getOperationalDashboard().subscribe((data) => {
-        expect(data.summary.kpis.classesToday).toBe(5);
-        expect(data.summary.kpis.classesInProgress).toBe(2);
-        expect(data.summary.kpis.studentsPresentToday).toBe(18);
-        expect(data.summary.kpis.pendingMakeups).toBe(3);
-        expect(data.summary.kpis.activeStudents).toBe(20);
-        expect(data.averageOccupancy).toBe(75);
-        expect(data.todayAttendanceRate).toBe(80);
+        expect(data.summary.kpis.classesToday).toBe(9);
+        expect(data.summary.kpis.classesInProgress).toBe(5);
+        expect(data.summary.kpis.studentsPresentToday).toBe(23);
+        expect(data.summary.kpis.pendingMakeups).toBe(30);
+        expect(data.summary.kpis.activeStudents).toBe(76);
+        expect(data.summary.averageOccupancy).toBe(95);
+        expect(data.summary.todayAttendanceRate).toBe(52);
         expect(data.upcomingSessions.length).toBe(1);
         expect(data.pendingMakeupRequests.length).toBe(1);
         expect(data.classOccupancy.length).toBe(1);

@@ -1,7 +1,5 @@
 export interface DashboardOperationalResponse {
   summary: DashboardSummary;
-  averageOccupancy: number;
-  todayAttendanceRate: number;
   upcomingSessions: UpcomingSession[];
   pendingMakeupRequests: PendingMakeupRequest[];
   classOccupancy: ClassOccupancy[];
@@ -10,6 +8,8 @@ export interface DashboardOperationalResponse {
 
 export interface DashboardSummary {
   kpis: DashboardKpis;
+  averageOccupancy: number;
+  todayAttendanceRate: number;
 }
 
 export interface DashboardKpis {
@@ -22,20 +22,23 @@ export interface DashboardKpis {
 
 export interface UpcomingSession {
   id: string;
+  classGroupId: string;
+  className: string;
+  instructorId: string;
+  instructorName: string;
   startTime: string;
   endTime: string;
-  className: string;
-  instructorName: string;
-  enrolledCount: number;
-  capacity: number;
+  enrolledStudents: number;
   status: string;
 }
 
 export interface PendingMakeupRequest {
   id: string;
+  classGroupId: string;
   studentName: string;
   className: string;
   absenceDate: string;
+  reason: string;
 }
 
 export interface ClassOccupancy {
@@ -47,6 +50,11 @@ export interface ClassOccupancy {
 }
 
 export interface DashboardAlert {
-  type: 'full_class' | 'pending_makeup' | 'ongoing_class';
+  title: string;
   message: string;
+  severity: string;
+  type: string;
+  actionLabel: string;
+  actionRoute: string;
+  actionId: string | null;
 }
