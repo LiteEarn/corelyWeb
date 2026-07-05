@@ -54,14 +54,27 @@
   color: #64748b;
 }
 
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
 .user-name {
   font-size: 14px;
   font-weight: 500;
   color: var(--text-color);
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: capitalize;
+  line-height: 1.2;
 }
 
 @media (max-width: 768px) {
-  .user-name {
+  .user-details {
     display: none;
   }
 }

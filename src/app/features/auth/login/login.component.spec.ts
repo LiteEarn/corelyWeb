@@ -6,32 +6,41 @@ import { of, throwError, delay } from 'rxjs';
 
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SessionService } from '../../../core/session/session.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { LoginResponse } from '../../../core/auth/auth.models';
+import { CurrentUser, LoginResponse } from '../../../core/auth/auth.models';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
   let authService: jasmine.SpyObj<AuthService>;
+  let sessionService: SessionService;
   let toastService: jasmine.SpyObj<ToastService>;
   let router: jasmine.SpyObj<Router>;
+
+  const mockCurrentUser: CurrentUser = {
+    id: '1', name: 'Admin', email: 'admin@corely.com',
+    role: 'OWNER', studio: { id: 'studio-1', name: 'Corely Studio' },
+    permissions: [], lastLogin: '2026-01-01T00:00:00'
+  };
 
   const mockLoginResponse: LoginResponse = {
     accessToken: 'mock-access-token',
     refreshToken: 'mock-refresh-token',
     expiresIn: 900000,
-    user: { id: '1', name: 'Admin', email: 'admin@corely.com' },
+    user: mockCurrentUser,
     studioId: 'studio-1',
     studioName: 'Corely Studio',
     role: 'OWNER',
   };
 
   beforeEach(async () => {
-    authService = jasmine.createSpyObj('AuthService', ['login', 'isAuthenticated']);
+    authService = jasmine.createSpyObj('AuthService', ['login', 'me']);
     toastService = jasmine.createSpyObj('ToastService', ['error']);
     router = jasmine.createSpyObj('Router', ['navigate']);
 
-    authService.isAuthenticated.and.returnValue(false);
+    authService.login.and.returnValue(of(mockLoginResponse));
+    authService.me.and.returnValue(of(mockCurrentUser));
     localStorage.clear();
 
     await TestBed.configureTestingModule({
@@ -44,6 +53,8 @@ describe('LoginComponent', () => {
         { provide: Router, useValue: router },
       ],
     }).compileComponents();
+
+    sessionService = TestBed.inject(SessionService);
 
     fixture = TestBed.createComponent(LoginComponent);
     component = fixture.componentInstance;
@@ -226,7 +237,6 @@ describe('LoginComponent', () => {
 
   describe('already authenticated', () => {
     it('redirects to dashboard on init if already authenticated', async () => {
-      authService.isAuthenticated.and.returnValue(true);
       TestBed.resetTestingModule();
       await TestBed.configureTestingModule({
         imports: [LoginComponent],
@@ -238,6 +248,9 @@ describe('LoginComponent', () => {
           { provide: Router, useValue: router },
         ],
       }).compileComponents();
+
+      const svc = TestBed.inject(SessionService);
+      svc.setUser(mockCurrentUser);
 
       fixture = TestBed.createComponent(LoginComponent);
       component = fixture.componentInstance;

@@ -3,6 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 
+export interface MenuItem {
+  icon: string;
+  label: string;
+  route: string;
+  roles?: string[];
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -17,7 +24,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class SidebarComponent {
   @Input() isSidebarOpen = true;
 
-  menuItems = [
+  menuItems: MenuItem[] = [
     { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
     { icon: 'school', label: 'Alunos', route: '/students' },
     { icon: 'person', label: 'Instrutores', route: '/instructors' },

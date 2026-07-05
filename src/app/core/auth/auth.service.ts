@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from './token.service';
+import { SessionService } from '../session/session.service';
 import { API_CONFIG } from '../config/api.config';
-import { LoginRequest, LoginResponse, RefreshTokenResponse } from './auth.models';
+import { CurrentUser, LoginRequest, LoginResponse, RefreshTokenResponse } from './auth.models';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private sessionService: SessionService
   ) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
@@ -21,6 +23,7 @@ export class AuthService {
       tap(response => {
         this.tokenService.setAccessToken(response.accessToken);
         this.tokenService.setRefreshToken(response.refreshToken);
+        this.sessionService.setUser(response.user);
       })
     );
   }
@@ -35,6 +38,10 @@ export class AuthService {
     );
   }
 
+  me(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${this.apiUrl}/me`);
+  }
+
   logout(): void {
     const refreshToken = this.tokenService.getRefreshToken();
     if (refreshToken) {
@@ -43,6 +50,7 @@ export class AuthService {
       });
     }
     this.tokenService.removeTokens();
+    this.sessionService.clear();
   }
 
   isAuthenticated(): boolean {

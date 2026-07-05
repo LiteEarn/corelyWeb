@@ -23,4 +23,13 @@ export interface CurrentUser {
   id: string;
   name: string;
   email: string;
+  role: string;
+  studio: CurrentStudio;
+  permissions: string[];
+  lastLogin: string;
+}
+
+export interface CurrentStudio {
+  id: string;
+  name: string;
 }
