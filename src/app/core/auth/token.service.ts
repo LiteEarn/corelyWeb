@@ -4,47 +4,36 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class TokenService {
-  private readonly TOKEN_KEY = 'auth_token';
+  private readonly ACCESS_TOKEN_KEY = 'access_token';
+  private readonly REFRESH_TOKEN_KEY = 'refresh_token';
 
-  constructor() { }
-
-  /**
-   * Armazena o token no localStorage
-   */
-  setToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-    console.log('[TokenService] Token armazenado no localStorage');
+  setAccessToken(token: string): void {
+    localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
   }
 
-  /**
-   * Recupera o token do localStorage
-   */
-  getToken(): string | null {
-    const token = localStorage.getItem(this.TOKEN_KEY);
-    console.log('[TokenService] Token recuperado:', !!token);
-    return token;
+  getAccessToken(): string | null {
+    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
   }
 
-  /**
-   * Verifica se existe um token
-   */
-  hasToken(): boolean {
-    return !!this.getToken();
+  setRefreshToken(token: string): void {
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, token);
   }
 
-  /**
-   * Remove o token do localStorage
-   */
-  removeToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    console.log('[TokenService] Token removido do localStorage');
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
-  /**
-   * Retorna o token no formato 'Bearer <token>'
-   */
+  hasAccessToken(): boolean {
+    return !!this.getAccessToken();
+  }
+
+  removeTokens(): void {
+    localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  }
+
   getAuthorizationHeader(): string | null {
-    const token = this.getToken();
+    const token = this.getAccessToken();
     return token ? `Bearer ${token}` : null;
   }
 }
