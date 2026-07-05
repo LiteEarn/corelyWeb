@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Subject, finalize } from 'rxjs';
+import { Subject, finalize, switchMap } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DsButtonComponent } from '../../../shared/design-system/button/button.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SessionService } from '../../../core/session/session.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
@@ -38,6 +39,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
+    private sessionService: SessionService,
     private router: Router,
     private toastService: ToastService,
     private cdr: ChangeDetectorRef,
@@ -50,7 +52,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+    if (this.sessionService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
 
@@ -80,13 +82,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.authService.login({ email, password })
       .pipe(
         takeUntil(this.destroy$),
+        switchMap(() => this.authService.me()),
         finalize(() => {
           this.loading = false;
           this.cdr.markForCheck();
         }),
       )
       .subscribe({
-        next: () => {
+        next: (user) => {
+          this.sessionService.setUser(user);
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {

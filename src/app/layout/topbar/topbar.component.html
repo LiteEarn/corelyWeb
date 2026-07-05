@@ -5,11 +5,14 @@
     </button>
     <h1 class="topbar-title">Corely</h1>
   </div>
-  
+
   <div class="topbar-right">
     <div class="user-info">
       <mat-icon class="user-icon">account_circle</mat-icon>
-      <span class="user-name">{{ userName }}</span>
+      <div class="user-details">
+        <span class="user-name">{{ sessionService.currentUser()?.name }}</span>
+        <span class="user-role">{{ sessionService.currentRole() }}</span>
+      </div>
     </div>
   </div>
 </div>
