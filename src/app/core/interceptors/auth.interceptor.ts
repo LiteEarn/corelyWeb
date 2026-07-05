@@ -1,8 +1,9 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap, tap, throwError } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { SessionService } from '../session/session.service';
 import { TokenService } from '../auth/token.service';
 
 let isRefreshing = false;
@@ -10,6 +11,7 @@ let isRefreshing = false;
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
+  const sessionService = inject(SessionService);
   const router = inject(Router);
 
   const token = tokenService.getAccessToken();
@@ -27,8 +29,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401 && !isRefreshing && tokenService.getRefreshToken()) {
         isRefreshing = true;
         return authService.refresh().pipe(
-          switchMap(() => {
+          switchMap(() => authService.me()),
+          tap(user => {
             isRefreshing = false;
+            sessionService.setUser(user);
+          }),
+          switchMap(() => {
             const newToken = tokenService.getAccessToken();
             if (newToken) {
               const newReq = req.clone({
@@ -43,6 +49,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           catchError((refreshError) => {
             isRefreshing = false;
             tokenService.removeTokens();
+            sessionService.clear();
             router.navigate(['/login']);
             return throwError(() => refreshError);
           })
