@@ -11,6 +11,7 @@ export interface LoginResponse {
   studioId: string;
   studioName: string;
   role: string;
+  permissions: string[];
 }
 
 export interface RefreshTokenResponse {
@@ -19,8 +20,16 @@ export interface RefreshTokenResponse {
   expiresIn: number;
 }
 
+export interface CurrentStudio {
+  id: string;
+  name: string;
+}
+
 export interface CurrentUser {
   id: string;
   name: string;
   email: string;
+  role: string;
+  studio: CurrentStudio;
+  permissions: string[];
 }

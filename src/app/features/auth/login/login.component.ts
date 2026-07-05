@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DsButtonComponent } from '../../../shared/design-system/button/button.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SessionService } from '../../../core/session/session.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
@@ -35,6 +36,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  private sessionService = inject(SessionService);
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -50,7 +53,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+    if (this.sessionService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
 
@@ -86,7 +89,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         }),
       )
       .subscribe({
-        next: () => {
+        next: (response) => {
+          this.sessionService.setUser(response.user);
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {

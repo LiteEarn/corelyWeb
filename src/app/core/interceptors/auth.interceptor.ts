@@ -4,12 +4,14 @@ import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { TokenService } from '../auth/token.service';
+import { SessionService } from '../session/session.service';
 
 let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
+  const sessionService = inject(SessionService);
   const router = inject(Router);
 
   const token = tokenService.getAccessToken();
@@ -43,6 +45,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           catchError((refreshError) => {
             isRefreshing = false;
             tokenService.removeTokens();
+            sessionService.clear();
             router.navigate(['/login']);
             return throwError(() => refreshError);
           })

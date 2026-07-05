@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from './token.service';
 import { API_CONFIG } from '../config/api.config';
-import { LoginRequest, LoginResponse, RefreshTokenResponse } from './auth.models';
+import { LoginRequest, LoginResponse, RefreshTokenResponse, CurrentUser } from './auth.models';
 
 @Injectable({
   providedIn: 'root'
@@ -55,5 +55,9 @@ export class AuthService {
 
   getRefreshToken(): string | null {
     return this.tokenService.getRefreshToken();
+  }
+
+  me(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${this.apiUrl}/me`);
   }
 }

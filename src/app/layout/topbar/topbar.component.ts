@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { SessionService } from '../../core/session/session.service';
 
 @Component({
   selector: 'app-topbar',
@@ -16,5 +17,9 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class TopbarComponent {
   @Output() toggleSidebar = new EventEmitter<void>();
-  userName = 'Admin User';
+  private sessionService = inject(SessionService);
+
+  userName = this.sessionService.userName;
+  userRole = this.sessionService.currentRole;
+  userStudio = this.sessionService.currentStudio;
 }

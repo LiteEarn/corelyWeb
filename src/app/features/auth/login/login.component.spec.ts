@@ -6,6 +6,7 @@ import { of, throwError, delay } from 'rxjs';
 
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../../core/auth/auth.service';
+import { SessionService } from '../../../core/session/session.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { LoginResponse } from '../../../core/auth/auth.models';
 
@@ -20,10 +21,11 @@ describe('LoginComponent', () => {
     accessToken: 'mock-access-token',
     refreshToken: 'mock-refresh-token',
     expiresIn: 900000,
-    user: { id: '1', name: 'Admin', email: 'admin@corely.com' },
+    user: { id: '1', name: 'Admin', email: 'admin@corely.com', role: 'OWNER', studio: { id: 'studio-1', name: 'Corely Studio' }, permissions: [] },
     studioId: 'studio-1',
     studioName: 'Corely Studio',
     role: 'OWNER',
+    permissions: [],
   };
 
   beforeEach(async () => {
@@ -238,6 +240,9 @@ describe('LoginComponent', () => {
           { provide: Router, useValue: router },
         ],
       }).compileComponents();
+
+      const sessionService = TestBed.inject(SessionService);
+      sessionService.setUser(mockLoginResponse.user);
 
       fixture = TestBed.createComponent(LoginComponent);
       component = fixture.componentInstance;
