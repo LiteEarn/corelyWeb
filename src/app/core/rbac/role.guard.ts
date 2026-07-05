@@ -21,7 +21,6 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const hasAccess = requiredRoles.includes(userRole as Role);
 
   if (!hasAccess) {
-    router.navigate(['/dashboard']);
     return false;
   }
 

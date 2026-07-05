@@ -38,6 +38,15 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private sessionService = inject(SessionService);
 
+  private roleDefaultRoutes: Record<string, string> = {
+    OWNER: '/dashboard',
+    ADMIN: '/dashboard',
+    RECEPTIONIST: '/students',
+    INSTRUCTOR: '/daily-agenda',
+    FINANCIAL: '/dashboard',
+    STUDENT: '/objectives',
+  };
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -52,9 +61,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getDefaultRoute(): string {
+    const role = this.sessionService.currentRole();
+    return this.roleDefaultRoutes[role] || '/dashboard';
+  }
+
   ngOnInit(): void {
     if (this.sessionService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.getDefaultRoute()]);
     }
 
     const rememberedEmail = localStorage.getItem('remembered_email');
@@ -91,7 +105,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.sessionService.setUser(response.user);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate([this.getDefaultRoute()]);
         },
         error: (error) => {
           if (error.status === 401) {
