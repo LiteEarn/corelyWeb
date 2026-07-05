@@ -1,0 +1,230 @@
+@import '../../../shared/design-system/variables';
+
+.login-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.login-brand {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $ds-primary 0%, darken($ds-primary, 15%) 100%);
+  color: $ds-white;
+  padding: $ds-spacing-xxxl;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 60%);
+  }
+}
+
+.brand-content {
+  position: relative;
+  max-width: 400px;
+  text-align: center;
+}
+
+.brand-illustration {
+  margin-bottom: $ds-spacing-xxl;
+  display: flex;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+
+  svg {
+    width: 240px;
+    height: 240px;
+  }
+}
+
+.brand-title {
+  font-size: 28px;
+  font-weight: $ds-fontWeight-bold;
+  line-height: $ds-lineHeight-tight;
+  margin: 0 0 $ds-spacing-lg 0;
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  font-size: $ds-fontSize-lg;
+  line-height: $ds-lineHeight-relaxed;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.login-form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $ds-spacing-xxl;
+  background: $ds-background;
+}
+
+.login-card-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card {
+  background: $ds-white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border: 1px solid $ds-neutral300;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: $ds-spacing-xxl;
+}
+
+.login-logo {
+  width: 48px;
+  height: 48px;
+  background: $ds-primary;
+  border-radius: $ds-borderRadius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $ds-white;
+  font-size: 24px;
+  font-weight: $ds-fontWeight-bold;
+  margin: 0 auto $ds-spacing-xl;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: $ds-fontWeight-bold;
+  color: $ds-neutral900;
+  margin: 0 0 $ds-spacing-sm 0;
+  letter-spacing: -0.3px;
+}
+
+.login-subtitle {
+  font-size: $ds-fontSize-md;
+  color: $ds-textSecondary;
+  margin: 0;
+}
+
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $ds-spacing-xl;
+  gap: $ds-spacing-md;
+}
+
+.forgot-link {
+  font-size: $ds-fontSize-sm;
+  color: $ds-primary;
+  text-decoration: none;
+  font-weight: $ds-fontWeight-medium;
+  white-space: nowrap;
+  transition: color $ds-transition-fast;
+
+  &:hover {
+    color: darken($ds-primary, 10%);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $ds-primary;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+::ng-deep {
+  .login-field {
+    width: 100%;
+    margin-bottom: $ds-spacing-lg;
+
+    .mat-mdc-form-field-subscript-wrapper {
+      height: 22px;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius: 8px;
+    }
+
+    .mat-mdc-form-field-flex {
+      height: 52px;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+
+    .mat-mdc-input-element {
+      font-size: 14px;
+    }
+
+    .mat-mdc-form-field-icon-prefix {
+      padding-left: 12px;
+    }
+
+    .mat-mdc-form-field-icon-suffix {
+      padding-right: 4px;
+    }
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: $ds-textTertiary;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .brand-illustration svg {
+    width: 180px;
+    height: 180px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-brand {
+    display: none;
+  }
+
+  .login-form-section {
+    padding: $ds-spacing-xl;
+    align-items: flex-start;
+    padding-top: 10vh;
+  }
+
+  .login-card {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-section {
+    padding: $ds-spacing-lg;
+    padding-top: 8vh;
+  }
+
+  .login-card {
+    padding: 24px 16px;
+    border-radius: 12px;
+  }
+
+  .login-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $ds-spacing-sm;
+  }
+}
