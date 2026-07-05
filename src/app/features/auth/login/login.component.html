@@ -1,23 +1,95 @@
-<mat-card class="login-card">
-  <mat-card-header>
-    <mat-card-title>Corely Admin</mat-card-title>
-    <mat-card-subtitle>Faça login para continuar</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <form class="login-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" placeholder="seu@email.com">
-        <mat-icon matPrefix>email</mat-icon>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Senha</mat-label>
-        <input matInput type="password">
-        <mat-icon matPrefix>lock</mat-icon>
-      </mat-form-field>
-    </form>
-  </mat-card-content>
-  <mat-card-actions align="end">
-    <button mat-raised-button color="primary" class="full-width">Entrar</button>
-  </mat-card-actions>
-</mat-card>
+<div class="login-layout">
+  <div class="login-brand">
+    <div class="brand-content">
+      <div class="brand-illustration" aria-hidden="true">
+        <svg width="280" height="280" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="140" cy="140" r="130" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.15"/>
+          <circle cx="140" cy="140" r="95" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 5" opacity="0.25"/>
+          <circle cx="140" cy="140" r="60" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="140" cy="110" r="25" fill="currentColor" opacity="0.15"/>
+          <ellipse cx="140" cy="180" rx="38" ry="18" fill="currentColor" opacity="0.1"/>
+          <path d="M115 140 Q127 120 140 130 Q153 120 165 140" stroke="currentColor" stroke-width="2.5" fill="none" opacity="0.3" stroke-linecap="round"/>
+          <path d="M108 155 Q124 135 140 148 Q156 135 172 155" stroke="currentColor" stroke-width="2" fill="none" opacity="0.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="brand-title">Gestão inteligente para Studios de Pilates.</h1>
+      <p class="brand-subtitle">Gerencie alunos, turmas, agenda e finanças em um só lugar. Simplicidade e tecnologia para o seu estúdio crescer.</p>
+    </div>
+  </div>
+
+  <div class="login-form-section">
+    <div class="login-card-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo" aria-hidden="true">C</div>
+          <h2 class="login-title">Entrar</h2>
+          <p class="login-subtitle">Acesse sua conta para continuar.</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <button type="submit" style="display:none" aria-hidden="true"></button>
+
+          <mat-form-field appearance="outline" class="login-field">
+            <mat-label>Email</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="seu@email.com"
+              autocomplete="email"
+              aria-required="true"
+              [attr.aria-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched || null"
+            />
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
+              Email obrigatório
+            </mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
+              Email inválido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="login-field">
+            <mat-label>Senha</mat-label>
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Sua senha"
+              autocomplete="current-password"
+              aria-required="true"
+              [attr.aria-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched || null"
+            />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'"
+            >
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+              Senha obrigatória
+            </mat-error>
+          </mat-form-field>
+
+          <div class="login-options">
+            <mat-checkbox formControlName="rememberMe" color="primary">Lembrar de mim</mat-checkbox>
+            <a (click)="onForgotPassword()" class="forgot-link" tabindex="0" role="link">Esqueci minha senha</a>
+          </div>
+
+          <ds-button
+            variant="primary"
+            [fullWidth]="true"
+            [loading]="loading"
+            [disabled]="loginForm.invalid"
+            label="Entrar"
+            (click)="onSubmit()"
+          ></ds-button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
