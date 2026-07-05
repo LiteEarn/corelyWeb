@@ -4,11 +4,11 @@ import { TokenService } from '../auth/token.service';
 import { SessionService } from './session.service';
 
 export function initializeSession(): () => Promise<void> {
-  return () => {
-    const sessionService = inject(SessionService);
-    const authService = inject(AuthService);
-    const tokenService = inject(TokenService);
+  const sessionService = inject(SessionService);
+  const authService = inject(AuthService);
+  const tokenService = inject(TokenService);
 
+  return () => {
     sessionService.setLoading(true);
 
     if (!tokenService.hasAccessToken()) {
