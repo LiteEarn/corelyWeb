@@ -19,8 +19,7 @@ import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
 import { ToastService } from '../../core/services/toast.service';
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 type StudentStatus = 'present' | 'absent' | 'reposition';
 
@@ -78,7 +77,7 @@ export class AttendanceComponent implements OnInit {
     private enrollmentService: EnrollmentService,
     private currentStudioService: CurrentStudioService,
     private toastService: ToastService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     private cdr: ChangeDetectorRef
   ) {
     this.filterForm = this.fb.group({
@@ -88,7 +87,7 @@ export class AttendanceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.featureGateService.canLoadClassGroupDropdown()) {
       this.loadClassGroups();
     }
   }
@@ -159,6 +158,13 @@ export class AttendanceComponent implements OnInit {
     this.selectedDate = attendanceDate;
     this.isLoading = true;
     this.searchQuery = '';
+
+    if (!this.featureGateService.canLoadEnrolledStudents()) {
+      this.toastService.warning('Você não tem permissão para carregar alunos.');
+      this.isLoading = false;
+      this.cdr.markForCheck();
+      return;
+    }
 
     this.enrollmentService.getStudentsByClassGroupId(classGroupId).subscribe({
       next: (enrollments) => {
@@ -266,6 +272,8 @@ export class AttendanceComponent implements OnInit {
   }
 
   saveAttendance(): void {
+    if (!this.featureGateService.canBulkCreateAttendance()) return;
+
     if (!this.selectedClassGroupId || !this.selectedDate || this.studentsAttendance.length === 0) {
       this.toastService.warning('Selecione uma turma, data e carregue os alunos.');
       return;

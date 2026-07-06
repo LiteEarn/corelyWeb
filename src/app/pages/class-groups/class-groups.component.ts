@@ -17,6 +17,7 @@ import { Instructor } from '../../features/instructors/instructor.model';
 import { ReactiveFormsModule } from "@angular/forms";
 import { ToastService } from '../../core/services/toast.service';
 import { DeactivateDialogComponent } from './deactivate-dialog.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-class-groups',
@@ -56,15 +57,23 @@ export class ClassGroupsComponent implements OnInit {
   constructor(
     private classGroupService: ClassGroupService,
     private instructorService: InstructorService,
+    private featureGateService: FeatureGateService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadClassGroups();
-    this.loadInstructors();
+    if (this.featureGateService.canLoadClassGroups()) {
+      this.loadClassGroups();
+    }
+    if (this.featureGateService.canLoadInstructors()) {
+      this.loadInstructors();
+    }
   }
 
   loadClassGroups(): void {
+    if (!this.featureGateService.canLoadClassGroups()) {
+      return;
+    }
     this.classGroupService.getAll().subscribe({
       next: (data) => {
         console.log('ClassGroups API Response', data);
@@ -78,6 +87,9 @@ export class ClassGroupsComponent implements OnInit {
   }
 
   loadInstructors(): void {
+    if (!this.featureGateService.canLoadInstructors()) {
+      return;
+    }
     this.instructorService.getAll({ active: true }).subscribe({
       next: (data) => {
         this.instructors = data;
@@ -152,6 +164,7 @@ export class ClassGroupsComponent implements OnInit {
   deactivateClassGroup(classGroup: ClassGroup): void {
     const id = classGroup.id;
     if (!id) return;
+    if (!this.featureGateService.canInactivateClassGroup()) return;
 
     this.openDeactivateDialog(id);
   }
@@ -174,6 +187,7 @@ export class ClassGroupsComponent implements OnInit {
   reactivateClassGroup(classGroup: ClassGroup): void {
     const id = classGroup.id;
     if (!id) return;
+    if (!this.featureGateService.canReactivateClassGroup()) return;
 
     this.classGroupService.reactivate(id).subscribe({
       next: () => {

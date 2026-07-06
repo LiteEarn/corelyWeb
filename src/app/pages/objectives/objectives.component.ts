@@ -14,8 +14,7 @@ import { Objective, ObjectiveFilters, ObjectiveStatus } from '../../features/obj
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ReactiveFormsModule } from '@angular/forms';
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-objectives',
@@ -51,13 +50,15 @@ export class ObjectivesComponent implements OnInit {
   constructor(
     private objectiveService: ObjectiveService,
     private studentService: StudentService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadObjectives();
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.featureGateService.canLoadObjectives()) {
+      this.loadObjectives();
+    }
+    if (this.featureGateService.canLoadStudentDropdown()) {
       this.loadStudents();
     }
   }
@@ -158,6 +159,7 @@ export class ObjectivesComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (!this.featureGateService.canManageObjectives()) return;
     if (confirm('Tem certeza que deseja excluir este objetivo?')) {
       this.objectiveService.delete(id).subscribe({
         next: () => {

@@ -19,6 +19,7 @@ import { Student } from '../../../../features/students/student.model';
 import { ObjectiveService } from '../../../../features/objectives/objective.service';
 import { Objective } from '../../../../features/objectives/objective.model';
 import { CurrentStudioService } from '../../../../core/services/current-studio.service';
+import { PermissionService } from '../../../../core/rbac/permission.service';
 
 export interface EvolutionDialogData {
   studentId: string;
@@ -61,11 +62,14 @@ export class EvolutionDialogComponent {
     private studentService: StudentService,
     private objectiveService: ObjectiveService,
     private currentStudioService: CurrentStudioService,
+    private permissionService: PermissionService,
     public dialogRef: MatDialogRef<EvolutionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: EvolutionDialogData
   ) {
     this.evolutionForm = this.createForm();
-    this.initializeForm();
+    if (this.permissionService.hasPermission('EVOLUTION_WRITE')) {
+      this.initializeForm();
+    }
   }
 
   createForm(): FormGroup {
@@ -100,6 +104,7 @@ export class EvolutionDialogComponent {
   }
 
   loadStudents(): void {
+    if (!this.permissionService.hasPermission('STUDENT_READ')) return;
     this.studentService.getAll().subscribe({
       next: (data) => {
         this.students = data;
@@ -111,6 +116,7 @@ export class EvolutionDialogComponent {
   }
 
   loadObjectives(): void {
+    if (!this.permissionService.hasPermission('OBJECTIVE_READ')) return;
     this.objectiveService.getAll({ studentId: this.data.studentId }).subscribe({
       next: (data) => {
         this.objectives = data;

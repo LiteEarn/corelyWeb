@@ -12,6 +12,7 @@ import { DsButtonComponent } from '../../../shared/design-system/button/button.c
 import { AuthService } from '../../../core/auth/auth.service';
 import { SessionService } from '../../../core/session/session.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { PermissionService } from '../../../core/rbac/permission.service';
 
 @Component({
   selector: 'app-login',
@@ -37,15 +38,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   private sessionService = inject(SessionService);
-
-  private roleDefaultRoutes: Record<string, string> = {
-    OWNER: '/dashboard',
-    ADMIN: '/dashboard',
-    RECEPTIONIST: '/students',
-    INSTRUCTOR: '/daily-agenda',
-    FINANCIAL: '/dashboard',
-    STUDENT: '/objectives',
-  };
+  private permissionService = inject(PermissionService);
 
   constructor(
     private fb: FormBuilder,
@@ -62,8 +55,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private getDefaultRoute(): string {
-    const role = this.sessionService.currentRole();
-    return this.roleDefaultRoutes[role] || '/dashboard';
+    return this.permissionService.getDefaultRoute();
   }
 
   ngOnInit(): void {

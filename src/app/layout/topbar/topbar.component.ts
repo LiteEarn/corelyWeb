@@ -34,6 +34,22 @@ export class TopbarComponent {
   userRole = this.sessionService.currentRole;
   userStudio = this.sessionService.currentStudio;
 
+  get roleDisplay(): string {
+    const roleMap: Record<string, string> = {
+      OWNER: 'Proprietário',
+      ADMIN: 'Administrador',
+      RECEPTIONIST: 'Recepcionista',
+      INSTRUCTOR: 'Instrutor',
+      FINANCIAL: 'Financeiro',
+      STUDENT: 'Aluno',
+    };
+    return roleMap[this.userRole()] || this.userRole();
+  }
+
+  get studioName(): string {
+    return this.userStudio()?.name || '';
+  }
+
   onNavigateProfile(): void {
     // TODO: implementar navegação para perfil do usuário
   }

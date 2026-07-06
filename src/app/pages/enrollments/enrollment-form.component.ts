@@ -22,6 +22,7 @@ import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { CustomValidators } from '../../shared/utils';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
 import { ToastService } from '../../core/services/toast.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-enrollment-form',
@@ -65,7 +66,8 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private featureGateService: FeatureGateService
   ) {
     this.enrollmentForm = this.createForm();
   }
@@ -73,11 +75,19 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.enrollmentId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.enrollmentId;
-    this.loadStudents();
-    this.loadClassGroups();
+
+    if (this.featureGateService.canLoadStudentDropdown()) {
+      this.loadStudents();
+    }
+
+    if (this.featureGateService.canLoadClassGroupDropdown()) {
+      this.loadClassGroups();
+    }
 
     if (this.isEditMode && this.enrollmentId) {
-      this.loadEnrollment(this.enrollmentId);
+      if (this.featureGateService.canLoadEnrollments()) {
+        this.loadEnrollment(this.enrollmentId);
+      }
     }
   }
 
@@ -139,6 +149,7 @@ export class EnrollmentFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
+    if (!this.featureGateService.canManageEnrollments()) return;
     if (this.isSubmitting) return;
 
     this.isFormSubmitted = true;

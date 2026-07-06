@@ -29,8 +29,7 @@ import { EnrollmentService } from '../../features/enrollments/enrollment.service
 import { ToastService } from '../../core/services/toast.service';
 import { AttendanceService } from '../../features/attendance/attendance.service';
 import { AttendanceStatus } from '../../features/attendance/attendance.model';
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 interface SessionCard {
   session: Session;
@@ -87,7 +86,6 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   private allSessions: Session[] = [];
   private classGroups: { id: string; name: string }[] = [];
   private destroy$ = new Subject<void>();
-  private isInstructor = false;
 
   constructor(
     private sessionService: SessionService,
@@ -96,17 +94,20 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     private enrollmentService: EnrollmentService,
     private toastService: ToastService,
     private attendanceService: AttendanceService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     @Inject(LOCALE_ID) private locale: string
   ) {}
 
   ngOnInit(): void {
-    this.isInstructor = this.permissionService.hasRole(Role.INSTRUCTOR);
-    if (!this.isInstructor) {
+    if (this.featureGateService.canLoadInstructors()) {
       this.loadInstructors();
+    }
+    if (this.featureGateService.canLoadClassGroups()) {
       this.loadClassGroups();
     }
-    this.loadSessions();
+    if (this.featureGateService.canLoadSessions()) {
+      this.loadSessions();
+    }
   }
 
   ngOnDestroy(): void {
@@ -178,7 +179,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
     this.applyFilter();
 
-    if (!this.isInstructor) {
+    if (this.featureGateService.canLoadEnrollments()) {
       this.loadEnrolledCounts();
     }
   }
@@ -248,7 +249,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   private loadStudentsForCard(card: SessionCard): void {
-    if (!card.classGroupId || this.isInstructor) return;
+    if (!card.classGroupId || !this.featureGateService.canLoadEnrolledStudents()) return;
 
     this.enrollmentService.getStudentsByClassGroupId(card.classGroupId).pipe(
       switchMap((enrollments) => {
@@ -306,6 +307,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   setAttendance(student: SessionStudent, status: AttendanceStatus, card: SessionCard): void {
+    if (!this.featureGateService.canManageAttendance()) return;
     if (student.saving || !card.session.id) return;
 
     if (student.attendanceStatus === status) return;
@@ -329,6 +331,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   startSession(card: SessionCard): void {
+    if (!this.featureGateService.canStartSession()) return;
     const sessionId = card.session.id;
     if (!sessionId || this.sessionActionLoading[sessionId]) return;
 
@@ -348,6 +351,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   completeSession(card: SessionCard): void {
+    if (!this.featureGateService.canCompleteSession()) return;
     const sessionId = card.session.id;
     if (!sessionId || this.sessionActionLoading[sessionId]) return;
 

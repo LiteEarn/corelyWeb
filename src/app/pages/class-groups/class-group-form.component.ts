@@ -21,6 +21,7 @@ import { Enrollment } from '../../features/enrollments/enrollment.model';
 import { CustomValidators } from '../../shared/utils';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
 import { ToastService } from '../../core/services/toast.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-class-group-form',
@@ -66,7 +67,8 @@ export class ClassGroupFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private featureGateService: FeatureGateService
   ) {
     this.classGroupForm = this.createForm();
   }
@@ -74,11 +76,18 @@ export class ClassGroupFormComponent implements OnInit {
   ngOnInit(): void {
     this.classGroupId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.classGroupId;
-    this.loadInstructors();
+
+    if (this.featureGateService.canLoadInstructors()) {
+      this.loadInstructors();
+    }
 
     if (this.isEditMode && this.classGroupId) {
-      this.loadClassGroup(this.classGroupId);
-      this.loadEnrolledStudents(this.classGroupId);
+      if (this.featureGateService.canLoadClassGroups()) {
+        this.loadClassGroup(this.classGroupId);
+      }
+      if (this.featureGateService.canLoadEnrollments()) {
+        this.loadEnrolledStudents(this.classGroupId);
+      }
     }
   }
 
@@ -170,13 +179,9 @@ export class ClassGroupFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('onSubmit executado');
+    if (!this.featureGateService.canManageClassGroups()) return;
     
-    // Proteção contra múltiplos submits
-    if (this.isSubmitting) {
-      console.log('Submit já em andamento, ignorando');
-      return;
-    }
+    if (this.isSubmitting) return;
 
     this.isFormSubmitted = true;
 

@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DsPageHeaderComponent, DsPageCardComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../../shared/design-system';
+import { FeatureGateService } from '../../../core/rbac/feature-gate.service';
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { StudentObjectivesTabComponent } from './student-objectives-tab/student-objectives-tab.component';
@@ -41,12 +42,13 @@ export class StudentDetailsComponent implements OnInit {
   constructor(
     private studentService: StudentService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private featureGateService: FeatureGateService,
   ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
+    if (id && this.featureGateService.canLoadStudents()) {
       this.loadStudent(id);
     }
   }

@@ -10,6 +10,7 @@ import { Objective, ObjectiveStatus } from '../../../../features/objectives/obje
 import { ObjectiveDialogComponent } from './objective-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PermissionService } from '../../../../core/rbac/permission.service';
 
 @Component({
   selector: 'app-student-objectives-tab',
@@ -37,11 +38,14 @@ export class StudentObjectivesTabComponent implements OnInit {
   constructor(
     private objectiveService: ObjectiveService,
     private dialog: MatDialog,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private permissionService: PermissionService
   ) {}
 
   ngOnInit(): void {
-    this.loadObjectives();
+    if (this.permissionService.hasPermission('OBJECTIVE_READ')) {
+      this.loadObjectives();
+    }
   }
 
   loadObjectives(): void {

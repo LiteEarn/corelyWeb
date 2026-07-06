@@ -27,7 +27,9 @@ describe('PermissionService', () => {
       'MAKEUP_REQUEST_READ', 'MAKEUP_REQUEST_WRITE',
       'FINANCIAL_READ', 'FINANCIAL_WRITE',
       'USER_READ', 'USER_WRITE',
-      'STUDIO_READ', 'STUDIO_WRITE'
+      'STUDIO_READ', 'STUDIO_WRITE',
+      'REPORT_READ', 'REPORT_WRITE',
+      'SETTINGS_READ', 'SETTINGS_WRITE',
     ],
     lastLogin: '2026-01-01T00:00:00'
   };
@@ -46,6 +48,40 @@ describe('PermissionService', () => {
       'SESSION_READ', 'SESSION_WRITE',
       'CLASS_GROUP_READ',
       'MAKEUP_REQUEST_READ', 'MAKEUP_REQUEST_WRITE'
+    ],
+    lastLogin: '2026-01-01T00:00:00'
+  };
+
+  const instructorUser: CurrentUser = {
+    id: '3',
+    name: 'Instructor',
+    email: 'inst@example.com',
+    role: 'INSTRUCTOR',
+    studio: { id: 's1', name: 'Studio 1' },
+    permissions: [
+      'DASHBOARD_VIEW',
+      'OBJECTIVE_READ', 'OBJECTIVE_WRITE',
+      'EVALUATION_READ', 'EVALUATION_WRITE',
+      'EVOLUTION_READ', 'EVOLUTION_WRITE',
+      'STUDENT_READ',
+      'CLASS_GROUP_READ',
+      'SESSION_READ', 'SESSION_WRITE',
+      'ATTENDANCE_READ', 'ATTENDANCE_WRITE'
+    ],
+    lastLogin: '2026-01-01T00:00:00'
+  };
+
+  const financialUser: CurrentUser = {
+    id: '4',
+    name: 'Financial',
+    email: 'fin@example.com',
+    role: 'FINANCIAL',
+    studio: { id: 's1', name: 'Studio 1' },
+    permissions: [
+      'DASHBOARD_VIEW',
+      'FINANCIAL_READ', 'FINANCIAL_WRITE',
+      'STUDENT_READ',
+      'ENROLLMENT_READ'
     ],
     lastLogin: '2026-01-01T00:00:00'
   };
@@ -127,7 +163,8 @@ describe('PermissionService', () => {
       expect(perms).toContain('DASHBOARD_VIEW');
       expect(perms).toContain('STUDENT_WRITE');
       expect(perms).toContain('STUDIO_WRITE');
-      expect(perms.length).toBe(27);
+      expect(perms).toContain('REPORT_READ');
+      expect(perms).toContain('SETTINGS_READ');
     });
 
     it('should return limited permissions for RECEPTIONIST', () => {
@@ -151,6 +188,103 @@ describe('PermissionService', () => {
 
     it('should return empty array when no user', () => {
       expect(service.getCurrentUserPermissions()).toEqual([]);
+    });
+  });
+
+  describe('getMenuItems', () => {
+    it('should return all menu items for ADMIN', () => {
+      sessionService.setUser(adminUser);
+      const items = service.getMenuItems();
+      expect(items.length).toBeGreaterThan(10);
+    });
+
+    it('should return limited menu items for RECEPTIONIST', () => {
+      sessionService.setUser(receptionistUser);
+      const items = service.getMenuItems();
+      const labels = items.map(i => i.label);
+      expect(labels).toContain('Dashboard');
+      expect(labels).toContain('Alunos');
+      expect(labels).toContain('Matrículas');
+      expect(labels).toContain('Presença');
+      expect(labels).toContain('Agenda do Dia');
+      expect(labels).toContain('Reposições');
+      expect(labels).toContain('Turmas');
+      expect(labels).not.toContain('Instrutores');
+      expect(labels).not.toContain('Financeiro');
+    });
+
+    it('should return limited menu items for INSTRUCTOR', () => {
+      sessionService.setUser(instructorUser);
+      const items = service.getMenuItems();
+      const labels = items.map(i => i.label);
+      expect(labels).toContain('Dashboard');
+      expect(labels).toContain('Objetivos');
+      expect(labels).toContain('Avaliações');
+      expect(labels).toContain('Evoluções');
+      expect(labels).toContain('Agenda do Dia');
+      expect(labels).not.toContain('Instrutores');
+      expect(labels).not.toContain('Financeiro');
+    });
+
+    it('should return limited menu items for FINANCIAL', () => {
+      sessionService.setUser(financialUser);
+      const items = service.getMenuItems();
+      const labels = items.map(i => i.label);
+      expect(labels).toContain('Dashboard');
+      expect(labels).toContain('Financeiro');
+      expect(labels).toContain('Alunos');
+      expect(labels).toContain('Matrículas');
+      expect(labels).not.toContain('Instrutores');
+      expect(labels).not.toContain('Presença');
+    });
+  });
+
+  describe('canAccessRoute', () => {
+    it('should allow ADMIN to access students route', () => {
+      sessionService.setUser(adminUser);
+      expect(service.canAccessRoute('students')).toBeTrue();
+    });
+
+    it('should allow RECEPTIONIST to access students route', () => {
+      sessionService.setUser(receptionistUser);
+      expect(service.canAccessRoute('students')).toBeTrue();
+    });
+
+    it('should deny RECEPTIONIST access to instructors route', () => {
+      sessionService.setUser(receptionistUser);
+      expect(service.canAccessRoute('instructors')).toBeFalse();
+    });
+
+    it('should deny FINANCIAL access to instructors route', () => {
+      sessionService.setUser(financialUser);
+      expect(service.canAccessRoute('instructors')).toBeFalse();
+    });
+
+    it('should allow INSTRUCTOR access to daily-agenda route', () => {
+      sessionService.setUser(instructorUser);
+      expect(service.canAccessRoute('daily-agenda')).toBeTrue();
+    });
+  });
+
+  describe('getDefaultRoute', () => {
+    it('should return dashboard for ADMIN', () => {
+      sessionService.setUser(adminUser);
+      expect(service.getDefaultRoute()).toBe('/dashboard');
+    });
+
+    it('should return students for RECEPTIONIST', () => {
+      sessionService.setUser(receptionistUser);
+      expect(service.getDefaultRoute()).toBe('/students');
+    });
+
+    it('should return daily-agenda for INSTRUCTOR', () => {
+      sessionService.setUser(instructorUser);
+      expect(service.getDefaultRoute()).toBe('/daily-agenda');
+    });
+
+    it('should return financial for FINANCIAL', () => {
+      sessionService.setUser(financialUser);
+      expect(service.getDefaultRoute()).toBe('/financial');
     });
   });
 

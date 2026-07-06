@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DsPageFormComponent, DsPageHeaderComponent, DsPageCardComponent } from '../../../shared/design-system';
+import { FeatureGateService } from '../../../core/rbac/feature-gate.service';
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { PhoneMaskUtil, DateMaskUtil, CustomValidators } from '../../../shared/utils';
@@ -51,7 +52,8 @@ export class StudentFormComponent implements OnInit {
     private studentService: StudentService,
     private route: ActivatedRoute,
     private router: Router,
-    private currentStudioService: CurrentStudioService
+    private currentStudioService: CurrentStudioService,
+    private featureGateService: FeatureGateService,
   ) {
     this.studentForm = this.createForm();
   }
@@ -60,7 +62,7 @@ export class StudentFormComponent implements OnInit {
     this.studentId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.studentId;
 
-    if (this.isEditMode && this.studentId) {
+    if (this.isEditMode && this.studentId && this.featureGateService.canManageStudents()) {
       this.loadStudent(this.studentId);
     }
   }
@@ -96,13 +98,9 @@ export class StudentFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('StudentForm onSubmit executado');
+    if (!this.featureGateService.canManageStudents()) return;
 
-    // Proteção contra múltiplos submits
-    if (this.isSubmitting) {
-      console.log('StudentForm submit já em andamento, ignorando');
-      return;
-    }
+    if (this.isSubmitting) return;
 
     this.isFormSubmitted = true;
 

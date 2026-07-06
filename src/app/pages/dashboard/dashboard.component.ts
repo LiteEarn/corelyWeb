@@ -18,6 +18,7 @@ import { ChipStatus } from '../../shared/design-system/status-chip/status-chip.c
 import { DashboardService } from './dashboard.service';
 import { DashboardOperationalResponse, UpcomingSession, DashboardAlert } from './dashboard.model';
 import { ToastService } from '../../core/services/toast.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,12 +49,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private toastService: ToastService,
+    private featureGateService: FeatureGateService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.loadDashboard();
+    if (this.featureGateService.canViewDashboard()) {
+      this.loadDashboard();
+    } else {
+      this.loading = false;
+      this.data = null;
+    }
   }
 
   ngOnDestroy(): void {
@@ -62,6 +69,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadDashboard(): void {
+    if (!this.featureGateService.canViewDashboard()) {
+      this.loading = false;
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.loading = true;
     this.error = false;
 

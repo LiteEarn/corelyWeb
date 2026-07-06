@@ -20,7 +20,6 @@ import { ObjectiveService } from '../../../features/objectives/objective.service
 import { Objective } from '../../../features/objectives/objective.model';
 import { CurrentStudioService } from '../../../core/services/current-studio.service';
 import { PermissionService } from '../../../core/rbac/permission.service';
-import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evolution-form',
@@ -72,7 +71,7 @@ export class EvolutionFormComponent implements OnInit {
   ngOnInit(): void {
     this.evolutionId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.evolutionId;
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.permissionService.hasPermission('STUDENT_READ')) {
       this.loadStudents();
     }
     this.loadObjectives();

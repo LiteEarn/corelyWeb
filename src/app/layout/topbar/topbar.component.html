@@ -15,7 +15,8 @@
       <mat-icon class="user-icon">account_circle</mat-icon>
       <div class="user-details">
         <span class="user-name">{{ userName() }}</span>
-        <span class="user-role">{{ userRole() }}</span>
+        <span class="user-role">{{ roleDisplay }}</span>
+        <span class="user-studio" *ngIf="studioName">{{ studioName }}</span>
       </div>
       <mat-icon class="user-dropdown-icon">arrow_drop_down</mat-icon>
     </div>

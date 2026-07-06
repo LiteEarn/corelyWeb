@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import {ReactiveFormsModule} from "@angular/forms";
@@ -42,10 +43,16 @@ export class StudentsComponent implements OnInit {
   searchValue: string = '';
   statusFilter: string = 'all';
 
-  constructor(private studentService: StudentService, private router: Router) {}
+  constructor(
+    private studentService: StudentService,
+    private router: Router,
+    private featureGateService: FeatureGateService,
+  ) {}
 
   ngOnInit(): void {
-    this.loadStudents();
+    if (this.featureGateService.canLoadStudents()) {
+      this.loadStudents();
+    }
   }
 
   loadStudents(): void {

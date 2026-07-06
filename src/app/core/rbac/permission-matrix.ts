@@ -1,0 +1,142 @@
+import { Role } from './role.enum';
+
+export interface MenuItemDef {
+  icon: string;
+  label: string;
+  route: string;
+  permissions: string[];
+}
+
+export interface RouteDef {
+  path: string;
+  roles: Role[];
+}
+
+export interface EndpointDef {
+  pattern: string;
+  permissions: string[];
+}
+
+export const MENU_PERMISSIONS: MenuItemDef[] = [
+  { icon: 'dashboard', label: 'Dashboard', route: '/dashboard', permissions: ['DASHBOARD_VIEW'] },
+  { icon: 'school', label: 'Alunos', route: '/students', permissions: ['STUDENT_READ'] },
+  { icon: 'person', label: 'Instrutores', route: '/instructors', permissions: ['INSTRUCTOR_READ'] },
+  { icon: 'groups', label: 'Turmas', route: '/class-groups', permissions: ['CLASS_GROUP_READ'] },
+  { icon: 'assignment_ind', label: 'Matrículas', route: '/enrollments', permissions: ['ENROLLMENT_READ'] },
+  { icon: 'fact_check', label: 'Presença', route: '/attendance', permissions: ['ATTENDANCE_READ'] },
+  { icon: 'event', label: 'Agenda do Dia', route: '/daily-agenda', permissions: ['SESSION_READ'] },
+  { icon: 'event_repeat', label: 'Reposições', route: '/makeup-approval', permissions: ['MAKEUP_REQUEST_READ'] },
+  { icon: 'flag', label: 'Objetivos', route: '/objectives', permissions: ['OBJECTIVE_READ'] },
+  { icon: 'assignment', label: 'Avaliações', route: '/evaluations', permissions: ['EVALUATION_READ'] },
+  { icon: 'timeline', label: 'Evoluções', route: '/evolutions', permissions: ['EVOLUTION_READ'] },
+  { icon: 'account_balance', label: 'Financeiro', route: '/financial', permissions: ['FINANCIAL_READ'] },
+  { icon: 'assessment', label: 'Relatórios', route: '/reports', permissions: ['REPORT_READ'] },
+  { icon: 'settings', label: 'Configurações', route: '/settings', permissions: ['SETTINGS_READ'] },
+];
+
+export const ROUTE_PERMISSIONS: RouteDef[] = [
+  { path: 'dashboard', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR, Role.FINANCIAL] },
+  { path: 'students', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR, Role.FINANCIAL] },
+  { path: 'students/new', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST] },
+  { path: 'students/:id', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR, Role.FINANCIAL] },
+  { path: 'students/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST] },
+  { path: 'instructors', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'instructors/new', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'instructors/:id', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'instructors/:id/edit', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'class-groups', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'class-groups/new', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'class-groups/:id', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'class-groups/:id/edit', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'enrollments', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.FINANCIAL] },
+  { path: 'enrollments/new', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST] },
+  { path: 'enrollments/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST] },
+  { path: 'attendance', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR] },
+  { path: 'daily-agenda', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR] },
+  { path: 'sessions', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR] },
+  { path: 'sessions/new', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR] },
+  { path: 'sessions/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST, Role.INSTRUCTOR] },
+  { path: 'makeup-approval', roles: [Role.OWNER, Role.ADMIN, Role.RECEPTIONIST] },
+  { path: 'objectives', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'objectives/new', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'objectives/:id', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'objectives/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evaluations', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evaluations/new', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evaluations/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evolutions', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evolutions/new', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'evolutions/:id/edit', roles: [Role.OWNER, Role.ADMIN, Role.INSTRUCTOR] },
+  { path: 'financial', roles: [Role.OWNER, Role.ADMIN, Role.FINANCIAL] },
+  { path: 'reports', roles: [Role.OWNER, Role.ADMIN] },
+  { path: 'settings', roles: [Role.OWNER, Role.ADMIN] },
+];
+
+export const ENDPOINT_PERMISSIONS: EndpointDef[] = [
+  { pattern: 'GET /students', permissions: ['STUDENT_READ'] },
+  { pattern: 'GET /students/*', permissions: ['STUDENT_READ'] },
+  { pattern: 'POST /students', permissions: ['STUDENT_WRITE'] },
+  { pattern: 'PUT /students/*', permissions: ['STUDENT_WRITE'] },
+  { pattern: 'DELETE /students/*', permissions: ['STUDENT_WRITE'] },
+  { pattern: 'GET /instructors', permissions: ['INSTRUCTOR_READ'] },
+  { pattern: 'GET /instructors/*', permissions: ['INSTRUCTOR_READ'] },
+  { pattern: 'POST /instructors', permissions: ['INSTRUCTOR_WRITE'] },
+  { pattern: 'PUT /instructors/*', permissions: ['INSTRUCTOR_WRITE'] },
+  { pattern: 'DELETE /instructors/*', permissions: ['INSTRUCTOR_WRITE'] },
+  { pattern: 'PUT /instructors/*/reassign', permissions: ['INSTRUCTOR_WRITE'] },
+  { pattern: 'GET /instructors/*/class-groups', permissions: ['INSTRUCTOR_READ'] },
+  { pattern: 'GET /class-groups', permissions: ['CLASS_GROUP_READ'] },
+  { pattern: 'GET /class-groups/*', permissions: ['CLASS_GROUP_READ'] },
+  { pattern: 'POST /class-groups', permissions: ['CLASS_GROUP_WRITE'] },
+  { pattern: 'PUT /class-groups/*', permissions: ['CLASS_GROUP_WRITE'] },
+  { pattern: 'DELETE /class-groups/*', permissions: ['CLASS_GROUP_WRITE'] },
+  { pattern: 'POST /class-groups/*/inactivate', permissions: ['CLASS_GROUP_WRITE'] },
+  { pattern: 'POST /class-groups/*/reactivate', permissions: ['CLASS_GROUP_WRITE'] },
+  { pattern: 'GET /enrollments', permissions: ['ENROLLMENT_READ'] },
+  { pattern: 'GET /enrollments/*', permissions: ['ENROLLMENT_READ'] },
+  { pattern: 'POST /enrollments', permissions: ['ENROLLMENT_WRITE'] },
+  { pattern: 'PUT /enrollments/*', permissions: ['ENROLLMENT_WRITE'] },
+  { pattern: 'DELETE /enrollments/*', permissions: ['ENROLLMENT_WRITE'] },
+  { pattern: 'GET /enrollments/class-groups/*/students', permissions: ['ENROLLMENT_READ'] },
+  { pattern: 'GET /attendance', permissions: ['ATTENDANCE_READ'] },
+  { pattern: 'GET /attendance/class-group/*', permissions: ['ATTENDANCE_READ'] },
+  { pattern: 'GET /attendance/class-group/*/date/*', permissions: ['ATTENDANCE_READ'] },
+  { pattern: 'POST /attendance/bulk', permissions: ['ATTENDANCE_WRITE'] },
+  { pattern: 'GET /class-sessions/*/attendance', permissions: ['ATTENDANCE_READ'] },
+  { pattern: 'POST /class-sessions/*/attendance', permissions: ['ATTENDANCE_WRITE'] },
+  { pattern: 'GET /class-sessions', permissions: ['SESSION_READ'] },
+  { pattern: 'GET /class-sessions/*', permissions: ['SESSION_READ'] },
+  { pattern: 'POST /class-sessions', permissions: ['SESSION_WRITE'] },
+  { pattern: 'PUT /class-sessions/*', permissions: ['SESSION_WRITE'] },
+  { pattern: 'DELETE /class-sessions/*', permissions: ['SESSION_WRITE'] },
+  { pattern: 'PATCH /class-sessions/*/start', permissions: ['SESSION_WRITE'] },
+  { pattern: 'PATCH /class-sessions/*/complete', permissions: ['SESSION_WRITE'] },
+  { pattern: 'GET /objectives', permissions: ['OBJECTIVE_READ'] },
+  { pattern: 'GET /objectives/*', permissions: ['OBJECTIVE_READ'] },
+  { pattern: 'POST /objectives', permissions: ['OBJECTIVE_WRITE'] },
+  { pattern: 'PUT /objectives/*', permissions: ['OBJECTIVE_WRITE'] },
+  { pattern: 'DELETE /objectives/*', permissions: ['OBJECTIVE_WRITE'] },
+  { pattern: 'GET /evaluations', permissions: ['EVALUATION_READ'] },
+  { pattern: 'GET /evaluations/*', permissions: ['EVALUATION_READ'] },
+  { pattern: 'POST /evaluations', permissions: ['EVALUATION_WRITE'] },
+  { pattern: 'PUT /evaluations/*', permissions: ['EVALUATION_WRITE'] },
+  { pattern: 'DELETE /evaluations/*', permissions: ['EVALUATION_WRITE'] },
+  { pattern: 'GET /evolutions', permissions: ['EVOLUTION_READ'] },
+  { pattern: 'GET /evolutions/*', permissions: ['EVOLUTION_READ'] },
+  { pattern: 'POST /evolutions', permissions: ['EVOLUTION_WRITE'] },
+  { pattern: 'PUT /evolutions/*', permissions: ['EVOLUTION_WRITE'] },
+  { pattern: 'DELETE /evolutions/*', permissions: ['EVOLUTION_WRITE'] },
+  { pattern: 'GET /makeup-requests', permissions: ['MAKEUP_REQUEST_READ'] },
+  { pattern: 'PATCH /makeup-requests/*/approve', permissions: ['MAKEUP_REQUEST_WRITE'] },
+  { pattern: 'PATCH /makeup-requests/*/reject', permissions: ['MAKEUP_REQUEST_WRITE'] },
+  { pattern: 'GET /dashboard/*', permissions: ['DASHBOARD_VIEW'] },
+];
+
+export const ROLE_DEFAULT_ROUTES: Record<string, string> = {
+  [Role.OWNER]: '/dashboard',
+  [Role.ADMIN]: '/dashboard',
+  [Role.RECEPTIONIST]: '/students',
+  [Role.INSTRUCTOR]: '/daily-agenda',
+  [Role.FINANCIAL]: '/financial',
+  [Role.STUDENT]: '/objectives',
+};

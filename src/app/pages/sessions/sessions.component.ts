@@ -14,8 +14,7 @@ import { Session } from '../../features/sessions/session.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
 import {ReactiveFormsModule} from "@angular/forms";
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-sessions',
@@ -51,13 +50,15 @@ export class SessionsComponent implements OnInit {
   constructor(
     private sessionService: SessionService,
     private instructorService: InstructorService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadSessions();
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.featureGateService.canLoadSessions()) {
+      this.loadSessions();
+    }
+    if (this.featureGateService.canLoadInstructors()) {
       this.loadInstructors();
     }
   }

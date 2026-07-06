@@ -17,7 +17,6 @@ import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { CurrentStudioService } from '../../../core/services/current-studio.service';
 import { PermissionService } from '../../../core/rbac/permission.service';
-import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evaluation-form',
@@ -66,7 +65,7 @@ export class EvaluationFormComponent implements OnInit {
   ngOnInit(): void {
     this.evaluationId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.evaluationId;
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.permissionService.hasPermission('STUDENT_READ')) {
       this.loadStudents();
     }
 
