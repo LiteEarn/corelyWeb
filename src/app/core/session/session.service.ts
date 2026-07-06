@@ -29,6 +29,10 @@ export class SessionService {
     this.userSignal.set(null);
   }
 
+  logout(): void {
+    this.clear();
+  }
+
   setLoading(value: boolean): void {
     this.loadingSignal.set(value);
   }

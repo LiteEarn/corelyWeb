@@ -47,4 +47,20 @@ describe('authGuard', () => {
     expect(result).toBeFalse();
     expect(navigateSpy).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/dashboard' } });
   });
+
+  it('should block access and redirect to login after logout', () => {
+    const navigateSpy = spyOn(router, 'navigate');
+
+    sessionService.setUser({
+      id: '123', name: 'Test', email: 'test@test.com',
+      role: 'ADMIN', studio: { id: 's1', name: 'Studio' },
+      permissions: [], lastLogin: '2026-01-01T00:00:00'
+    });
+    sessionService.logout();
+
+    const result = executeGuard({} as any, { url: '/students' } as any);
+
+    expect(result).toBeFalse();
+    expect(navigateSpy).toHaveBeenCalledWith(['/login'], { queryParams: { returnUrl: '/students' } });
+  });
 });

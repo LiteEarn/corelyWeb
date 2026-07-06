@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 import { ShellComponent } from './shell.component';
 
@@ -8,7 +9,8 @@ describe('ShellComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShellComponent]
+      imports: [ShellComponent],
+      providers: [provideHttpClient()]
     })
     .compileComponents();
 

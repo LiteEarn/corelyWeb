@@ -57,6 +57,18 @@ describe('SessionService', () => {
     expect(service.permissions()).toEqual([]);
   });
 
+  it('should call clear on logout', () => {
+    service.setUser(mockUser);
+    service.logout();
+    expect(service.currentUser()).toBeNull();
+    expect(service.isAuthenticated()).toBeFalse();
+    expect(service.currentRole()).toBe('');
+    expect(service.userName()).toBe('');
+    expect(service.userEmail()).toBe('');
+    expect(service.currentStudio()).toBeNull();
+    expect(service.permissions()).toEqual([]);
+  });
+
   it('should set loading state', () => {
     expect(service.loading()).toBeFalse();
     service.setLoading(true);
