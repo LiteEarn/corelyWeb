@@ -32,6 +32,7 @@ describe('LoginComponent', () => {
     studioId: 'studio-1',
     studioName: 'Corely Studio',
     role: 'OWNER',
+    permissions: [],
   };
 
   beforeEach(async () => {
@@ -249,8 +250,8 @@ describe('LoginComponent', () => {
         ],
       }).compileComponents();
 
-      const svc = TestBed.inject(SessionService);
-      svc.setUser(mockCurrentUser);
+      const sessionService = TestBed.inject(SessionService);
+      sessionService.setUser(mockLoginResponse.user);
 
       fixture = TestBed.createComponent(LoginComponent);
       component = fixture.componentInstance;

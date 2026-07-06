@@ -29,6 +29,8 @@ import { EnrollmentService } from '../../features/enrollments/enrollment.service
 import { ToastService } from '../../core/services/toast.service';
 import { AttendanceService } from '../../features/attendance/attendance.service';
 import { AttendanceStatus } from '../../features/attendance/attendance.model';
+import { PermissionService } from '../../core/rbac/permission.service';
+import { Role } from '../../core/rbac/role.enum';
 
 interface SessionCard {
   session: Session;
@@ -85,6 +87,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   private allSessions: Session[] = [];
   private classGroups: { id: string; name: string }[] = [];
   private destroy$ = new Subject<void>();
+  private isInstructor = false;
 
   constructor(
     private sessionService: SessionService,
@@ -93,12 +96,16 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     private enrollmentService: EnrollmentService,
     private toastService: ToastService,
     private attendanceService: AttendanceService,
+    private permissionService: PermissionService,
     @Inject(LOCALE_ID) private locale: string
   ) {}
 
   ngOnInit(): void {
-    this.loadInstructors();
-    this.loadClassGroups();
+    this.isInstructor = this.permissionService.hasRole(Role.INSTRUCTOR);
+    if (!this.isInstructor) {
+      this.loadInstructors();
+      this.loadClassGroups();
+    }
     this.loadSessions();
   }
 
@@ -162,7 +169,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
       return {
         session,
-        instructorName: instructor ? instructor.fullName : 'Não encontrado',
+        instructorName: instructor ? instructor.fullName : session.instructorId || 'Não encontrado',
         classGroupId: classGroup?.id,
         enrolledCount: undefined,
         expanded: false,
@@ -171,7 +178,9 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
     this.applyFilter();
 
-    this.loadEnrolledCounts();
+    if (!this.isInstructor) {
+      this.loadEnrolledCounts();
+    }
   }
 
   private loadEnrolledCounts(): void {
@@ -239,7 +248,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   private loadStudentsForCard(card: SessionCard): void {
-    if (!card.classGroupId) return;
+    if (!card.classGroupId || this.isInstructor) return;
 
     this.enrollmentService.getStudentsByClassGroupId(card.classGroupId).pipe(
       switchMap((enrollments) => {

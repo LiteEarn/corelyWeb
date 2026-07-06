@@ -14,6 +14,8 @@ import { Objective, ObjectiveFilters, ObjectiveStatus } from '../../features/obj
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ReactiveFormsModule } from '@angular/forms';
+import { PermissionService } from '../../core/rbac/permission.service';
+import { Role } from '../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-objectives',
@@ -49,12 +51,15 @@ export class ObjectivesComponent implements OnInit {
   constructor(
     private objectiveService: ObjectiveService,
     private studentService: StudentService,
+    private permissionService: PermissionService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadObjectives();
-    this.loadStudents();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadStudents();
+    }
   }
 
   loadObjectives(): void {
@@ -131,7 +136,7 @@ export class ObjectivesComponent implements OnInit {
 
   getStudentName(studentId: string): string {
     const student = this.students.find(s => s.id === studentId);
-    return student ? student.fullName : 'N/A';
+    return student ? student.fullName : studentId || 'N/A';
   }
 
   formatDate(dateString: string): string {

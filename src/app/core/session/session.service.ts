@@ -1,30 +1,35 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { CurrentUser } from '../auth/auth.models';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class SessionService {
-  private currentUserSignal = signal<CurrentUser | null>(null);
-  private loadingSignal = signal(true);
+  private userSignal = signal<CurrentUser | null>(null);
+  private loadingSignal = signal(false);
 
-  readonly currentUser = this.currentUserSignal.asReadonly();
+  readonly currentUser = this.userSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
 
-  readonly currentStudio = computed(() => this.currentUserSignal()?.studio ?? null);
-  readonly currentRole = computed(() => this.currentUserSignal()?.role ?? null);
-  readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
-  readonly permissions = computed(() => this.currentUserSignal()?.permissions ?? []);
+  readonly isAuthenticated = computed(() => this.userSignal() !== null);
+
+  readonly currentRole = computed(() => this.userSignal()?.role ?? '');
+
+  readonly currentStudio = computed(() => this.userSignal()?.studio ?? null);
+
+  readonly permissions = computed<string[]>(() => this.userSignal()?.permissions ?? []);
+
+  readonly userName = computed(() => this.userSignal()?.name ?? '');
+
+  readonly userEmail = computed(() => this.userSignal()?.email ?? '');
 
   setUser(user: CurrentUser): void {
-    this.currentUserSignal.set(user);
+    this.userSignal.set(user);
   }
 
   clear(): void {
-    this.currentUserSignal.set(null);
+    this.userSignal.set(null);
   }
 
-  setLoading(loading: boolean): void {
-    this.loadingSignal.set(loading);
+  setLoading(value: boolean): void {
+    this.loadingSignal.set(value);
   }
 }

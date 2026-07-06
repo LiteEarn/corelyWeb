@@ -4,14 +4,13 @@ import { CurrentUser } from '../auth/auth.models';
 
 describe('SessionService', () => {
   let service: SessionService;
-
   const mockUser: CurrentUser = {
-    id: '123',
+    id: '1',
     name: 'John Doe',
-    email: 'john@test.com',
+    email: 'john@example.com',
     role: 'ADMIN',
-    studio: { id: 'studio-1', name: 'Test Studio' },
-    permissions: ['read', 'write'],
+    studio: { id: 'studio-1', name: 'Main Studio' },
+    permissions: ['DASHBOARD_VIEW', 'STUDENT_READ'],
     lastLogin: '2026-07-04T10:00:00'
   };
 
@@ -24,57 +23,65 @@ describe('SessionService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should start with null user', () => {
+  it('should start with no user and not loading', () => {
     expect(service.currentUser()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
+    expect(service.loading()).toBeFalse();
+    expect(service.currentRole()).toBe('');
+    expect(service.userName()).toBe('');
+    expect(service.userEmail()).toBe('');
     expect(service.currentStudio()).toBeNull();
-    expect(service.currentRole()).toBeNull();
     expect(service.permissions()).toEqual([]);
   });
 
-  it('should set user and expose signals', () => {
+  it('should set user and update all signals', () => {
     service.setUser(mockUser);
-
     expect(service.currentUser()).toEqual(mockUser);
     expect(service.isAuthenticated()).toBeTrue();
-    expect(service.currentStudio()).toEqual(mockUser.studio);
     expect(service.currentRole()).toBe('ADMIN');
-    expect(service.permissions()).toEqual(['read', 'write']);
+    expect(service.userName()).toBe('John Doe');
+    expect(service.userEmail()).toBe('john@example.com');
+    expect(service.currentStudio()).toEqual({ id: 'studio-1', name: 'Main Studio' });
+    expect(service.permissions()).toEqual(['DASHBOARD_VIEW', 'STUDENT_READ']);
   });
 
-  it('should clear user on clear', () => {
+  it('should clear user and reset signals', () => {
     service.setUser(mockUser);
-    expect(service.isAuthenticated()).toBeTrue();
-
     service.clear();
-
     expect(service.currentUser()).toBeNull();
     expect(service.isAuthenticated()).toBeFalse();
+    expect(service.currentRole()).toBe('');
+    expect(service.userName()).toBe('');
+    expect(service.userEmail()).toBe('');
     expect(service.currentStudio()).toBeNull();
-    expect(service.currentRole()).toBeNull();
     expect(service.permissions()).toEqual([]);
   });
 
-  it('should manage loading state', () => {
+  it('should set loading state', () => {
+    expect(service.loading()).toBeFalse();
+    service.setLoading(true);
     expect(service.loading()).toBeTrue();
-
     service.setLoading(false);
-
     expect(service.loading()).toBeFalse();
   });
 
-  it('should replace user on subsequent setUser calls', () => {
-    service.setUser(mockUser);
-
-    const updatedUser: CurrentUser = {
+  it('should handle user with empty permissions', () => {
+    const noPermsUser: CurrentUser = {
       ...mockUser,
-      name: 'Jane Doe',
-      role: 'RECEPTIONIST'
+      permissions: []
     };
+    service.setUser(noPermsUser);
+    expect(service.permissions()).toEqual([]);
+  });
 
-    service.setUser(updatedUser);
-
-    expect(service.currentUser()?.name).toBe('Jane Doe');
-    expect(service.currentRole()).toBe('RECEPTIONIST');
+  it('should handle user with STUDENT role', () => {
+    const studentUser: CurrentUser = {
+      ...mockUser,
+      role: 'STUDENT',
+      studio: { id: 's2', name: 'Studio B' }
+    };
+    service.setUser(studentUser);
+    expect(service.currentRole()).toBe('STUDENT');
+    expect(service.currentStudio()?.name).toBe('Studio B');
   });
 });

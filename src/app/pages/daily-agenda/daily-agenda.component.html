@@ -29,7 +29,7 @@
           Hoje
         </button>
 
-        <mat-form-field appearance="outline" class="filter-field instructor-field">
+        <mat-form-field *ngIf="instructors.length > 0" appearance="outline" class="filter-field instructor-field">
           <mat-label>Instrutor</mat-label>
           <mat-select
             [value]="instructorFilter"

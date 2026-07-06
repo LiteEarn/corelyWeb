@@ -19,6 +19,8 @@ import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
 import { ToastService } from '../../core/services/toast.service';
+import { PermissionService } from '../../core/rbac/permission.service';
+import { Role } from '../../core/rbac/role.enum';
 
 type StudentStatus = 'present' | 'absent' | 'reposition';
 
@@ -76,6 +78,7 @@ export class AttendanceComponent implements OnInit {
     private enrollmentService: EnrollmentService,
     private currentStudioService: CurrentStudioService,
     private toastService: ToastService,
+    private permissionService: PermissionService,
     private cdr: ChangeDetectorRef
   ) {
     this.filterForm = this.fb.group({
@@ -85,7 +88,9 @@ export class AttendanceComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadClassGroups();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadClassGroups();
+    }
   }
 
   get selectedClassGroup(): ClassGroup | null {

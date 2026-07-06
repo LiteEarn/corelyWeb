@@ -11,12 +11,18 @@ export interface LoginResponse {
   studioId: string;
   studioName: string;
   role: string;
+  permissions: string[];
 }
 
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+}
+
+export interface CurrentStudio {
+  id: string;
+  name: string;
 }
 
 export interface CurrentUser {
@@ -27,9 +33,4 @@ export interface CurrentUser {
   studio: CurrentStudio;
   permissions: string[];
   lastLogin: string;
-}
-
-export interface CurrentStudio {
-  id: string;
-  name: string;
 }
