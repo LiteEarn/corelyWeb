@@ -43,6 +43,7 @@
   border-radius: 8px;
   transition: background 0.2s ease;
   cursor: pointer;
+  user-select: none;
   
   &:hover {
     background: #f1f5f9;
@@ -71,6 +72,17 @@
   color: #94a3b8;
   text-transform: capitalize;
   line-height: 1.2;
+}
+
+.user-dropdown-icon {
+  font-size: 20px;
+  color: #94a3b8;
+}
+
+.logout-item {
+  .logout-text {
+    color: #ef4444;
+  }
 }
 
 @media (max-width: 768px) {

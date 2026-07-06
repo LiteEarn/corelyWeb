@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { TokenService } from './token.service';
 import { SessionService } from '../session/session.service';
@@ -11,6 +12,8 @@ import { CurrentUser, LoginRequest, LoginResponse, RefreshTokenResponse } from '
 })
 export class AuthService {
   private apiUrl = API_CONFIG.baseURL + '/auth';
+
+  private router = inject(Router);
 
   constructor(
     private http: HttpClient,
@@ -46,7 +49,8 @@ export class AuthService {
       });
     }
     this.tokenService.removeTokens();
-    this.sessionService.clear();
+    this.sessionService.logout();
+    this.router.navigate(['/login']);
   }
 
   isAuthenticated(): boolean {
