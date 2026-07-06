@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -36,10 +36,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  private sessionService = inject(SessionService);
+
+  private roleDefaultRoutes: Record<string, string> = {
+    OWNER: '/dashboard',
+    ADMIN: '/dashboard',
+    RECEPTIONIST: '/students',
+    INSTRUCTOR: '/daily-agenda',
+    FINANCIAL: '/dashboard',
+    STUDENT: '/objectives',
+  };
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private sessionService: SessionService,
     private router: Router,
     private toastService: ToastService,
     private cdr: ChangeDetectorRef,
@@ -51,9 +61,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getDefaultRoute(): string {
+    const role = this.sessionService.currentRole();
+    return this.roleDefaultRoutes[role] || '/dashboard';
+  }
+
   ngOnInit(): void {
     if (this.sessionService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate([this.getDefaultRoute()]);
     }
 
     const rememberedEmail = localStorage.getItem('remembered_email');
@@ -91,7 +106,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (user) => {
           this.sessionService.setUser(user);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate([this.getDefaultRoute()]);
         },
         error: (error) => {
           if (error.status === 401) {

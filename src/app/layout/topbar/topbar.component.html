@@ -10,9 +10,10 @@
     <div class="user-info">
       <mat-icon class="user-icon">account_circle</mat-icon>
       <div class="user-details">
-        <span class="user-name">{{ sessionService.currentUser()?.name }}</span>
-        <span class="user-role">{{ sessionService.currentRole() }}</span>
+        <span class="user-name">{{ userName() }}</span>
+        <span class="user-role">{{ userRole() }}</span>
       </div>
+      <span class="user-studio" *ngIf="userStudio() as studio">{{ studio.name }}</span>
     </div>
   </div>
 </div>

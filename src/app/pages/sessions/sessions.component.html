@@ -27,7 +27,7 @@
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="instructor-filter">
+        <mat-form-field *ngIf="instructors.length > 0" appearance="outline" class="instructor-filter">
           <mat-label>Instrutor</mat-label>
           <mat-select (selectionChange)="onInstructorFilterChange($event.value)" [value]="instructorFilter">
             <mat-option value="all">Todos</mat-option>

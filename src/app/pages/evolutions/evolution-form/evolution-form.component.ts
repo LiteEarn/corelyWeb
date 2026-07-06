@@ -19,6 +19,8 @@ import { Student } from '../../../features/students/student.model';
 import { ObjectiveService } from '../../../features/objectives/objective.service';
 import { Objective } from '../../../features/objectives/objective.model';
 import { CurrentStudioService } from '../../../core/services/current-studio.service';
+import { PermissionService } from '../../../core/rbac/permission.service';
+import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evolution-form',
@@ -59,6 +61,7 @@ export class EvolutionFormComponent implements OnInit {
     private evolutionService: EvolutionService,
     private studentService: StudentService,
     private objectiveService: ObjectiveService,
+    private permissionService: PermissionService,
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService
@@ -69,7 +72,9 @@ export class EvolutionFormComponent implements OnInit {
   ngOnInit(): void {
     this.evolutionId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.evolutionId;
-    this.loadStudents();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadStudents();
+    }
     this.loadObjectives();
 
     const studentId = this.route.snapshot.queryParamMap.get('studentId');

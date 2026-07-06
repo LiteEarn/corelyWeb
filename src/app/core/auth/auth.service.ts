@@ -38,10 +38,6 @@ export class AuthService {
     );
   }
 
-  me(): Observable<CurrentUser> {
-    return this.http.get<CurrentUser>(`${this.apiUrl}/me`);
-  }
-
   logout(): void {
     const refreshToken = this.tokenService.getRefreshToken();
     if (refreshToken) {
@@ -63,5 +59,9 @@ export class AuthService {
 
   getRefreshToken(): string | null {
     return this.tokenService.getRefreshToken();
+  }
+
+  me(): Observable<CurrentUser> {
+    return this.http.get<CurrentUser>(`${this.apiUrl}/me`);
   }
 }

@@ -18,6 +18,8 @@ import { Student } from '../../features/students/student.model';
 import { ObjectiveService } from '../../features/objectives/objective.service';
 import { Objective } from '../../features/objectives/objective.model';
 import { ReactiveFormsModule } from '@angular/forms';
+import { PermissionService } from '../../core/rbac/permission.service';
+import { Role } from '../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evolutions',
@@ -59,12 +61,15 @@ export class EvolutionsComponent implements OnInit {
     private evolutionService: EvolutionService,
     private studentService: StudentService,
     private objectiveService: ObjectiveService,
+    private permissionService: PermissionService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadEvolutions();
-    this.loadStudents();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadStudents();
+    }
     this.loadObjectives();
   }
 
@@ -161,7 +166,7 @@ export class EvolutionsComponent implements OnInit {
 
   getStudentName(studentId: string): string {
     const student = this.students.find(s => s.id === studentId);
-    return student ? student.fullName : 'N/A';
+    return student ? student.fullName : studentId || 'N/A';
   }
 
   getObjectiveTitle(objectiveId: string): string {

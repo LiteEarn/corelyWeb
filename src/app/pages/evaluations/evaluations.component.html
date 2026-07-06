@@ -10,7 +10,7 @@
   <mat-card class="filters-card">
     <mat-card-content class="filters-content">
       <div class="filters-section">
-        <mat-form-field appearance="outline" class="student-filter">
+        <mat-form-field *ngIf="students.length > 0" appearance="outline" class="student-filter">
           <mat-label>Aluno</mat-label>
           <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
             <mat-option value="all">Todos</mat-option>

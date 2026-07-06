@@ -1,44 +1,61 @@
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { catchError, of, switchMap, tap } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { TokenService } from '../auth/token.service';
 import { SessionService } from './session.service';
 
-export function initializeSession() {
+export function initializeSession(): () => Promise<void> {
+  const sessionService = inject(SessionService);
   const authService = inject(AuthService);
   const tokenService = inject(TokenService);
-  const sessionService = inject(SessionService);
-  const router = inject(Router);
 
   return () => {
+    sessionService.setLoading(true);
+
     if (!tokenService.hasAccessToken()) {
       sessionService.setLoading(false);
       return Promise.resolve();
     }
 
-    return authService.me().pipe(
-      tap(user => sessionService.setUser(user)),
-      catchError(() => {
-        if (tokenService.getRefreshToken()) {
-          return authService.refresh().pipe(
-            switchMap(() => authService.me()),
-            tap(user => sessionService.setUser(user)),
-            catchError(() => {
-              tokenService.removeTokens();
-              sessionService.clear();
-              router.navigate(['/login']);
-              return of(null);
-            })
-          );
+    return new Promise<void>((resolve) => {
+      authService.me().subscribe({
+        next: (user) => {
+          sessionService.setUser(user);
+          sessionService.setLoading(false);
+          resolve();
+        },
+        error: () => {
+          if (tokenService.getRefreshToken()) {
+            authService.refresh().subscribe({
+              next: () => {
+                authService.me().subscribe({
+                  next: (user) => {
+                    sessionService.setUser(user);
+                    sessionService.setLoading(false);
+                    resolve();
+                  },
+                  error: () => {
+                    tokenService.removeTokens();
+                    sessionService.clear();
+                    sessionService.setLoading(false);
+                    resolve();
+                  }
+                });
+              },
+              error: () => {
+                tokenService.removeTokens();
+                sessionService.clear();
+                sessionService.setLoading(false);
+                resolve();
+              }
+            });
+          } else {
+            tokenService.removeTokens();
+            sessionService.clear();
+            sessionService.setLoading(false);
+            resolve();
+          }
         }
-        tokenService.removeTokens();
-        sessionService.clear();
-        router.navigate(['/login']);
-        return of(null);
-      })
-    ).toPromise().then(() => {
-      sessionService.setLoading(false);
+      });
     });
   };
 }

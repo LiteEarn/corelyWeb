@@ -16,6 +16,8 @@ import { Evaluation } from '../../../features/evaluations/evaluation.model';
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { CurrentStudioService } from '../../../core/services/current-studio.service';
+import { PermissionService } from '../../../core/rbac/permission.service';
+import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evaluation-form',
@@ -53,6 +55,7 @@ export class EvaluationFormComponent implements OnInit {
     private fb: FormBuilder,
     private evaluationService: EvaluationService,
     private studentService: StudentService,
+    private permissionService: PermissionService,
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService
@@ -63,7 +66,9 @@ export class EvaluationFormComponent implements OnInit {
   ngOnInit(): void {
     this.evaluationId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.evaluationId;
-    this.loadStudents();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadStudents();
+    }
 
     // Check if studentId is passed in query params (for creating from student details)
     const studentId = this.route.snapshot.queryParamMap.get('studentId');

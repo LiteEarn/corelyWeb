@@ -16,6 +16,8 @@ import { Objective, ObjectiveStatus } from '../../../features/objectives/objecti
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { CurrentStudioService } from '../../../core/services/current-studio.service';
+import { PermissionService } from '../../../core/rbac/permission.service';
+import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-objective-form',
@@ -52,6 +54,7 @@ export class ObjectiveFormComponent implements OnInit {
     private fb: FormBuilder,
     private objectiveService: ObjectiveService,
     private studentService: StudentService,
+    private permissionService: PermissionService,
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService
@@ -62,7 +65,9 @@ export class ObjectiveFormComponent implements OnInit {
   ngOnInit(): void {
     this.objectiveId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.objectiveId;
-    this.loadStudents();
+    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+      this.loadStudents();
+    }
 
     if (this.isEditMode && this.objectiveId) {
       this.loadObjective(this.objectiveId);
