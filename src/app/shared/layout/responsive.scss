@@ -1,0 +1,116 @@
+@import '../design-system/variables';
+
+$bp-mobile: 600px;
+$bp-tablet: 960px;
+$bp-notebook: 1280px;
+$bp-desktop: 1920px;
+
+$spacing-map: (
+  xs: 4px,
+  sm: 8px,
+  md: 12px,
+  lg: 16px,
+  xl: 24px,
+  xxl: 32px,
+  xxxl: 48px,
+);
+
+$container-max-widths: (
+  mobile: 100%,
+  tablet: 720px,
+  notebook: 960px,
+  desktop: 1200px,
+  desktop-xl: 1400px,
+);
+
+@mixin respond-above($bp) {
+  @if $bp == mobile {
+    @media (min-width: $bp-mobile) { @content; }
+  } @else if $bp == tablet {
+    @media (min-width: $bp-tablet) { @content; }
+  } @else if $bp == notebook {
+    @media (min-width: $bp-notebook) { @content; }
+  } @else if $bp == desktop {
+    @media (min-width: $bp-desktop) { @content; }
+  }
+}
+
+@mixin respond-below($bp) {
+  @if $bp == tablet {
+    @media (max-width: ($bp-tablet - 1px)) { @content; }
+  } @else if $bp == notebook {
+    @media (max-width: ($bp-notebook - 1px)) { @content; }
+  } @else if $bp == desktop {
+    @media (max-width: ($bp-desktop - 1px)) { @content; }
+  }
+}
+
+@mixin respond-between($min, $max) {
+  $min-val: if($min == mobile, 0, $min);
+  $max-val: if($max == desktop, $bp-desktop, $max);
+  @media (min-width: $min-val) and (max-width: ($max-val - 1px)) { @content; }
+}
+
+@mixin container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  @include respond-above(tablet) {
+    max-width: map-get($container-max-widths, tablet);
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  @include respond-above(notebook) {
+    max-width: map-get($container-max-widths, notebook);
+  }
+
+  @include respond-above(desktop) {
+    max-width: map-get($container-max-widths, desktop);
+  }
+}
+
+@mixin responsive-padding {
+  padding: 16px;
+
+  @include respond-above(tablet) {
+    padding: 24px;
+  }
+
+  @include respond-above(notebook) {
+    padding: 32px;
+  }
+}
+
+@mixin hide-mobile {
+  @include respond-below(tablet) {
+    display: none !important;
+  }
+}
+
+@mixin hide-desktop {
+  @include respond-above(tablet) {
+    display: none !important;
+  }
+}
+
+@mixin show-mobile-only {
+  @include respond-below(tablet) {
+    display: revert;
+  }
+  @include respond-above(tablet) {
+    display: none !important;
+  }
+}
+
+@mixin show-desktop-only {
+  @include respond-above(tablet) {
+    display: revert;
+  }
+  @include respond-below(tablet) {
+    display: none !important;
+  }
+}

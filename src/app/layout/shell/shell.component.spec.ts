@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-
 import { ShellComponent } from './shell.component';
 
 describe('ShellComponent', () => {
