@@ -366,6 +366,141 @@ export class MyComponent {
 }
 ```
 
+## Responsive Dashboard Architecture (MOB-005)
+
+### Overview
+
+The Operational Dashboard (`DashboardComponent`) was redesigned as a fully responsive experience using three distinct layouts switched via `ResponsiveService.layoutMode()` Signal.
+
+### Component Tree
+
+```
+┌────────────────────────────────────────────────────────┐
+│  DashboardComponent (orchestrator)                      │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │  DsPageHeader (title + subtitle)                 │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │  QuickActionsComponent (always visible)          │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │  Layout Switch (responsive.layoutMode)            │  │
+│  │  ┌────────────┬─────────────┬────────────────┐   │  │
+│  │  │ MOBILE     │ TABLET      │ DESKTOP        │   │  │
+│  │  │ Carousel   │ Grid 4-col  │ Grid 7-col KPI │   │  │
+│  │  │ Timeline   │ 2-col split │ 8+4 main+alert │   │  │
+│  │  │ Card occ.  │ List occ.   │ Tables occ.    │   │  │
+│  │  │ Card alerts│ Card alerts │ Sidebar alerts │   │  │
+│  │  └────────────┴─────────────┴────────────────┘   │  │
+│  ├──────────────────────────────────────────────────┤  │
+│  │  DashboardSkeletonComponent (loading)            │  │
+│  │  DsEmptyState (error / empty)                    │  │
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+### New Reusable Components
+
+**`DashboardKpiCarouselComponent`** - Horizontal swipe carousel for mobile KPIs:
+- Shows 2 KPI cards per slide
+- Prev/next navigation buttons (44px min touch target)
+- Dot indicators for pagination
+- CSS transition on track transform
+- Hidden on tablet/desktop
+
+**`DashboardTimelineComponent`** - Vertical timeline for mobile upcoming sessions:
+- Time marker with gradient line
+- Session card with class name, instructor, student count
+- "Abrir Aula" action button
+- Staggered slide-in animation
+- Hidden on tablet/desktop
+
+**`DashboardOccupancyCardComponent`** - Cards with progress bars for mobile occupancy:
+- Class name + percentage header
+- MatProgressBar colored by threshold (warn >=80%, accent >=50%, primary <50%)
+- Enrolled/count footer
+- Hidden on tablet/desktop
+
+**`DashboardAlertCardComponent`** - Priority-colored alert cards:
+- Severity badge: Crítico (red), Atenção (amber), Informativo (blue)
+- Alert icon mapped by type
+- Action button for navigation
+- Staggered fade-slide animation
+- Max 5 alerts displayed
+
+**`QuickActionsComponent`** - Always-visible action buttons:
+- Desktop: 4 horizontal buttons
+- Mobile: 2x2 grid
+- Actions: Nova Presença, Nova Matrícula, Novo Aluno, Agenda
+- Color-coded icons with hover lift effect
+- Emits action string for navigation
+
+**`DashboardSkeletonComponent`** - Skeleton loading with shimmer animation:
+- 7 KPI placeholders (responsive grid)
+- 2 card placeholders for content sections
+- 4 action button placeholders
+- Screen reader accessible via `role="status"` and `.sr-only` text
+
+### Layout Behavior
+
+| Breakpoint | KPIs | Sessions | Occupancy | Alerts | Layout |
+|------------|------|----------|-----------|--------|--------|
+| Desktop (>=960px) | 7-col grid | Compact table | Compact table | Sidebar panel | 8+4 col grid |
+| Tablet (600-959px) | 4-col grid | Horizontal cards | List | Card list | 2-col split |
+| Mobile (<600px) | Carousel (2 per slide) | Timeline vertical | Progress cards | Color cards | Single column |
+
+### Empty States
+
+Every section uses `DsEmptyStateComponent` with:
+- Icon, title, description
+- Consistent padding and alignment
+- No section left blank
+
+### Loading
+
+- `DashboardSkeletonComponent` replaces the old spinner
+- Shimmer animation via `background-position` keyframes
+- Responsive skeleton grid adjusts to viewport
+- `role="status"` + `aria-label` for screen readers
+
+### Animations
+
+- Dashboard content: fadeIn 0.3s
+- Timeline items: staggered slideIn 0.3s (60ms delay each)
+- Alert cards: staggered fadeSlideIn 0.3s (50ms delay each)
+- Table rows: staggered rowFadeIn 0.25s (30ms delay each)
+- Quick actions: fadeIn 0.4s
+- All animations disabled with `prefers-reduced-motion: reduce`
+
+### KPIs Updated
+
+7 KPIs now shown (from 4 + 2 indicators):
+1. Aulas Hoje
+2. Em Andamento
+3. Alunos Ativos
+4. Presentes Hoje
+5. Reposições Pendentes
+6. Ocupação Média
+7. Frequência Hoje
+
+The model was updated: `DashboardKpis` now includes `averageOccupancy` and `todayAttendanceRate` directly (removed from `DashboardSummary`).
+
+### Accessibility
+
+- All interactive elements meet 44px min touch target
+- `aria-label` on navigation buttons, progress bars, list items
+- `role="list"` and `role="listitem"` on all lists
+- `role="group"` on QuickActions
+- `role="status"` on skeleton loading
+- Tab navigation with visible focus indicators
+- `prefers-reduced-motion` disables animations
+- Color-coded alerts include text labels (not color-only)
+
+### Performance
+
+- `ResponsiveService` with `BreakpointObserver` only (no `window.innerWidth`)
+- No `HostListener('window:resize')`
+- CSS media queries for layout (hide/show), `layoutMode()` Signal for logic
+- `ChangeDetectionStrategy.OnPush` on all new components
+
 ## Best practices
 
 - Never use `BreakpointObserver` directly in components
