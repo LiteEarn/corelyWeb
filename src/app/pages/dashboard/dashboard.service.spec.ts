@@ -16,6 +16,8 @@ describe('DashboardService', () => {
         activeStudents: 76,
         studentsPresentToday: 23,
         pendingMakeups: 30,
+        averageOccupancy: 95,
+        todayAttendanceRate: 52,
       },
       averageOccupancy: 95,
       todayAttendanceRate: 52,

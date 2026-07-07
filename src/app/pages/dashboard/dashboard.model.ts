@@ -18,6 +18,8 @@ export interface DashboardKpis {
   activeStudents: number;
   studentsPresentToday: number;
   pendingMakeups: number;
+  averageOccupancy: number;
+  todayAttendanceRate: number;
 }
 
 export interface UpcomingSession {
