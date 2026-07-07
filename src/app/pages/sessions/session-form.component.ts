@@ -17,8 +17,7 @@ import { InstructorService } from '../../features/instructors/instructor.service
 import { Instructor } from '../../features/instructors/instructor.model';
 import { CustomValidators } from '../../shared/utils';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-session-form',
@@ -54,7 +53,7 @@ export class SessionFormComponent implements OnInit {
     private fb: FormBuilder,
     private sessionService: SessionService,
     private instructorService: InstructorService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     private route: ActivatedRoute,
     private router: Router,
     private currentStudioService: CurrentStudioService
@@ -65,12 +64,14 @@ export class SessionFormComponent implements OnInit {
   ngOnInit(): void {
     this.sessionId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.sessionId;
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.featureGateService.canLoadInstructors()) {
       this.loadInstructors();
     }
 
     if (this.isEditMode && this.sessionId) {
-      this.loadSession(this.sessionId);
+      if (this.featureGateService.canLoadSessions()) {
+        this.loadSession(this.sessionId);
+      }
     }
   }
 
@@ -120,6 +121,7 @@ export class SessionFormComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (!this.featureGateService.canManageSessions()) return;
     this.isFormSubmitted = true;
 
     if (this.sessionForm.invalid) {

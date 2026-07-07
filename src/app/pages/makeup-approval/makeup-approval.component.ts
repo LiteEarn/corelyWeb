@@ -24,6 +24,7 @@ import { StudentService } from '../../features/students/student.service';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { ToastService } from '../../core/services/toast.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { MakeupApprovalApproveDialogComponent } from './makeup-approval-approve-dialog.component';
 import { MakeupApprovalRejectDialogComponent } from './makeup-approval-reject-dialog.component';
 
@@ -74,12 +75,17 @@ export class MakeupApprovalComponent implements OnInit, OnDestroy {
     private studentService: StudentService,
     private instructorService: InstructorService,
     private toastService: ToastService,
+    private featureGateService: FeatureGateService,
     private dialog: MatDialog,
   ) {}
 
   ngOnInit(): void {
-    this.loadInstructors();
-    this.loadRequests();
+    if (this.featureGateService.canLoadInstructors()) {
+      this.loadInstructors();
+    }
+    if (this.featureGateService.canLoadMakeupRequests()) {
+      this.loadRequests();
+    }
   }
 
   ngOnDestroy(): void {
@@ -173,6 +179,7 @@ export class MakeupApprovalComponent implements OnInit, OnDestroy {
   }
 
   openApproveDialog(request: MakeupRequest): void {
+    if (!this.featureGateService.canManageMakeupRequests()) return;
     const dialogRef = this.dialog.open(MakeupApprovalApproveDialogComponent, {
       width: '480px',
       data: { makeupRequestId: request.id },
@@ -201,6 +208,7 @@ export class MakeupApprovalComponent implements OnInit, OnDestroy {
   }
 
   openRejectDialog(request: MakeupRequest): void {
+    if (!this.featureGateService.canManageMakeupRequests()) return;
     const dialogRef = this.dialog.open(MakeupApprovalRejectDialogComponent, {
       width: '480px',
       data: { makeupRequestId: request.id },

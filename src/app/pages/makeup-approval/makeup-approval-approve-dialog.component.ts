@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subject, of } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { DsButtonComponent } from '../../shared/design-system/button/button.component';
+import { PermissionService } from '../../core/rbac/permission.service';
 import { SessionService } from '../../features/sessions/session.service';
 import { Session } from '../../features/sessions/session.model';
 
@@ -95,10 +96,13 @@ export class MakeupApprovalApproveDialogComponent implements OnInit, OnDestroy {
     public dialogRef: MatDialogRef<MakeupApprovalApproveDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { makeupRequestId: string },
     private sessionService: SessionService,
+    private permissionService: PermissionService,
   ) {}
 
   ngOnInit(): void {
-    this.loadSessions();
+    if (this.permissionService.hasPermission('MAKEUP_REQUEST_WRITE')) {
+      this.loadSessions();
+    }
   }
 
   ngOnDestroy(): void {

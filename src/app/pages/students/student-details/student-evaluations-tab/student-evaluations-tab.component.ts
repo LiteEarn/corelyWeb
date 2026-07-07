@@ -10,6 +10,7 @@ import { Evaluation } from '../../../../features/evaluations/evaluation.model';
 import { EvaluationDialogComponent } from './evaluation-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PermissionService } from '../../../../core/rbac/permission.service';
 
 @Component({
   selector: 'app-student-evaluations-tab',
@@ -37,11 +38,14 @@ export class StudentEvaluationsTabComponent implements OnInit {
   constructor(
     private evaluationService: EvaluationService,
     private dialog: MatDialog,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private permissionService: PermissionService
   ) {}
 
   ngOnInit(): void {
-    this.loadEvaluations();
+    if (this.permissionService.hasPermission('EVALUATION_READ')) {
+      this.loadEvaluations();
+    }
   }
 
   loadEvaluations(): void {

@@ -8,6 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-instructor-details',
@@ -30,6 +31,7 @@ export class InstructorDetailsComponent implements OnInit {
 
   constructor(
     private instructorService: InstructorService,
+    private featureGateService: FeatureGateService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -37,7 +39,9 @@ export class InstructorDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.instructorId = this.route.snapshot.paramMap.get('id');
     if (this.instructorId) {
-      this.loadInstructor(this.instructorId);
+      if (this.featureGateService.canLoadInstructors()) {
+        this.loadInstructor(this.instructorId);
+      }
     } else {
       this.router.navigate(['/instructors']);
     }
@@ -65,6 +69,7 @@ export class InstructorDetailsComponent implements OnInit {
   }
 
   onDelete(): void {
+    if (!this.featureGateService.canManageInstructors()) return;
     if (this.instructor && confirm(`Tem certeza que deseja excluir o instrutor ${this.instructor.fullName}?`)) {
       this.instructorService.delete(this.instructor.id!).subscribe({
         next: () => {

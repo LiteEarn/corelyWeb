@@ -22,6 +22,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingComponent } from '../../shared/components/loading/loading.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-enrollments',
@@ -67,13 +68,20 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
     private enrollmentService: EnrollmentService,
     private studentService: StudentService,
     private classGroupService: ClassGroupService,
-    private router: Router
+    private router: Router,
+    private featureGateService: FeatureGateService
   ) { }
 
   ngOnInit(): void {
-    this.loadEnrollments();
-    this.loadStudents();
-    this.loadClassGroups();
+    if (this.featureGateService.canLoadEnrollments()) {
+      this.loadEnrollments();
+    }
+    if (this.featureGateService.canLoadStudentDropdown()) {
+      this.loadStudents();
+    }
+    if (this.featureGateService.canLoadClassGroupDropdown()) {
+      this.loadClassGroups();
+    }
   }
 
   ngOnDestroy(): void {
@@ -175,6 +183,7 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
 
   deleteEnrollment(enrollment: Enrollment): void {
     if (!enrollment.id) return;
+    if (!this.featureGateService.canManageEnrollments()) return;
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '420px',

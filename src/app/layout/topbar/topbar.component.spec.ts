@@ -63,7 +63,7 @@ describe('TopbarComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('Maria Silva');
-    expect(compiled.textContent).toContain('ADMIN');
+    expect(compiled.textContent).toContain('Administrador');
   });
 
   it('should have user-info element with menu trigger', () => {

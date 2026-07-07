@@ -14,6 +14,7 @@ import { Instructor } from '../../features/instructors/instructor.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { PhoneMaskUtil, CustomValidators } from '../../shared/utils';
 import { CurrentStudioService } from '../../core/services/current-studio.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-instructor-form',
@@ -60,7 +61,8 @@ export class InstructorFormComponent implements OnInit {
     private instructorService: InstructorService,
     private router: Router,
     private route: ActivatedRoute,
-    private currentStudioService: CurrentStudioService
+    private currentStudioService: CurrentStudioService,
+    private featureGateService: FeatureGateService
   ) {
     this.instructorForm = this.createForm();
   }
@@ -70,7 +72,9 @@ export class InstructorFormComponent implements OnInit {
     this.isEditMode = !!this.instructorId;
 
     if (this.isEditMode && this.instructorId) {
-      this.loadInstructor(this.instructorId);
+      if (this.featureGateService.canLoadInstructors()) {
+        this.loadInstructor(this.instructorId);
+      }
     }
   }
 
@@ -103,13 +107,9 @@ export class InstructorFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('InstructorForm onSubmit executado');
+    if (!this.featureGateService.canManageInstructors()) return;
     
-    // Proteção contra múltiplos submits
-    if (this.isSubmitting) {
-      console.log('InstructorForm submit já em andamento, ignorando');
-      return;
-    }
+    if (this.isSubmitting) return;
 
     this.isFormSubmitted = true;
 

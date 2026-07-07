@@ -4,6 +4,7 @@ import { LOCALE_ID } from '@angular/core';
 import { of, throwError } from 'rxjs';
 
 import { DailyAgendaComponent } from './daily-agenda.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { SessionService } from '../../features/sessions/session.service';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { ClassGroupService } from '../../features/class-groups/class-group.service';
@@ -109,11 +110,26 @@ describe('DailyAgendaComponent', () => {
     enrollmentService.getAll.and.returnValue(of([]));
     attendanceService.getBySessionId.and.returnValue(of([]));
 
+    const featureGateService = jasmine.createSpyObj('FeatureGateService', [
+      'canLoadInstructors', 'canLoadClassGroups', 'canLoadSessions',
+      'canLoadEnrollments', 'canLoadEnrolledStudents',
+      'canManageAttendance', 'canStartSession', 'canCompleteSession',
+    ]);
+    featureGateService.canLoadInstructors.and.returnValue(true);
+    featureGateService.canLoadClassGroups.and.returnValue(true);
+    featureGateService.canLoadSessions.and.returnValue(true);
+    featureGateService.canLoadEnrollments.and.returnValue(true);
+    featureGateService.canLoadEnrolledStudents.and.returnValue(true);
+    featureGateService.canManageAttendance.and.returnValue(true);
+    featureGateService.canStartSession.and.returnValue(true);
+    featureGateService.canCompleteSession.and.returnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [DailyAgendaComponent],
       providers: [
         provideNoopAnimations(),
         { provide: LOCALE_ID, useValue: 'pt-BR' },
+        { provide: FeatureGateService, useValue: featureGateService },
         { provide: SessionService, useValue: sessionService },
         { provide: InstructorService, useValue: instructorService },
         { provide: ClassGroupService, useValue: classGroupService },

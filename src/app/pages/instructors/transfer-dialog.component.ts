@@ -15,6 +15,7 @@ import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { PermissionService } from '../../core/rbac/permission.service';
 
 @Component({
   selector: 'app-transfer-dialog',
@@ -49,13 +50,16 @@ export class TransferDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<TransferDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { instructor: Instructor },
     private instructorService: InstructorService,
+    private permissionService: PermissionService,
     private snackBar: MatSnackBar
   ) {
     this.sourceInstructor = data.instructor;
   }
 
   ngOnInit(): void {
-    this.loadData();
+    if (this.permissionService.hasPermission('INSTRUCTOR_READ')) {
+      this.loadData();
+    }
   }
 
   loadData(): void {
@@ -68,35 +72,39 @@ export class TransferDialogComponent implements OnInit {
       return;
     }
 
-    this.instructorService.getClassGroups(this.sourceInstructor.id).subscribe({
-      next: (classGroups) => {
-        this.activeClassGroups = classGroups.filter(cg => cg.active);
-        // Select all class groups by default (filter out undefined IDs)
-        this.selectedClassGroupIds = new Set(
-          this.activeClassGroups
-            .map(cg => cg.id)
-            .filter((id): id is string => id !== undefined)
-        );
-        console.log('Active class groups:', this.activeClassGroups);
-      },
-      error: (error) => {
-        console.error('Error loading class groups:', error);
-        this.loading = false;
-      }
-    });
+    if (this.permissionService.hasPermission('INSTRUCTOR_READ')) {
+      this.instructorService.getClassGroups(this.sourceInstructor.id).subscribe({
+        next: (classGroups) => {
+          this.activeClassGroups = classGroups.filter(cg => cg.active);
+          // Select all class groups by default (filter out undefined IDs)
+          this.selectedClassGroupIds = new Set(
+            this.activeClassGroups
+              .map(cg => cg.id)
+              .filter((id): id is string => id !== undefined)
+          );
+          console.log('Active class groups:', this.activeClassGroups);
+        },
+        error: (error) => {
+          console.error('Error loading class groups:', error);
+          this.loading = false;
+        }
+      });
+    }
 
     // Load active instructors (excluding source instructor)
-    this.instructorService.getAll({ active: true }).subscribe({
-      next: (instructors) => {
-        this.activeInstructors = instructors.filter(i => i.id !== this.sourceInstructor.id);
-        console.log('Active instructors:', this.activeInstructors);
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading instructors:', error);
-        this.loading = false;
-      }
-    });
+    if (this.permissionService.hasPermission('INSTRUCTOR_READ')) {
+      this.instructorService.getAll({ active: true }).subscribe({
+        next: (instructors) => {
+          this.activeInstructors = instructors.filter(i => i.id !== this.sourceInstructor.id);
+          console.log('Active instructors:', this.activeInstructors);
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading instructors:', error);
+          this.loading = false;
+        }
+      });
+    }
   }
 
   onConfirm(): void {

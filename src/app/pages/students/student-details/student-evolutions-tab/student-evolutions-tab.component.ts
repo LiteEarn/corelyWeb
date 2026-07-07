@@ -11,6 +11,7 @@ import { Evolution } from '../../../../features/evolutions/evolution.model';
 import { EvolutionDialogComponent } from './evolution-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToastService } from '../../../../core/services/toast.service';
+import { PermissionService } from '../../../../core/rbac/permission.service';
 
 @Component({
   selector: 'app-student-evolutions-tab',
@@ -37,11 +38,14 @@ export class StudentEvolutionsTabComponent implements OnInit {
   constructor(
     private evolutionService: EvolutionService,
     private dialog: MatDialog,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private permissionService: PermissionService
   ) {}
 
   ngOnInit(): void {
-    this.loadEvolutions();
+    if (this.permissionService.hasPermission('EVOLUTION_READ')) {
+      this.loadEvolutions();
+    }
   }
 
   loadEvolutions(): void {

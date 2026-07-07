@@ -16,8 +16,7 @@ import { Evaluation, EvaluationFilters } from '../../features/evaluations/evalua
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ReactiveFormsModule } from '@angular/forms';
-import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-evaluations',
@@ -55,13 +54,15 @@ export class EvaluationsComponent implements OnInit {
   constructor(
     private evaluationService: EvaluationService,
     private studentService: StudentService,
-    private permissionService: PermissionService,
+    private featureGateService: FeatureGateService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadEvaluations();
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.featureGateService.canLoadEvaluations()) {
+      this.loadEvaluations();
+    }
+    if (this.featureGateService.canLoadStudentDropdown()) {
       this.loadStudents();
     }
   }
@@ -151,6 +152,7 @@ export class EvaluationsComponent implements OnInit {
   }
 
   onDelete(id: string): void {
+    if (!this.featureGateService.canManageEvaluations()) return;
     if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
       this.evaluationService.delete(id).subscribe({
         next: () => {

@@ -19,7 +19,6 @@ import { ObjectiveService } from '../../features/objectives/objective.service';
 import { Objective } from '../../features/objectives/objective.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PermissionService } from '../../core/rbac/permission.service';
-import { Role } from '../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-evolutions',
@@ -67,7 +66,7 @@ export class EvolutionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadEvolutions();
-    if (!this.permissionService.hasRole(Role.INSTRUCTOR)) {
+    if (this.permissionService.hasPermission('STUDENT_READ')) {
       this.loadStudents();
     }
     this.loadObjectives();

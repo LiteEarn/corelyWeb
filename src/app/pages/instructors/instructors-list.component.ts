@@ -15,6 +15,7 @@ import { Instructor } from '../../features/instructors/instructor.model';
 import {ReactiveFormsModule} from "@angular/forms";
 import { TransferDialogComponent } from './transfer-dialog.component';
 import { ToastService } from '../../core/services/toast.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
 @Component({
   selector: 'app-instructors-list',
@@ -49,11 +50,14 @@ export class InstructorsListComponent implements OnInit {
     private instructorService: InstructorService,
     private router: Router,
     private dialog: MatDialog,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private featureGateService: FeatureGateService
   ) {}
 
   ngOnInit(): void {
-    this.loadInstructors();
+    if (this.featureGateService.canLoadInstructors()) {
+      this.loadInstructors();
+    }
   }
 
   loadInstructors(): void {
@@ -103,6 +107,7 @@ export class InstructorsListComponent implements OnInit {
   }
 
   openTransferDialog(instructor: Instructor): void {
+    if (!this.featureGateService.canTransferInstructor()) return;
     const dialogRef = this.dialog.open(TransferDialogComponent, {
       width: '700px',
       maxWidth: '90vw',

@@ -10,7 +10,6 @@ import { Objective, ObjectiveStatus } from '../../../features/objectives/objecti
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
 import { PermissionService } from '../../../core/rbac/permission.service';
-import { Role } from '../../../core/rbac/role.enum';
 
 @Component({
   selector: 'app-objective-details',
@@ -63,7 +62,7 @@ export class ObjectiveDetailsComponent implements OnInit {
   }
 
   loadStudent(studentId: string): void {
-    if (this.permissionService.hasRole(Role.INSTRUCTOR)) return;
+    if (!this.permissionService.hasPermission('STUDENT_READ')) return;
     this.studentService.getById(studentId).subscribe({
       next: (data) => {
         this.student = data;
