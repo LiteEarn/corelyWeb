@@ -1,14 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
+import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
 import { By } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import { DashboardComponent } from './dashboard.component';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { DashboardService } from './dashboard.service';
 import { ToastService } from '../../core/services/toast.service';
 import { DashboardOperationalResponse } from './dashboard.model';
+import { ResponsiveService } from '../../shared/layout';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -25,6 +27,8 @@ describe('DashboardComponent', () => {
         activeStudents: 76,
         studentsPresentToday: 23,
         pendingMakeups: 30,
+        averageOccupancy: 95,
+        todayAttendanceRate: 52,
       },
       averageOccupancy: 95,
       todayAttendanceRate: 52,
@@ -97,6 +101,8 @@ describe('DashboardComponent', () => {
         activeStudents: 0,
         studentsPresentToday: 0,
         pendingMakeups: 0,
+        averageOccupancy: 0,
+        todayAttendanceRate: 0,
       },
       averageOccupancy: 0,
       todayAttendanceRate: 0,
@@ -147,14 +153,20 @@ describe('DashboardComponent', () => {
     ]);
     featureGateService.canViewDashboard.and.returnValue(true);
 
+    const breakpointObserverMock = jasmine.createSpyObj('BreakpointObserver', ['observe']);
+    const breakpointSubject = new Subject<BreakpointState>();
+    breakpointObserverMock.observe.and.returnValue(breakpointSubject.asObservable());
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
         provideNoopAnimations(),
+        ResponsiveService,
         { provide: FeatureGateService, useValue: featureGateService },
         { provide: DashboardService, useValue: dashboardService },
         { provide: ToastService, useValue: toastService },
         { provide: Router, useValue: router },
+        { provide: BreakpointObserver, useValue: breakpointObserverMock },
       ],
     }).compileComponents();
 
@@ -193,59 +205,37 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('displays 4 stat cards', () => {
-      const cards = fixture.debugElement.queryAll(By.css('app-stat-card'));
-      expect(cards.length).toBe(4);
+    it('creates 7 kpi items from data', () => {
+      expect(component.kpiItems.length).toBe(7);
     });
 
-    it('shows "Aulas Hoje" with correct value', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Aulas Hoje');
-      expect(compiled.textContent).toContain('9');
+    it('includes "Aulas Hoje"', () => {
+      expect(component.kpiItems[0].label).toBe('Aulas Hoje');
+      expect(component.kpiItems[0].value).toBe(9);
     });
 
-    it('shows "Aulas em Andamento" with correct value', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Aulas em Andamento');
-      expect(compiled.textContent).toContain('5');
+    it('includes "Em Andamento"', () => {
+      expect(component.kpiItems[1].label).toBe('Em Andamento');
     });
 
-    it('shows "Alunos Presentes" with correct value', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Alunos Presentes');
-      expect(compiled.textContent).toContain('23');
+    it('includes "Alunos Ativos"', () => {
+      expect(component.kpiItems[2].label).toBe('Alunos Ativos');
     });
 
-    it('shows "Reposições Pendentes" with correct value', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Reposições Pendentes');
-      expect(compiled.textContent).toContain('30');
-    });
-  });
-
-  describe('indicators', () => {
-    it('shows average occupancy from summary', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
-      fixture.detectChanges();
-      expect(component.computedAverageOccupancy).toBe(95);
+    it('includes "Presentes Hoje"', () => {
+      expect(component.kpiItems[3].label).toBe('Presentes Hoje');
     });
 
-    it('shows attendance rate from summary', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(mockDashboard));
-      fixture.detectChanges();
-      expect(component.computedAttendanceRate).toBe(52);
+    it('includes "Reposições Pendentes"', () => {
+      expect(component.kpiItems[4].label).toBe('Reposições Pendentes');
     });
 
-    it('returns 0 for average occupancy when no data', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
-      fixture.detectChanges();
-      expect(component.computedAverageOccupancy).toBe(0);
+    it('includes "Ocupação Média"', () => {
+      expect(component.kpiItems[5].label).toBe('Ocupação Média');
     });
 
-    it('returns 0 for attendance rate when no data', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(emptyDashboard));
-      fixture.detectChanges();
-      expect(component.computedAttendanceRate).toBe(0);
+    it('includes "Frequência Hoje"', () => {
+      expect(component.kpiItems[6].label).toBe('Frequência Hoje');
     });
   });
 
@@ -255,49 +245,13 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('displays session list', () => {
-      const rows = fixture.debugElement.queryAll(By.css('.session-row'));
-      expect(rows.length).toBe(2);
-    });
-
-    it('shows session details', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Alongamento');
-      expect(compiled.textContent).toContain('Pilates Avancado');
-      expect(compiled.textContent).toContain('Ricardo Souza');
-      expect(compiled.textContent).toContain('Fernanda Lima');
-    });
-
-    it('shows enrolled students', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('10 alunos');
-      expect(compiled.textContent).toContain('3 alunos');
-    });
-
-    it('shows status chip for each session', () => {
-      const chips = fixture.debugElement.queryAll(By.css('ds-status-chip'));
-      expect(chips.length).toBeGreaterThan(0);
+    it('returns sessions slice', () => {
+      expect(component.displayUpcomingSessions.length).toBe(2);
     });
 
     it('limits to 5 sessions when more exist', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
-      const rows = fixture.debugElement.queryAll(By.css('.session-row'));
-      expect(rows.length).toBe(5);
-    });
-
-    it('shows "Ver Agenda" footer when more than 5 sessions', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
-      const footer = fixture.debugElement.query(By.css('.section-footer'));
-      expect(footer).toBeTruthy();
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Ver Agenda');
-    });
-
-    it('hides footer when 5 or fewer sessions', () => {
-      const footers = fixture.debugElement.queryAll(By.css('.section-footer'));
-      expect(footers.length).toBe(0);
+      component.data = largeDashboard;
+      expect(component.displayUpcomingSessions.length).toBe(5);
     });
   });
 
@@ -307,31 +261,14 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('displays alert cards', () => {
-      const cards = fixture.debugElement.queryAll(By.css('.alert-card'));
-      expect(cards.length).toBe(2);
+    it('returns alerts slice', () => {
+      expect(component.displayAlerts.length).toBe(2);
     });
 
     it('shows alert titles', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.textContent).toContain('Turma Lotada');
       expect(compiled.textContent).toContain('Muitas Reposições');
-    });
-
-    it('shows alert messages', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('100% de ocupação');
-      expect(compiled.textContent).toContain('30 reposições pendentes');
-    });
-
-    it('applies error severity class', () => {
-      const errorAlert = fixture.debugElement.query(By.css('.alert-error'));
-      expect(errorAlert).toBeTruthy();
-    });
-
-    it('applies warning severity class', () => {
-      const warningAlert = fixture.debugElement.query(By.css('.alert-warning'));
-      expect(warningAlert).toBeTruthy();
     });
   });
 
@@ -341,45 +278,18 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('displays pending makeup list', () => {
-      const rows = fixture.debugElement.queryAll(By.css('.makeup-row'));
-      expect(rows.length).toBe(1);
-    });
-
-    it('shows student name and class', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Monica Santos Almeida');
-      expect(compiled.textContent).toContain('Gestantes');
-    });
-
-    it('shows formatted date', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('26/06/2026');
-    });
-
-    it('shows approve button', () => {
-      const button = fixture.debugElement.query(By.css('.makeup-row ds-button'));
-      expect(button).toBeTruthy();
-    });
-
-    it('navigates to makeup-approval on approve click', () => {
-      const button = fixture.debugElement.query(By.css('.makeup-row ds-button'));
-      button.triggerEventHandler('click', null);
-      expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
+    it('returns pending makeups slice', () => {
+      expect(component.displayPendingMakeups.length).toBe(1);
     });
 
     it('limits to 5 makeups when more exist', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
-      const rows = fixture.debugElement.queryAll(By.css('.makeup-row'));
-      expect(rows.length).toBe(5);
+      component.data = largeDashboard;
+      expect(component.displayPendingMakeups.length).toBe(5);
     });
 
-    it('shows "Ver todas" footer when more than 5 makeups', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
+    it('shows student name', () => {
       const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Ver todas');
+      expect(compiled.textContent).toContain('Monica Santos Almeida');
     });
   });
 
@@ -389,39 +299,13 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('displays class occupancy rows', () => {
-      const rows = fixture.debugElement.queryAll(By.css('.occupancy-row'));
-      expect(rows.length).toBe(2);
-    });
-
-    it('shows occupancy percentage', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('100%');
-    });
-
-    it('shows enrollment count and capacity', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('10/10 alunos');
-      expect(compiled.textContent).toContain('6/6 alunos');
-    });
-
-    it('shows progress bars', () => {
-      const bars = fixture.debugElement.queryAll(By.css('mat-progress-bar'));
-      expect(bars.length).toBe(2);
+    it('returns class occupancy slice', () => {
+      expect(component.displayClassOccupancy.length).toBe(2);
     });
 
     it('limits to 5 classes when more exist', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
-      const rows = fixture.debugElement.queryAll(By.css('.occupancy-row'));
-      expect(rows.length).toBe(5);
-    });
-
-    it('shows "Ver todas" footer when more than 5 classes', () => {
-      dashboardService.getOperationalDashboard.and.returnValue(of(largeDashboard));
-      fixture.detectChanges();
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Ver todas');
+      component.data = largeDashboard;
+      expect(component.displayClassOccupancy.length).toBe(5);
     });
   });
 
@@ -437,6 +321,7 @@ describe('DashboardComponent', () => {
     });
 
     it('shows error empty state', () => {
+      fixture.detectChanges();
       const emptyState = fixture.debugElement.query(By.css('ds-empty-state'));
       expect(emptyState).toBeTruthy();
       const compiled = fixture.nativeElement as HTMLElement;
@@ -454,29 +339,15 @@ describe('DashboardComponent', () => {
       fixture.detectChanges();
     });
 
-    it('shows empty message for upcoming sessions', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Nenhuma aula programada para hoje');
-    });
-
-    it('shows empty message for makeups', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Nenhuma reposição pendente');
-    });
-
-    it('shows empty state for alerts', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Nenhum alerta');
-    });
-
-    it('shows empty message for classes', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('Nenhuma turma cadastrada');
-    });
-
     it('shows zero values in KPIs', () => {
-      const compiled = fixture.nativeElement as HTMLElement;
-      expect(compiled.textContent).toContain('0');
+      expect(component.kpiItems[0].value).toBe(0);
+    });
+
+    it('returns empty arrays for empty data', () => {
+      expect(component.displayUpcomingSessions.length).toBe(0);
+      expect(component.displayPendingMakeups.length).toBe(0);
+      expect(component.displayClassOccupancy.length).toBe(0);
+      expect(component.displayAlerts.length).toBe(0);
     });
   });
 
@@ -506,19 +377,6 @@ describe('DashboardComponent', () => {
       expect(component.getOccupancyColor(30)).toBe('primary');
     });
 
-    it('returns correct alert icon', () => {
-      expect(component.getAlertIcon('FULL_CLASS')).toBe('group');
-      expect(component.getAlertIcon('PENDING_MAKEUP')).toBe('assignment');
-      expect(component.getAlertIcon('ONGOING_CLASS')).toBe('play_circle');
-      expect(component.getAlertIcon('unknown')).toBe('info');
-    });
-
-    it('returns correct alert severity class', () => {
-      expect(component.getAlertSeverityClass('ERROR')).toBe('alert-error');
-      expect(component.getAlertSeverityClass('WARNING')).toBe('alert-warning');
-      expect(component.getAlertSeverityClass('INFO')).toBe('alert-info');
-    });
-
     it('formats date to pt-BR', () => {
       expect(component.formatDate('2026-06-20')).toBe('20/06/2026');
       expect(component.formatDate('')).toBe('');
@@ -540,14 +398,31 @@ describe('DashboardComponent', () => {
       expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
     });
 
-    it('navigateToMakeups navigates to /makeup-approval', () => {
-      component.navigateToMakeups();
-      expect(router.navigate).toHaveBeenCalledWith(['/makeup-approval']);
-    });
-
     it('navigateToClasses navigates to /class-groups', () => {
       component.navigateToClasses();
       expect(router.navigate).toHaveBeenCalledWith(['/class-groups']);
+    });
+
+    it('handleQuickAction navigates to correct routes', () => {
+      component.handleQuickAction('attendance');
+      expect(router.navigate).toHaveBeenCalledWith(['/attendance']);
+      component.handleQuickAction('enrollment');
+      expect(router.navigate).toHaveBeenCalledWith(['/enrollments/new']);
+      component.handleQuickAction('student');
+      expect(router.navigate).toHaveBeenCalledWith(['/students/new']);
+      component.handleQuickAction('agenda');
+      expect(router.navigate).toHaveBeenCalledWith(['/daily-agenda']);
+    });
+
+    it('resolveAlert navigates to action route', () => {
+      const alert = mockDashboard.alerts[0];
+      component.resolveAlert(alert);
+      expect(router.navigate).toHaveBeenCalledWith(['/class-groups']);
+    });
+
+    it('openSession navigates to session', () => {
+      component.openSession('s1');
+      expect(router.navigate).toHaveBeenCalledWith(['/sessions', 's1']);
     });
   });
 });

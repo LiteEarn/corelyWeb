@@ -4,10 +4,12 @@
     subtitle="Visão geral da operação do estúdio.">
   </ds-page-header>
 
+  <!-- Skeleton Loading -->
   <div *ngIf="loading" class="dashboard-loading">
-    <app-loading></app-loading>
+    <app-dashboard-skeleton [mode]="responsive.isMobile() ? 'mobile' : 'desktop'"></app-dashboard-skeleton>
   </div>
 
+  <!-- Error State -->
   <div *ngIf="!loading && error" class="dashboard-error">
     <ds-empty-state
       icon="error_outline"
@@ -20,194 +22,300 @@
     </ds-empty-state>
   </div>
 
+  <!-- Dashboard Content -->
   <div *ngIf="!loading && data" class="dashboard-content">
-    <div class="kpi-row">
-      <app-stat-card
-        title="Aulas Hoje"
-        [value]="data.summary.kpis.classesToday"
-        icon="today"
-        color="primary">
-      </app-stat-card>
-      <app-stat-card
-        title="Aulas em Andamento"
-        [value]="data.summary.kpis.classesInProgress"
-        icon="play_circle"
-        color="accent">
-      </app-stat-card>
-      <app-stat-card
-        title="Alunos Presentes"
-        [value]="data.summary.kpis.studentsPresentToday"
-        icon="person"
-        color="primary">
-      </app-stat-card>
-      <app-stat-card
-        title="Reposições Pendentes"
-        [value]="data.summary.kpis.pendingMakeups"
-        icon="refresh"
-        color="warn">
-      </app-stat-card>
-    </div>
 
-    <div class="indicators-row">
-      <ds-page-card>
-        <div class="indicator-card">
-          <div class="indicator-icon" [ngClass]="computedAverageOccupancy >= 80 ? 'indicator-warn' : 'indicator-primary'">
-            <mat-icon>bar_chart</mat-icon>
-          </div>
-          <div class="indicator-info">
-            <span class="indicator-label">Ocupação Média</span>
-            <span class="indicator-value">{{ computedAverageOccupancy }}%</span>
-          </div>
-        </div>
-      </ds-page-card>
-      <ds-page-card>
-        <div class="indicator-card">
-          <div class="indicator-icon indicator-primary">
-            <mat-icon>fact_check</mat-icon>
-          </div>
-          <div class="indicator-info">
-            <span class="indicator-label">Taxa de Presença</span>
-            <span class="indicator-value">{{ computedAttendanceRate }}%</span>
-          </div>
-        </div>
-      </ds-page-card>
-    </div>
+    <!-- QUICK ACTIONS -->
+    <app-quick-actions (actionClick)="handleQuickAction($event)"></app-quick-actions>
 
-    <div class="grid-2col">
+    <!-- === MOBILE LAYOUT (< 600px) === -->
+    <div *ngIf="responsive.layoutMode() === LayoutMode.MOBILE" class="layout-mobile">
+
+      <!-- KPIs Carousel -->
+      <ds-page-card>
+        <div class="section-header">
+          <mat-icon class="section-icon">monitoring</mat-icon>
+          <h3 class="section-title">Indicadores</h3>
+        </div>
+        <app-dashboard-kpi-carousel [items]="kpiItems"></app-dashboard-kpi-carousel>
+      </ds-page-card>
+
+      <!-- Próximas Aulas - Timeline -->
       <ds-page-card>
         <div class="section-header">
           <mat-icon class="section-icon">schedule</mat-icon>
           <h3 class="section-title">Próximas Aulas</h3>
         </div>
-
         <div *ngIf="displayUpcomingSessions.length === 0" class="section-empty">
-          <p>Nenhuma aula programada para hoje.</p>
+          <ds-empty-state icon="event" title="Nenhuma aula" description="Nenhuma aula programada para hoje."></ds-empty-state>
         </div>
-
-        <div *ngIf="displayUpcomingSessions.length > 0" class="sessions-list">
-          <div *ngFor="let session of displayUpcomingSessions" class="session-row">
-            <span class="session-time">{{ session.startTime }} - {{ session.endTime }}</span>
-            <span class="session-class">{{ session.className }}</span>
-            <span class="session-instructor">{{ session.instructorName }}</span>
-            <span class="session-occupancy">{{ session.enrolledStudents }} alunos</span>
-            <ds-status-chip
-              [status]="getSessionStatus(session.status)"
-              [label]="getSessionStatusLabel(session.status)">
-            </ds-status-chip>
-          </div>
-        </div>
-
-        <div class="section-footer" *ngIf="data.upcomingSessions.length > 5">
-          <ds-button
-            label="Ver Agenda"
-            variant="secondary"
-            size="sm"
-            icon="calendar_today"
-            (click)="navigateToSchedule()">
-          </ds-button>
+        <app-dashboard-timeline [sessions]="displayUpcomingSessions" (openSession)="openSession($event)"></app-dashboard-timeline>
+        <div *ngIf="data.upcomingSessions.length > 5" class="section-footer">
+          <ds-button label="Ver Agenda" variant="secondary" size="sm" icon="calendar_today" (click)="navigateToSchedule()"></ds-button>
         </div>
       </ds-page-card>
 
+      <!-- Ocupação -->
       <ds-page-card>
         <div class="section-header">
-          <mat-icon class="section-icon">warning</mat-icon>
-          <h3 class="section-title">Alertas</h3>
+          <mat-icon class="section-icon">groups</mat-icon>
+          <h3 class="section-title">Ocupação das Turmas</h3>
         </div>
-
-        <div *ngIf="data.alerts.length === 0" class="section-empty">
-          <ds-empty-state
-            icon="check_circle"
-            title="Nenhum alerta"
-            description="Tudo tranquilo no estúdio.">
-          </ds-empty-state>
+        <div *ngIf="displayClassOccupancy.length === 0" class="section-empty">
+          <ds-empty-state icon="group" title="Nenhuma turma" description="Nenhuma turma cadastrada."></ds-empty-state>
         </div>
-
-        <div *ngIf="data.alerts.length > 0" class="alerts-list">
-          <div *ngFor="let alert of data.alerts" class="alert-card" [ngClass]="getAlertSeverityClass(alert.severity)">
-            <mat-icon class="alert-icon">
-              {{ getAlertIcon(alert.type) }}
-            </mat-icon>
-            <div class="alert-content">
-              <span class="alert-title">{{ alert.title }}</span>
-              <span class="alert-message">{{ alert.message }}</span>
-            </div>
-          </div>
+        <app-dashboard-occupancy-card [items]="displayClassOccupancy"></app-dashboard-occupancy-card>
+        <div *ngIf="data.classOccupancy.length > 5" class="section-footer">
+          <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToClasses()"></ds-button>
         </div>
       </ds-page-card>
-    </div>
 
-    <div class="grid-2col">
+      <!-- Reposições -->
       <ds-page-card>
         <div class="section-header">
           <mat-icon class="section-icon">assignment</mat-icon>
           <h3 class="section-title">Reposições</h3>
         </div>
-
         <div *ngIf="displayPendingMakeups.length === 0" class="section-empty">
-          <p>Nenhuma reposição pendente.</p>
+          <ds-empty-state icon="check_circle" title="Nenhuma reposição" description="Nenhuma reposição pendente."></ds-empty-state>
         </div>
-
         <div *ngIf="displayPendingMakeups.length > 0" class="makeups-list">
-          <div *ngFor="let makeup of displayPendingMakeups" class="makeup-row">
-            <span class="makeup-student">{{ makeup.studentName }}</span>
-            <span class="makeup-class">{{ makeup.className }}</span>
-            <span class="makeup-date">{{ formatDate(makeup.absenceDate) }}</span>
-            <ds-button
-              label="Aprovar"
-              variant="primary"
-              size="sm"
-              (click)="navigateToMakeupApproval()">
-            </ds-button>
+          <div *ngFor="let makeup of displayPendingMakeups" class="makeup-card">
+            <div class="makeup-info">
+              <span class="makeup-student">{{ makeup.studentName }}</span>
+              <span class="makeup-class">{{ makeup.className }}</span>
+              <span class="makeup-date">{{ formatDate(makeup.absenceDate) }}</span>
+            </div>
+            <ds-button label="Resolver" variant="primary" size="sm" (click)="navigateToMakeupApproval()"></ds-button>
           </div>
         </div>
-
-        <div class="section-footer" *ngIf="data.pendingMakeupRequests.length > 5">
-          <ds-button
-            label="Ver todas"
-            variant="secondary"
-            size="sm"
-            icon="visibility"
-            (click)="navigateToMakeups()">
-          </ds-button>
+        <div *ngIf="data.pendingMakeupRequests.length > 5" class="section-footer">
+          <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToMakeups()"></ds-button>
         </div>
       </ds-page-card>
 
+      <!-- Alertas -->
       <ds-page-card>
         <div class="section-header">
-          <mat-icon class="section-icon">groups</mat-icon>
-          <h3 class="section-title">Turmas</h3>
+          <mat-icon class="section-icon">warning</mat-icon>
+          <h3 class="section-title">Alertas</h3>
         </div>
-
-        <div *ngIf="displayClassOccupancy.length === 0" class="section-empty">
-          <p>Nenhuma turma cadastrada.</p>
+        <div *ngIf="displayAlerts.length === 0" class="section-empty">
+          <ds-empty-state icon="check_circle" title="Nenhum alerta" description="Tudo tranquilo no estúdio."></ds-empty-state>
         </div>
+        <app-dashboard-alert-card [alerts]="displayAlerts" (resolve)="resolveAlert($event)"></app-dashboard-alert-card>
+      </ds-page-card>
 
-        <div *ngIf="displayClassOccupancy.length > 0" class="occupancy-list">
-          <div *ngFor="let item of displayClassOccupancy" class="occupancy-row">
-            <div class="occupancy-info">
-              <span class="occupancy-name">{{ item.className }}</span>
-              <span class="occupancy-count">{{ item.enrolled }}/{{ item.capacity }} alunos</span>
-              <span class="occupancy-percent">{{ item.occupancyPercent }}%</span>
+    </div>
+
+    <!-- === TABLET LAYOUT (600px - 959px) === -->
+    <div *ngIf="responsive.layoutMode() === LayoutMode.TABLET" class="layout-tablet">
+
+      <!-- KPIs -->
+      <div class="tablet-kpi-grid">
+        <app-stat-card *ngFor="let kpi of kpiItems" [title]="kpi.label" [value]="kpi.value" [icon]="kpi.icon" [color]="kpi.color"></app-stat-card>
+      </div>
+
+      <!-- Próximas Aulas + Painel direito -->
+      <div class="tablet-two-col">
+        <ds-page-card class="tablet-main">
+          <div class="section-header">
+            <mat-icon class="section-icon">schedule</mat-icon>
+            <h3 class="section-title">Próximas Aulas</h3>
+          </div>
+          <div *ngIf="displayUpcomingSessions.length === 0" class="section-empty">
+            <ds-empty-state icon="event" title="Nenhuma aula" description="Nenhuma aula programada para hoje."></ds-empty-state>
+          </div>
+          <div *ngIf="displayUpcomingSessions.length > 0" class="tablet-sessions">
+            <div *ngFor="let session of displayUpcomingSessions" class="tablet-session-card">
+              <div class="tablet-session-time">{{ formatTime(session.startTime) }}</div>
+              <div class="tablet-session-body">
+                <span class="tablet-session-class">{{ session.className }}</span>
+                <span class="tablet-session-instructor">{{ session.instructorName }}</span>
+              </div>
+              <div class="tablet-session-meta">
+                <span>{{ session.enrolledStudents }} alunos</span>
+                <ds-status-chip [status]="getSessionStatus(session.status)" [label]="getSessionStatusLabel(session.status)"></ds-status-chip>
+              </div>
             </div>
-            <mat-progress-bar
-              class="occupancy-bar"
-              [color]="getOccupancyColor(item.occupancyPercent)"
-              [value]="item.occupancyPercent"
-              mode="determinate">
-            </mat-progress-bar>
+          </div>
+          <div *ngIf="data.upcomingSessions.length > 5" class="section-footer">
+            <ds-button label="Ver Agenda" variant="secondary" size="sm" icon="calendar_today" (click)="navigateToSchedule()"></ds-button>
+          </div>
+        </ds-page-card>
+
+        <div class="tablet-sidebar">
+          <!-- Alertas -->
+          <ds-page-card>
+            <div class="section-header">
+              <mat-icon class="section-icon">warning</mat-icon>
+              <h3 class="section-title">Alertas</h3>
+            </div>
+            <div *ngIf="displayAlerts.length === 0" class="section-empty">
+              <ds-empty-state icon="check_circle" title="Nenhum alerta" description="Tudo tranquilo."></ds-empty-state>
+            </div>
+            <app-dashboard-alert-card [alerts]="displayAlerts" (resolve)="resolveAlert($event)"></app-dashboard-alert-card>
+          </ds-page-card>
+        </div>
+      </div>
+
+      <!-- Ocupação + Reposições -->
+      <div class="tablet-two-col">
+        <ds-page-card>
+          <div class="section-header">
+            <mat-icon class="section-icon">groups</mat-icon>
+            <h3 class="section-title">Ocupação</h3>
+          </div>
+          <div *ngIf="displayClassOccupancy.length === 0" class="section-empty">
+            <ds-empty-state icon="group" title="Nenhuma turma" description="Nenhuma turma cadastrada."></ds-empty-state>
+          </div>
+          <div *ngIf="displayClassOccupancy.length > 0" class="occupancy-list">
+            <div *ngFor="let item of displayClassOccupancy" class="occupancy-row">
+              <div class="occupancy-info">
+                <span class="occupancy-name">{{ item.className }}</span>
+                <span class="occupancy-count">{{ item.enrolled }}/{{ item.capacity }} alunos</span>
+                <span class="occupancy-percent">{{ item.occupancyPercent }}%</span>
+              </div>
+              <mat-progress-bar class="occupancy-bar" [color]="getOccupancyColor(item.occupancyPercent)" [value]="item.occupancyPercent" mode="determinate"></mat-progress-bar>
+            </div>
+          </div>
+          <div *ngIf="data.classOccupancy.length > 5" class="section-footer">
+            <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToClasses()"></ds-button>
+          </div>
+        </ds-page-card>
+
+        <ds-page-card>
+          <div class="section-header">
+            <mat-icon class="section-icon">assignment</mat-icon>
+            <h3 class="section-title">Reposições</h3>
+          </div>
+          <div *ngIf="displayPendingMakeups.length === 0" class="section-empty">
+            <ds-empty-state icon="check_circle" title="Nenhuma reposição" description="Nenhuma reposição pendente."></ds-empty-state>
+          </div>
+          <div *ngIf="displayPendingMakeups.length > 0" class="makeups-list">
+            <div *ngFor="let makeup of displayPendingMakeups" class="makeup-row">
+              <span class="makeup-student">{{ makeup.studentName }}</span>
+              <span class="makeup-class">{{ makeup.className }}</span>
+              <span class="makeup-date">{{ formatDate(makeup.absenceDate) }}</span>
+              <ds-button label="Aprovar" variant="primary" size="sm" (click)="navigateToMakeupApproval()"></ds-button>
+            </div>
+          </div>
+          <div *ngIf="data.pendingMakeupRequests.length > 5" class="section-footer">
+            <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToMakeups()"></ds-button>
+          </div>
+        </ds-page-card>
+      </div>
+    </div>
+
+    <!-- === DESKTOP LAYOUT (>= 960px) === -->
+    <div *ngIf="responsive.layoutMode() === LayoutMode.DESKTOP" class="layout-desktop">
+
+      <!-- KPIs Row - 12 columns -->
+      <div class="desktop-kpi-row">
+        <app-stat-card *ngFor="let kpi of kpiItems" [title]="kpi.label" [value]="kpi.value" [icon]="kpi.icon" [color]="kpi.color"></app-stat-card>
+      </div>
+
+      <!-- Main Content: 8 columns + Alerts sidebar: 4 columns -->
+      <div class="desktop-main-grid">
+        <div class="desktop-main-content">
+
+          <!-- Próximas Aulas -->
+          <ds-page-card>
+            <div class="section-header">
+              <mat-icon class="section-icon">schedule</mat-icon>
+              <h3 class="section-title">Próximas Aulas</h3>
+            </div>
+            <div *ngIf="displayUpcomingSessions.length === 0" class="section-empty">
+              <ds-empty-state icon="event" title="Nenhuma aula" description="Nenhuma aula programada para hoje."></ds-empty-state>
+            </div>
+            <div *ngIf="displayUpcomingSessions.length > 0" class="desktop-sessions-table">
+              <div class="sessions-table-header">
+                <span>Horário</span>
+                <span>Aula</span>
+                <span>Instrutor</span>
+                <span>Alunos</span>
+                <span>Status</span>
+              </div>
+              <div *ngFor="let session of displayUpcomingSessions" class="sessions-table-row">
+                <span class="session-time-cell">{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</span>
+                <span class="session-class-cell">{{ session.className }}</span>
+                <span class="session-instructor-cell">{{ session.instructorName }}</span>
+                <span class="session-students-cell">{{ session.enrolledStudents }}</span>
+                <ds-status-chip [status]="getSessionStatus(session.status)" [label]="getSessionStatusLabel(session.status)"></ds-status-chip>
+              </div>
+            </div>
+            <div *ngIf="data.upcomingSessions.length > 5" class="section-footer">
+              <ds-button label="Ver Agenda" variant="secondary" size="sm" icon="calendar_today" (click)="navigateToSchedule()"></ds-button>
+            </div>
+          </ds-page-card>
+
+          <!-- Ocupação + Reposições lado a lado -->
+          <div class="desktop-two-col">
+            <ds-page-card>
+              <div class="section-header">
+                <mat-icon class="section-icon">groups</mat-icon>
+                <h3 class="section-title">Ocupação</h3>
+              </div>
+              <div *ngIf="displayClassOccupancy.length === 0" class="section-empty">
+                <ds-empty-state icon="group" title="Nenhuma turma" description="Nenhuma turma cadastrada."></ds-empty-state>
+              </div>
+              <div *ngIf="displayClassOccupancy.length > 0" class="desktop-occupancy-table">
+                <div class="occupancy-table-header">
+                  <span>Turma</span>
+                  <span>Alunos</span>
+                  <span>%</span>
+                  <span>Barra</span>
+                </div>
+                <div *ngFor="let item of displayClassOccupancy" class="occupancy-table-row">
+                  <span class="occupancy-table-name">{{ item.className }}</span>
+                  <span class="occupancy-table-count">{{ item.enrolled }}/{{ item.capacity }}</span>
+                  <span class="occupancy-table-percent" [style.color]="item.occupancyPercent >= 80 ? '#dc2626' : '#0F766E'">{{ item.occupancyPercent }}%</span>
+                  <mat-progress-bar class="occupancy-table-bar" [color]="getOccupancyColor(item.occupancyPercent)" [value]="item.occupancyPercent" mode="determinate"></mat-progress-bar>
+                </div>
+              </div>
+              <div *ngIf="data.classOccupancy.length > 5" class="section-footer">
+                <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToClasses()"></ds-button>
+              </div>
+            </ds-page-card>
+
+            <ds-page-card>
+              <div class="section-header">
+                <mat-icon class="section-icon">assignment</mat-icon>
+                <h3 class="section-title">Reposições</h3>
+              </div>
+              <div *ngIf="displayPendingMakeups.length === 0" class="section-empty">
+                <ds-empty-state icon="check_circle" title="Nenhuma reposição" description="Nenhuma reposição pendente."></ds-empty-state>
+              </div>
+              <div *ngIf="displayPendingMakeups.length > 0" class="makeups-list">
+                <div *ngFor="let makeup of displayPendingMakeups" class="makeup-row">
+                  <span class="makeup-student">{{ makeup.studentName }}</span>
+                  <span class="makeup-class">{{ makeup.className }}</span>
+                  <span class="makeup-date">{{ formatDate(makeup.absenceDate) }}</span>
+                  <ds-button label="Aprovar" variant="primary" size="sm" (click)="navigateToMakeupApproval()"></ds-button>
+                </div>
+              </div>
+              <div *ngIf="data.pendingMakeupRequests.length > 5" class="section-footer">
+                <ds-button label="Ver todas" variant="secondary" size="sm" icon="visibility" (click)="navigateToMakeups()"></ds-button>
+              </div>
+            </ds-page-card>
           </div>
         </div>
 
-        <div class="section-footer" *ngIf="data.classOccupancy.length > 5">
-          <ds-button
-            label="Ver todas"
-            variant="secondary"
-            size="sm"
-            icon="visibility"
-            (click)="navigateToClasses()">
-          </ds-button>
+        <!-- Sidebar: Alertas -->
+        <div class="desktop-alerts-sidebar">
+          <ds-page-card>
+            <div class="section-header">
+              <mat-icon class="section-icon">warning</mat-icon>
+              <h3 class="section-title">Alertas</h3>
+            </div>
+            <div *ngIf="displayAlerts.length === 0" class="section-empty">
+              <ds-empty-state icon="check_circle" title="Nenhum alerta" description="Tudo tranquilo no estúdio."></ds-empty-state>
+            </div>
+            <app-dashboard-alert-card [alerts]="displayAlerts" (resolve)="resolveAlert($event)"></app-dashboard-alert-card>
+          </ds-page-card>
         </div>
-      </ds-page-card>
+      </div>
     </div>
+
   </div>
 </div>
