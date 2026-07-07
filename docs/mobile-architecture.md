@@ -161,6 +161,91 @@ class NavigationService {
 - Drawer open/close: MatSidenav default animation (~225ms)
 - Nav items hover: background transition 200ms ease
 
+## CRUD Architecture (MOB-003)
+
+### Overview
+
+All CRUD pages (Students, Instructors, Class Groups, Enrollments, Objectives, Evaluations, Evolutions) use a reusable component architecture that automatically switches between table (Desktop), simplified table (Tablet), and cards (Mobile).
+
+### Component Tree
+
+```
+┌────────────────────────────────────────────┐
+│  DsPageHeader (title + new button)         │
+├────────────────────────────────────────────┤
+│  ResponsiveCrudComponent (orchestrator)    │
+│  ┌──────────────────────────────────────┐  │
+│  │  CrudToolbarComponent                │  │
+│  │  ┌────────┬──────────┬───────────┐   │  │
+│  │  │ Search │ Filters  │ New/FAB   │   │  │
+│  │  └────────┴──────────┴───────────┘   │  │
+│  ├──────────────────────────────────────┤  │
+│  │  View Switch                          │  │
+│  │  ┌──────────────────────────────┐    │  │
+│  │  │ Desktop: CrudTableComponent  │    │  │
+│  │  │ Tablet: CrudTableComponent   │    │  │
+│  │  │        (simplified columns)  │    │  │
+│  │  │ Mobile: CrudCardComponent    │    │  │
+│  │  └──────────────────────────────┘    │  │
+│  ├──────────────────────────────────────┤  │
+│  │  CrudEmptyStateComponent              │  │
+│  │  (when list is empty)                │  │
+│  └──────────────────────────────────────┘  │
+└────────────────────────────────────────────┘
+```
+
+### Responsive Behavior
+
+| Breakpoint | Table Visible | Cards Visible | Actions | Pagination |
+|------------|--------------|---------------|---------|------------|
+| Desktop (>=960px) | Full table | Hidden | Icon buttons + menu | Material Table |
+| Tablet (600-959px) | Simplified columns | Hidden | Menu grouped | Material Table |
+| Mobile (<600px) | Hidden | Card list | ⋮ Menu | FAB + infinite scroll / load more |
+
+### Reusable Components
+
+**`ResponsiveCrudComponent`** - Orchestrator that manages view switching based on `ResponsiveService.layoutMode()`. Accepts:
+- `dataSource` (MatTableDataSource) for table
+- `items` (array) for card rendering
+- `displayedColumns` / `tabletColumns` for responsive columns
+- `empty*` inputs for empty state
+- Content projection slots: `[crudFilters]`, `[tableColumns]`, `[cardContent]`
+
+**`CrudToolbarComponent`** - Search field + projected filters + New button (Desktop/Tablet) / FAB (Mobile). Uses `ResponsiveService` to toggle visibility.
+
+**`CrudTableComponent`** - Wraps `<table mat-table>` with loading state and hidden class on mobile. Supports `tabletColumns` for simplified view.
+
+**`CrudCardComponent`** - Renders a list of cards via `ngTemplateOutlet` on mobile only.
+
+**`CrudActionsComponent`** - Renders icon buttons on Desktop/Tablet and a ⋮ menu on Mobile. Accepts `CrudAction[]` config.
+
+**`CrudEmptyStateComponent`** - Standardized empty state with icon, title, description, and optional CTA button.
+
+### Flow
+
+1. Page loads data from service
+2. `applyFilters()` updates both `filteredItems` and `dataSource.data`
+3. `ResponsiveCrudComponent` uses `ResponsiveService.layoutMode()` Signal to determine view
+4. Desktop/Tablet → renders `CrudTableComponent` with `MatTableDataSource`
+5. Mobile → renders `CrudCardComponent` with projected card template
+6. Empty state → renders `CrudEmptyStateComponent`
+7. FAB appears only on mobile, positioned fixed bottom-right
+
+### Accessibility
+
+- All cards have `role="listitem"`, `aria-label`, and `tabindex="0"`
+- Keyboard navigation: Tab through cards, Enter/Space to activate
+- Toolbar has `role="toolbar"` and `aria-label`
+- Search input has `aria-label` bound to placeholder
+- Action buttons have `aria-label` for each action
+
+### Performance
+
+- Uses `ResponsiveService` with `BreakpointObserver` only (no `window.innerWidth`)
+- No `HostListener('window:resize')`
+- CSS media queries only for layout, not for logic
+- Signals for reactive breakpoint detection
+
 ## Como usar
 
 ### Injetar NavigationService:
