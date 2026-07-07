@@ -1,0 +1,123 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 12px;
+  animation: slideIn 0.3s ease both;
+}
+
+.timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 48px;
+}
+
+.timeline-time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0F766E;
+  white-space: nowrap;
+}
+
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: linear-gradient(to bottom, #0F766E 0%, #e2e8f0 100%);
+  min-height: 24px;
+  border-radius: 1px;
+}
+
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+.timeline-card {
+  flex: 1;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.timeline-card:hover {
+  border-color: #0F766E;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.1);
+}
+
+.timeline-card:focus-visible {
+  outline: 2px solid #0F766E;
+  outline-offset: 2px;
+}
+
+.timeline-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timeline-class {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.timeline-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeline-info-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+}
+
+.timeline-info-text {
+  font-size: 13px;
+  color: #475569;
+}
+
+@media (min-width: 600px) {
+  .timeline {
+    display: none;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0ms; }
+.timeline-item:nth-child(2) { animation-delay: 60ms; }
+.timeline-item:nth-child(3) { animation-delay: 120ms; }
+.timeline-item:nth-child(4) { animation-delay: 180ms; }
+.timeline-item:nth-child(5) { animation-delay: 240ms; }

@@ -1,0 +1,20 @@
+<div class="occupancy-cards" role="list" aria-label="Ocupação das turmas">
+  <div *ngFor="let item of items; trackBy: trackByClassGroupId" class="occupancy-item" role="listitem">
+    <div class="occupancy-header">
+      <span class="occupancy-name">{{ item.className }}</span>
+      <span class="occupancy-percent">{{ item.occupancyPercent }}%</span>
+    </div>
+    <div class="occupancy-bar-wrapper" role="progressbar" [attr.aria-valuenow]="item.occupancyPercent" aria-valuemin="0" aria-valuemax="100" [attr.aria-label]="'Ocupação de ' + item.className + ': ' + item.occupancyPercent + '%'">
+      <mat-progress-bar
+        class="occupancy-bar"
+        [color]="getBarColor(item.occupancyPercent)"
+        [value]="item.occupancyPercent"
+        mode="determinate">
+      </mat-progress-bar>
+    </div>
+    <div class="occupancy-footer">
+      <mat-icon class="occupancy-footer-icon">group</mat-icon>
+      <span class="occupancy-count">{{ item.enrolled }} / {{ item.capacity }}</span>
+    </div>
+  </div>
+</div>

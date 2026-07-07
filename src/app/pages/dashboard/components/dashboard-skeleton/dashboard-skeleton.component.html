@@ -1,0 +1,29 @@
+<div class="skeleton-container" [ngClass]="'skeleton-' + mode" role="status" aria-label="Carregando dashboard">
+  <div class="skeleton-kpis" aria-hidden="true">
+    <div *ngFor="let _ of [1,2,3,4,5,6,7]" class="skeleton-kpi">
+      <div class="skeleton skeleton-icon"></div>
+      <div class="skeleton skeleton-line skeleton-line-sm"></div>
+      <div class="skeleton skeleton-line skeleton-line-xs"></div>
+    </div>
+  </div>
+
+  <div class="skeleton-grid" aria-hidden="true">
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-line skeleton-line-md"></div>
+      <div *ngFor="let _ of [1,2,3]" class="skeleton skeleton-row"></div>
+    </div>
+    <div class="skeleton-card">
+      <div class="skeleton skeleton-line skeleton-line-md"></div>
+      <div *ngFor="let _ of [1,2,3]" class="skeleton skeleton-row"></div>
+    </div>
+  </div>
+
+  <div class="skeleton-quick-actions" aria-hidden="true">
+    <div class="skeleton skeleton-line skeleton-line-md"></div>
+    <div class="skeleton-actions-grid">
+      <div *ngFor="let _ of [1,2,3,4]" class="skeleton skeleton-action-btn"></div>
+    </div>
+  </div>
+
+  <span class="sr-only">Carregando informações do dashboard</span>
+</div>
