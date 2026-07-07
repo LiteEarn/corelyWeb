@@ -1,10 +1,12 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
+import { ResponsiveService } from '../../shared/layout/responsive.service';
+import { LayoutMode } from '../../shared/layout/layout-mode.enum';
 
 @Component({
   selector: 'app-shell',
@@ -20,27 +22,13 @@ import { TopbarComponent } from '../topbar/topbar.component';
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
-export class ShellComponent implements OnInit, OnDestroy {
+export class ShellComponent {
+  private responsive = inject(ResponsiveService);
+
   isSidebarOpen = true;
-  isMobile = false;
-
-  private _resizeHandler = () => this.checkMobile();
-
-  ngOnInit(): void {
-    this.checkMobile();
-    window.addEventListener('resize', this._resizeHandler);
-  }
-
-  ngOnDestroy(): void {
-    window.removeEventListener('resize', this._resizeHandler);
-  }
-
-  private checkMobile() {
-    this.isMobile = window.innerWidth <= 768;
-    if (!this.isMobile) {
-      this.isSidebarOpen = true;
-    }
-  }
+  isMobile = this.responsive.isMobile;
+  layoutMode = this.responsive.layoutMode;
+  isDesktop = this.responsive.isDesktop;
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
