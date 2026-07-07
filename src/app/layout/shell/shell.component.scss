@@ -1,15 +1,27 @@
-.shell-layout {
-  display: flex;
-  width: 100%;
+:host {
+  display: block;
   height: 100vh;
-  overflow: hidden;
+}
+
+.shell-layout {
+  height: 100vh;
+}
+
+.app-sidenav {
+  width: 260px;
+  border-right: 1px solid #e2e8f0;
+  transition: width 0.25s ease;
+
+  &.sidenav-collapsed {
+    width: 72px;
+  }
 }
 
 .content-wrapper {
-  flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -26,12 +38,3 @@
     padding: 16px;
   }
 }
-
-/* Mobile overlay that sits under the sidebar drawer */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 900;
-}
-
