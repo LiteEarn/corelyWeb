@@ -20,15 +20,33 @@
     display: flex;
     justify-content: flex-end;
     gap: $ds-spacing-md;
+
+    ds-button {
+      min-height: 44px;
+    }
+  }
+
+  &.ds-page-form-mobile {
+    .ds-form-footer {
+      flex-direction: column-reverse;
+      padding: $ds-spacing-lg $ds-spacing-xl;
+
+      ds-button {
+        width: 100%;
+      }
+    }
   }
 }
 
 @media (max-width: 768px) {
-  .ds-form-footer {
-    padding: $ds-spacing-lg $ds-spacing-xl;
+  .ds-page-form {
+    .ds-form-footer {
+      flex-direction: column-reverse;
+      padding: $ds-spacing-lg $ds-spacing-xl;
 
-    ds-button {
-      width: 100%;
+      ds-button {
+        width: 100%;
+      }
     }
   }
 }

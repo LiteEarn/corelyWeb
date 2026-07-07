@@ -4,4 +4,5 @@ export * from './empty-state/empty-state.component';
 export * from './loading/loading.component';
 export * from './confirm-dialog/confirm-dialog.component';
 export * from './crud';
+export * from './responsive-form';
 

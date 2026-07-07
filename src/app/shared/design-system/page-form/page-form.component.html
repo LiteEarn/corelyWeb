@@ -1,9 +1,8 @@
-<div class="ds-page-form">
+<div class="ds-page-form" [class.ds-page-form-mobile]="isMobile">
   <div class="ds-form-content">
     <ng-content></ng-content>
   </div>
-
-  <div class="ds-form-footer">
+  <div class="ds-form-footer" [class.ds-form-footer-mobile]="isMobile">
     <ds-button
       [label]="cancelText"
       variant="secondary"
@@ -15,7 +14,7 @@
       [variant]="submitVariant"
       [loading]="loading"
       [disabled]="disabled"
-      (click)="submit.emit()">
+      (click)="onFormSubmit()">
     </ds-button>
   </div>
 </div>
