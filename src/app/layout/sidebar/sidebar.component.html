@@ -1,21 +1,22 @@
-<div class="sidebar" [class.sidebar-closed]="!isSidebarOpen">
+<div class="sidebar" [class.sidebar-closed]="navigation.isCollapsed()">
   <div class="sidebar-header">
     <div class="sidebar-logo">
       <span class="logo-icon">C</span>
     </div>
-    <h2 class="sidebar-title" *ngIf="isSidebarOpen">Corely</h2>
+    <h2 class="sidebar-title" *ngIf="!navigation.isCollapsed()">Corely</h2>
   </div>
 
-  <nav class="sidebar-nav">
-    <a 
-      *ngFor="let item of menuItems" 
+  <nav class="sidebar-nav" role="navigation" aria-label="Navegação principal">
+    <a
+      *ngFor="let item of menuItems"
       class="nav-item"
-      [routerLink]="item.route" 
+      [routerLink]="item.route"
       routerLinkActive="nav-item-active"
       [routerLinkActiveOptions]="{ exact: true }"
+      [attr.aria-label]="item.label"
     >
       <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
-      <span class="nav-label" *ngIf="isSidebarOpen">{{ item.label }}</span>
+      <span class="nav-label" *ngIf="!navigation.isCollapsed()">{{ item.label }}</span>
     </a>
   </nav>
 </div>

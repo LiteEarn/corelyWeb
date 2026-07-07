@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { TopbarComponent } from '../topbar/topbar.component';
-import { ResponsiveService } from '../../shared/layout/responsive.service';
-import { LayoutMode } from '../../shared/layout/layout-mode.enum';
+import { NavigationService } from '../../shared/navigation/navigation.service';
 
 @Component({
   selector: 'app-shell',
@@ -16,6 +16,7 @@ import { LayoutMode } from '../../shared/layout/layout-mode.enum';
     RouterModule,
     MatIconModule,
     MatButtonModule,
+    MatSidenavModule,
     SidebarComponent,
     TopbarComponent
   ],
@@ -23,14 +24,13 @@ import { LayoutMode } from '../../shared/layout/layout-mode.enum';
   styleUrl: './shell.component.scss'
 })
 export class ShellComponent {
-  private responsive = inject(ResponsiveService);
+  navigation = inject(NavigationService);
 
-  isSidebarOpen = true;
-  isMobile = this.responsive.isMobile;
-  layoutMode = this.responsive.layoutMode;
-  isDesktop = this.responsive.isDesktop;
+  onToggleMenu(): void {
+    this.navigation.toggle();
+  }
 
-  toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
+  onDrawerClose(): void {
+    this.navigation.closeDrawer();
   }
 }

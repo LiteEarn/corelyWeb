@@ -1,9 +1,9 @@
-import { Component, Input, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { PermissionService } from '../../core/rbac';
-import { ResponsiveService } from '../../shared/layout/responsive.service';
+import { NavigationService } from '../../shared/navigation/navigation.service';
 import type { MenuItemDef } from '../../core/rbac/permission-matrix';
 
 @Component({
@@ -18,14 +18,10 @@ import type { MenuItemDef } from '../../core/rbac/permission-matrix';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit {
-  @Input() isSidebarOpen = true;
   private permissionService = inject(PermissionService);
-  private responsive = inject(ResponsiveService);
+  navigation = inject(NavigationService);
 
   menuItems: MenuItemDef[] = [];
-
-  readonly isMobile = this.responsive.isMobile;
-  readonly isOverlayMode = computed(() => this.responsive.isMobile());
 
   ngOnInit(): void {
     this.menuItems = this.permissionService.getMenuItems();
