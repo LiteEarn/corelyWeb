@@ -1,0 +1,54 @@
+<div class="crud-toolbar" role="toolbar" aria-label="Ferramentas de listagem">
+  <div class="toolbar-search">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ searchPlaceholder }}</mat-label>
+      <input
+        matInput
+        [value]="searchValue"
+        (input)="searchChange.emit($any($event.target).value)"
+        [placeholder]="searchPlaceholder"
+        [attr.aria-label]="searchPlaceholder"
+      />
+      <mat-icon matPrefix class="search-icon">search</mat-icon>
+      <button
+        *ngIf="searchValue"
+        matSuffix
+        mat-icon-button
+        aria-label="Limpar busca"
+        (click)="searchChange.emit('')"
+        type="button"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="toolbar-filters" [class.toolbar-filters--stacked]="responsive.layoutMode() === LayoutMode.TABLET || responsive.layoutMode() === LayoutMode.MOBILE">
+    <ng-content select="[crudFilters]"></ng-content>
+  </div>
+
+  <div class="toolbar-actions">
+    <button
+      *ngIf="responsive.layoutMode() !== LayoutMode.MOBILE && showNewButton"
+      mat-raised-button
+      color="primary"
+      class="new-button"
+      (click)="newClick.emit()"
+      [attr.aria-label]="newButtonText"
+    >
+      <mat-icon>add</mat-icon>
+      <span class="new-button-label">{{ newButtonText }}</span>
+    </button>
+  </div>
+
+  <button
+    *ngIf="responsive.layoutMode() === LayoutMode.MOBILE && showNewButton"
+    mat-fab
+    color="primary"
+    class="crud-fab"
+    (click)="newClick.emit()"
+    [attr.aria-label]="newButtonText"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

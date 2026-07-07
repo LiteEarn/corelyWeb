@@ -1,0 +1,63 @@
+@import '../../../design-system/variables';
+@import '../../../layout/responsive';
+
+.crud-table-wrapper {
+  overflow-x: auto;
+
+  &--hidden {
+    @include respond-below(tablet) {
+      display: none;
+    }
+  }
+}
+
+.crud-table-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $ds-spacing-md;
+  padding: $ds-spacing-xxl;
+  color: $ds-textSecondary;
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.crud-table {
+  width: 100%;
+
+  &--tablet {
+    .mat-column-actions {
+      width: 48px;
+    }
+  }
+}
+
+::ng-deep {
+  .crud-table .mat-mdc-header-row {
+    background: $ds-neutral100;
+  }
+
+  .crud-table .mat-mdc-header-cell {
+    color: $ds-textSecondary;
+    font-weight: $ds-fontWeight-semibold;
+    font-size: $ds-fontSize-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .crud-table .mat-mdc-row:hover {
+    background: rgba(15, 23, 42, 0.02);
+  }
+
+  .crud-table .mat-mdc-cell {
+    color: $ds-neutral900;
+    font-size: $ds-fontSize-md;
+  }
+}

@@ -1,0 +1,60 @@
+<div class="crud-actions" (click)="$event.stopPropagation()">
+  <ng-container *ngIf="responsive.layoutMode() !== LayoutMode.MOBILE">
+    <button
+      *ngFor="let action of visibleActions"
+      mat-icon-button
+      class="action-button"
+      [disabled]="action.disabled"
+      [attr.aria-label]="action.label"
+      (click)="onAction(action.action)"
+    >
+      <mat-icon>{{ action.icon }}</mat-icon>
+    </button>
+
+    <button
+      *ngIf="menuActions.length > 0"
+      mat-icon-button
+      class="action-button"
+      [matMenuTriggerFor]="menu"
+      aria-label="Mais ações"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #menu="matMenu" xPosition="before">
+      <button
+        *ngFor="let action of menuActions"
+        mat-menu-item
+        [disabled]="action.disabled"
+        (click)="onAction(action.action)"
+      >
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <span>{{ action.label }}</span>
+      </button>
+    </mat-menu>
+  </ng-container>
+
+  <ng-container *ngIf="responsive.layoutMode() === LayoutMode.MOBILE">
+    <button
+      mat-icon-button
+      class="action-button action-button--mobile"
+      [matMenuTriggerFor]="mobileMenu"
+      aria-label="Abrir menu de ações"
+      (click)="$event.stopPropagation()"
+    >
+      <mat-icon>more_vert</mat-icon>
+    </button>
+
+    <mat-menu #mobileMenu="matMenu" xPosition="before" class="crud-mobile-menu">
+      <button
+        *ngFor="let action of actions"
+        mat-menu-item
+        [disabled]="action.disabled"
+        (click)="onAction(action.action)"
+      >
+        <mat-icon>{{ action.icon }}</mat-icon>
+        <span>{{ action.label }}</span>
+      </button>
+    </mat-menu>
+  </ng-container>
+</div>

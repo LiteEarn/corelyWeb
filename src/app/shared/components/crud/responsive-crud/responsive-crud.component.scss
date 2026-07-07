@@ -1,0 +1,20 @@
+@import '../../../design-system/variables';
+@import '../../../layout/responsive';
+
+.responsive-crud {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: $ds-spacing-xxl $ds-spacing-lg;
+
+  @include respond-below(tablet) {
+    padding: $ds-spacing-lg $ds-spacing-md;
+  }
+}
+
+.responsive-crud-content {
+  margin-top: $ds-spacing-xl;
+
+  @include respond-below(tablet) {
+    margin-top: $ds-spacing-lg;
+  }
+}

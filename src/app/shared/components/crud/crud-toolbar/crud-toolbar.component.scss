@@ -1,0 +1,91 @@
+@import '../../../design-system/variables';
+@import '../../../layout/responsive';
+
+.crud-toolbar {
+  display: flex;
+  align-items: flex-start;
+  gap: $ds-spacing-lg;
+  flex-wrap: wrap;
+  position: relative;
+
+  @include respond-below(tablet) {
+    flex-direction: column;
+    gap: $ds-spacing-md;
+  }
+}
+
+.toolbar-search {
+  flex: 1;
+  min-width: 240px;
+
+  @include respond-below(tablet) {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .search-field {
+    width: 100%;
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      padding: 0;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      padding: $ds-spacing-md $ds-spacing-lg;
+      min-height: 48px;
+    }
+
+    .search-icon {
+      color: $ds-textTertiary;
+      font-size: 20px;
+    }
+  }
+}
+
+.toolbar-filters {
+  display: flex;
+  gap: $ds-spacing-md;
+  align-items: center;
+  flex-wrap: wrap;
+
+  &--stacked {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+
+  @include respond-below(tablet) {
+    display: none;
+  }
+}
+
+.new-button {
+  white-space: nowrap;
+  height: 48px;
+}
+
+.crud-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: $ds-zIndex-fixed;
+
+  @include respond-above(tablet) {
+    display: none !important;
+  }
+}
+
+::ng-deep {
+  .crud-toolbar .mat-mdc-form-field {
+    width: 100%;
+  }
+}
