@@ -1,33 +1,59 @@
+@import '../../shared/design-system/variables';
+@import '../../shared/layout/responsive';
+
 .evolutions-page {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
+  @include container;
+  padding-top: $ds-spacing-xxl;
+  padding-bottom: $ds-spacing-xxl;
+
+  @include respond-below(tablet) {
+    padding-top: $ds-spacing-lg;
+    padding-bottom: $ds-spacing-lg;
+  }
 }
 
-.filters-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 24px;
-}
-
-.filters-content {
-  padding: 24px;
-}
-
-.filters-section {
+.evolutions-filters {
   display: flex;
+  gap: $ds-spacing-md;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  align-items: flex-end;
+
+  @include respond-below(tablet) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .filter-field {
-  flex: 1;
+  width: 220px;
+
+  @include respond-below(tablet) {
+    width: 100%;
+  }
+
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+  ::ng-deep .mat-mdc-text-field-wrapper { padding: 0; }
+  ::ng-deep .mat-mdc-form-field-infix {
+    padding: $ds-spacing-md $ds-spacing-lg;
+    min-height: 48px;
+  }
+}
+
+.date-filter {
+  width: 180px;
+
+  @include respond-below(tablet) {
+    width: 100%;
+  }
+}
+
+.search-field {
+  width: 240px;
   min-width: 200px;
 
-  &.search-field {
-    flex: 2;
-    min-width: 300px;
+  @include respond-below(tablet) {
+    width: 100%;
+    min-width: unset;
   }
 }
 
@@ -36,162 +62,127 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 32px;
+  padding: $ds-spacing-xxl * 2;
+  color: $ds-textSecondary;
 
   .spinner {
-    font-size: 48px;
-    color: #3b82f6;
     animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-  }
-
-  p {
-    color: #64748b;
-    margin: 0;
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
   }
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .empty-state-wrapper {
-  padding: 32px 0;
+  padding: 96px $ds-spacing-xxl;
+
+  @include respond-below(tablet) {
+    padding: 64px $ds-spacing-lg;
+  }
 }
 
 .timeline-container {
-  padding: 24px 0;
+  margin-top: $ds-spacing-xxl;
 }
 
 .timeline {
   position: relative;
-  padding-left: 32px;
+  padding-left: $ds-spacing-xxl;
 
   &::before {
     content: '';
     position: absolute;
-    left: 7px;
+    left: 15px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+    background: $ds-neutral300;
   }
 }
 
 .timeline-item {
   position: relative;
-  margin-bottom: 32px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
+  margin-bottom: $ds-spacing-xl;
 }
 
 .timeline-marker {
   position: absolute;
-  left: -32px;
-  top: 16px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 2px #3b82f6;
+  left: -24px;
+  top: 24px;
+  width: 12px;
+  height: 12px;
+  border-radius: $ds-borderRadius-full;
+  background: $ds-primary;
+  border: 2px solid $ds-white;
+  box-shadow: 0 0 0 2px $ds-primary;
+  z-index: 1;
 }
 
 .evolution-card {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s;
-
-  &:hover {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.date-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 600;
-  margin-right: 16px;
-}
-
-.date-day {
-  font-size: 24px;
-  line-height: 1;
-}
-
-.date-month {
-  font-size: 12px;
-  text-transform: uppercase;
-  line-height: 1;
-  margin-top: 2px;
-}
-
-.student-name {
-  font-weight: 500;
-  color: #1e293b;
-}
-
-.objective-name {
-  color: #64748b;
-}
-
-.evolution-description {
-  margin: 16px 0;
-  color: #475569;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.created-by {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-left: auto;
-}
-
-.more-button {
-  margin-left: auto;
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .filters-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-field {
-    min-width: 100%;
-  }
-
-  .timeline {
-    padding-left: 24px;
-  }
-
-  .timeline-marker {
-    left: -24px;
-  }
+  border-radius: $ds-borderRadius-lg;
+  border: 1px solid $ds-border;
+  box-shadow: $ds-shadow-card;
 
   .date-avatar {
+    background: $ds-primary;
+    color: $ds-white;
+    border-radius: $ds-borderRadius-md;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 48px;
     height: 48px;
+
+    .date-day {
+      font-size: $ds-fontSize-lg;
+      font-weight: $ds-fontWeight-bold;
+      line-height: 1;
+    }
+
+    .date-month {
+      font-size: $ds-fontSize-xs;
+      line-height: 1;
+      opacity: 0.9;
+    }
   }
 
-  .date-day {
-    font-size: 20px;
+  .student-name {
+    font-weight: $ds-fontWeight-medium;
+  }
+
+  .objective-name {
+    color: $ds-textSecondary;
+  }
+
+  .evolution-description {
+    color: $ds-textSecondary;
+    line-height: $ds-lineHeight-relaxed;
+    margin-top: $ds-spacing-md;
+    white-space: pre-line;
+  }
+
+  .created-by {
+    color: $ds-textTertiary;
+    font-size: $ds-fontSize-sm;
+  }
+}
+
+@include respond-below(tablet) {
+  .timeline {
+    padding-left: $ds-spacing-xl;
+
+    &::before {
+      left: 11px;
+    }
+
+    .timeline-marker {
+      left: -18px;
+    }
   }
 }
