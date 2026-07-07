@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
+import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { ClassGroupService } from '../../features/class-groups/class-group.service';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
@@ -25,7 +26,6 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatTableModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -36,30 +36,34 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent
+    ResponsiveCrudComponent,
+    CrudActionsComponent,
   ],
   templateUrl: './class-groups.component.html',
   styleUrl: './class-groups.component.scss'
 })
 export class ClassGroupsComponent implements OnInit {
+  private classGroupService = inject(ClassGroupService);
+  private instructorService = inject(InstructorService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private toastService = inject(ToastService);
+  private featureGateService = inject(FeatureGateService);
+
   displayedColumns: string[] = ['name', 'instructor', 'days', 'time', 'capacity', 'status', 'actions'];
+  tabletColumns: string[] = ['name', 'instructor', 'time', 'status', 'actions'];
   classGroups: ClassGroup[] = [];
   filteredClassGroups: ClassGroup[] = [];
   dataSource = new MatTableDataSource<ClassGroup>([]);
   instructors: Instructor[] = [];
-  searchValue: string = '';
-  instructorFilter: string = 'all';
-  activeFilter: string = 'all';
+  searchValue = '';
+  instructorFilter = 'all';
+  activeFilter = 'all';
 
-  private dialog = inject(MatDialog);
-  private toastService = inject(ToastService);
-
-  constructor(
-    private classGroupService: ClassGroupService,
-    private instructorService: InstructorService,
-    private featureGateService: FeatureGateService,
-    private router: Router
-  ) {}
+  readonly crudActions: CrudAction[] = [
+    { label: 'Visualizar', icon: 'visibility', action: 'view' },
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+  ];
 
   ngOnInit(): void {
     if (this.featureGateService.canLoadClassGroups()) {
@@ -71,12 +75,9 @@ export class ClassGroupsComponent implements OnInit {
   }
 
   loadClassGroups(): void {
-    if (!this.featureGateService.canLoadClassGroups()) {
-      return;
-    }
+    if (!this.featureGateService.canLoadClassGroups()) return;
     this.classGroupService.getAll().subscribe({
       next: (data) => {
-        console.log('ClassGroups API Response', data);
         this.classGroups = data;
         this.applyFilters();
       },
@@ -87,9 +88,7 @@ export class ClassGroupsComponent implements OnInit {
   }
 
   loadInstructors(): void {
-    if (!this.featureGateService.canLoadInstructors()) {
-      return;
-    }
+    if (!this.featureGateService.canLoadInstructors()) return;
     this.instructorService.getAll({ active: true }).subscribe({
       next: (data) => {
         this.instructors = data;
@@ -161,11 +160,21 @@ export class ClassGroupsComponent implements OnInit {
     this.router.navigate(['/class-groups/new']);
   }
 
+  onAction(event: { action: string; item: ClassGroup }): void {
+    switch (event.action) {
+      case 'view':
+        if (event.item.id) this.router.navigate(['/class-groups', event.item.id]);
+        break;
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/class-groups', event.item.id, 'edit']);
+        break;
+    }
+  }
+
   deactivateClassGroup(classGroup: ClassGroup): void {
     const id = classGroup.id;
     if (!id) return;
     if (!this.featureGateService.canInactivateClassGroup()) return;
-
     this.openDeactivateDialog(id);
   }
 
