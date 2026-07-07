@@ -7,90 +7,118 @@
     (actionButtonClick)="navigateToNew()">
   </ds-page-header>
 
-  <mat-card class="filters-card">
-    <mat-card-content class="filters-content">
-      <div class="filters-section">
-        <mat-form-field *ngIf="students.length > 0" appearance="outline" class="student-filter">
-          <mat-label>Aluno</mat-label>
-          <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
-            <mat-option value="all">Todos</mat-option>
-            <mat-option *ngFor="let student of students" [value]="student.id">
-              {{ student.fullName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+  <responsive-crud
+    [showNewButton]="true"
+    newButtonText="Nova Avaliação"
+    (newClick)="navigateToNew()"
+    [dataSource]="dataSource"
+    [displayedColumns]="displayedColumns"
+    [tabletColumns]="tabletColumns"
+    [items]="filteredEvaluations"
+    emptyIcon="assignment"
+    emptyTitle="Nenhuma avaliação encontrada"
+    emptyDescription="Cadastre a primeira avaliação para acompanhar a evolução dos alunos."
+    [emptyShowAction]="studentFilter === 'all' && !startDateFilter && !endDateFilter"
+    emptyActionText="Nova Avaliação"
+    (emptyActionClick)="navigateToNew()"
+  >
+    <mat-form-field *ngIf="students.length > 0" appearance="outline" class="filter-field" crudFilters>
+      <mat-label>Aluno</mat-label>
+      <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
+        <mat-option value="all">Todos</mat-option>
+        <mat-option *ngFor="let student of students" [value]="student.id">{{ student.fullName }}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="date-filter">
-          <mat-label>Período Inicial</mat-label>
-          <input matInput [matDatepicker]="startDatePicker" (dateChange)="onStartDateChange($event.value)">
-          <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #startDatePicker></mat-datepicker>
-        </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field date-filter" crudFilters>
+      <mat-label>Período Inicial</mat-label>
+      <input matInput [matDatepicker]="startDatePicker" (dateChange)="onStartDateChange($event.value)" [value]="startDateFilter">
+      <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #startDatePicker></mat-datepicker>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="date-filter">
-          <mat-label>Período Final</mat-label>
-          <input matInput [matDatepicker]="endDatePicker" (dateChange)="onEndDateChange($event.value)">
-          <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #endDatePicker></mat-datepicker>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <mat-form-field appearance="outline" class="filter-field date-filter" crudFilters>
+      <mat-label>Período Final</mat-label>
+      <input matInput [matDatepicker]="endDatePicker" (dateChange)="onEndDateChange($event.value)" [value]="endDateFilter">
+      <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #endDatePicker></mat-datepicker>
+    </mat-form-field>
 
-  <mat-card class="table-card">
-    <mat-card-content class="table-content">
-      <table mat-table [dataSource]="dataSource" class="full-width-table">
-        <ng-container matColumnDef="student">
-          <th mat-header-cell *matHeaderCellDef>Aluno</th>
-          <td mat-cell *matCellDef="let evaluation">{{ getStudentName(evaluation.studentId) }}</td>
-        </ng-container>
+    <ng-container tableColumns>
+      <ng-container matColumnDef="student">
+        <th mat-header-cell *matHeaderCellDef>Aluno</th>
+        <td mat-cell *matCellDef="let evaluation">{{ getStudentName(evaluation.studentId) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="evaluationDate">
-          <th mat-header-cell *matHeaderCellDef>Data</th>
-          <td mat-cell *matCellDef="let evaluation">{{ formatDate(evaluation.evaluationDate) }}</td>
-        </ng-container>
+      <ng-container matColumnDef="evaluationDate">
+        <th mat-header-cell *matHeaderCellDef>Data</th>
+        <td mat-cell *matCellDef="let evaluation">{{ formatDate(evaluation.evaluationDate) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="weight">
-          <th mat-header-cell *matHeaderCellDef>Peso (kg)</th>
-          <td mat-cell *matCellDef="let evaluation">{{ evaluation.weight }}</td>
-        </ng-container>
+      <ng-container matColumnDef="weight">
+        <th mat-header-cell *matHeaderCellDef>Peso (kg)</th>
+        <td mat-cell *matCellDef="let evaluation">{{ evaluation.weight }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="height">
-          <th mat-header-cell *matHeaderCellDef>Altura (m)</th>
-          <td mat-cell *matCellDef="let evaluation">{{ evaluation.height }}</td>
-        </ng-container>
+      <ng-container matColumnDef="height">
+        <th mat-header-cell *matHeaderCellDef>Altura (m)</th>
+        <td mat-cell *matCellDef="let evaluation">{{ evaluation.height }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="imc">
-          <th mat-header-cell *matHeaderCellDef>IMC</th>
-          <td mat-cell *matCellDef="let evaluation">{{ calculateIMC(evaluation.weight, evaluation.height).toFixed(2) }}</td>
-        </ng-container>
+      <ng-container matColumnDef="imc">
+        <th mat-header-cell *matHeaderCellDef>IMC</th>
+        <td mat-cell *matCellDef="let evaluation">{{ calculateIMC(evaluation.weight, evaluation.height).toFixed(2) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Ações</th>
-          <td mat-cell *matCellDef="let evaluation">
-            <button mat-icon-button class="action-button" (click)="navigateToEdit(evaluation.id)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button delete-button" (click)="onDelete(evaluation.id)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let evaluation">
+          <crud-actions
+            [actions]="crudActions"
+            [item]="evaluation"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+        </td>
+      </ng-container>
+    </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-
-      <div *ngIf="filteredEvaluations.length === 0" class="empty-state-wrapper">
-        <ds-empty-state
-          icon="assignment"
-          [title]="studentFilter !== 'all' || startDateFilter || endDateFilter ? 'Nenhuma avaliação encontrada' : 'Nenhuma avaliação encontrada'"
-          [description]="studentFilter !== 'all' || startDateFilter || endDateFilter ? 'Tente ajustar os filtros de busca.' : 'Cadastre a primeira avaliação para acompanhar a evolução dos alunos.'"
-          [showAction]="studentFilter === 'all' && !startDateFilter && !endDateFilter"
-          actionText="Nova Avaliação"
-          (actionClick)="navigateToNew()">
-        </ds-empty-state>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <ng-template cardContent let-evaluation>
+      <mat-card class="crud-item-card" role="listitem" [attr.aria-label]="'Avaliação: ' + getStudentName(evaluation.studentId)" tabindex="0">
+        <mat-card-content>
+          <div class="card-header">
+            <h3 class="card-title">{{ getStudentName(evaluation.studentId) }}</h3>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row" *ngIf="evaluation.evaluationDate">
+              <mat-icon class="card-info-icon">calendar_today</mat-icon>
+              <span>{{ formatDate(evaluation.evaluationDate) }}</span>
+            </div>
+            <div class="card-info-row" *ngIf="evaluation.weight">
+              <mat-icon class="card-info-icon">monitor_weight</mat-icon>
+              <span>{{ evaluation.weight }} kg</span>
+            </div>
+            <div class="card-info-row" *ngIf="evaluation.height">
+              <mat-icon class="card-info-icon">straighten</mat-icon>
+              <span>{{ evaluation.height }} m</span>
+            </div>
+            <div class="card-info-row" *ngIf="evaluation.weight && evaluation.height">
+              <mat-icon class="card-info-icon">calculate</mat-icon>
+              <span>IMC: {{ calculateIMC(evaluation.weight, evaluation.height).toFixed(2) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions class="card-actions">
+          <button mat-button color="primary" (click)="onAction({ action: 'edit', item: evaluation })" aria-label="Editar avaliação">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <crud-actions
+            [actions]="crudActions"
+            [item]="evaluation"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+        </mat-card-actions>
+      </mat-card>
+    </ng-template>
+  </responsive-crud>
 </div>

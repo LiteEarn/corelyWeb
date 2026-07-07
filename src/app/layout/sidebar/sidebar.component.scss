@@ -1,31 +1,12 @@
 .sidebar {
   width: 260px;
-  flex-shrink: 0;
   background: white;
-  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  transition: width 0.25s ease, transform 0.25s ease;
+  height: 100%;
 
   &.sidebar-closed {
     width: 72px;
-  }
-
-  /* Mobile drawer styles: when host element has class 'mobile' we'll switch to overlay behavior */
-  &.mobile {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 1000;
-    width: 260px;
-    transform: translateX(-100%);
-    box-shadow: 0 8px 24px rgba(2,6,23,0.2);
-    transition: transform 0.25s ease;
-
-    &.open {
-      transform: translateX(0);
-    }
   }
 }
 
@@ -123,5 +104,3 @@
     font-size: 14px;
   }
 }
-
-// Remove old mobile styles as they're now handled by .sidebar-mobile class

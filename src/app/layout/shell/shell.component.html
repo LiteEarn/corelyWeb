@@ -1,17 +1,19 @@
-<div class="shell-layout">
-  <app-sidebar
-    [isSidebarOpen]="isSidebarOpen"
-    [class.mobile]="isMobile()"
-    [class.open]="isSidebarOpen"
-  ></app-sidebar>
+<mat-sidenav-container class="shell-layout" [autosize]="true">
+  <mat-sidenav
+    [mode]="navigation.sidenavMode()"
+    [opened]="navigation.sidenavOpened()"
+    class="app-sidenav"
+    [class.sidenav-collapsed]="navigation.isCollapsed()"
+    (keydown.escape)="onDrawerClose()">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
 
-  <div class="overlay" *ngIf="isMobile() && isSidebarOpen" (click)="toggleSidebar()"></div>
-
-  <div class="content-wrapper">
-    <app-topbar (toggleSidebar)="toggleSidebar()"></app-topbar>
-
-    <div class="shell-content">
-      <router-outlet></router-outlet>
+  <mat-sidenav-content>
+    <div class="content-wrapper">
+      <app-topbar (toggleSidebar)="onToggleMenu()"></app-topbar>
+      <div class="shell-content">
+        <router-outlet></router-outlet>
+      </div>
     </div>
-  </div>
-</div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

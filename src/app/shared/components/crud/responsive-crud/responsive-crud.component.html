@@ -1,0 +1,49 @@
+<div class="responsive-crud">
+  <crud-toolbar
+    [searchPlaceholder]="searchPlaceholder"
+    [searchValue]="searchValue"
+    (searchChange)="searchChange.emit($event)"
+    [showNewButton]="showNewButton"
+    [newButtonText]="newButtonText"
+    (newClick)="newClick.emit()"
+  >
+    <div crudFilters>
+      <ng-content select="[crudFilters]"></ng-content>
+    </div>
+  </crud-toolbar>
+
+  <div class="responsive-crud-content">
+    <crud-table
+      *ngIf="!isEmpty"
+      [dataSource]="dataSource"
+      [displayedColumns]="displayedColumns"
+      [tabletColumns]="tabletColumns"
+      [isLoading]="isLoading"
+    >
+      <ng-content select="[tableColumns]"></ng-content>
+    </crud-table>
+
+    <crud-card
+      *ngIf="!isEmpty"
+      [items]="items"
+      [trackBy]="trackBy"
+      [cardTemplate]="cardTemplate"
+    >
+      <ng-template #cardTemplate let-item>
+        <ng-content select="[cardContent]" [ngTemplateOutletContext]="{ $implicit: item }"></ng-content>
+      </ng-template>
+    </crud-card>
+
+    <crud-empty-state
+      *ngIf="isEmpty"
+      [icon]="emptyIcon"
+      [title]="emptyTitle"
+      [description]="emptyDescription"
+      [showAction]="emptyShowAction"
+      [actionText]="emptyActionText"
+      (actionClick)="emptyActionClick.emit()"
+    ></crud-empty-state>
+
+    <ng-content select="[afterContent]"></ng-content>
+  </div>
+</div>

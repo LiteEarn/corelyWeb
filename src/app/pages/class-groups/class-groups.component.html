@@ -7,107 +7,131 @@
     (actionButtonClick)="navigateToNew()">
   </ds-page-header>
 
-  <mat-card class="filters-card">
-    <mat-card-content class="filters-content">
-      <div class="filters-section">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar turma</mat-label>
-          <input matInput #searchInput (input)="onSearchChange(searchInput.value)" placeholder="Buscar turma">
-          <mat-icon matPrefix class="search-icon">search</mat-icon>
-        </mat-form-field>
+  <responsive-crud
+    searchPlaceholder="Buscar turma..."
+    [searchValue]="searchValue"
+    (searchChange)="onSearchChange($event)"
+    [showNewButton]="true"
+    newButtonText="Nova Turma"
+    (newClick)="navigateToNew()"
+    [dataSource]="dataSource"
+    [displayedColumns]="displayedColumns"
+    [tabletColumns]="tabletColumns"
+    [items]="filteredClassGroups"
+    emptyIcon="groups"
+    emptyTitle="Nenhuma turma encontrada"
+    emptyDescription="Cadastre a primeira turma para começar."
+    [emptyShowAction]="!searchValue && instructorFilter === 'all' && activeFilter === 'all'"
+    emptyActionText="Cadastrar Primeira Turma"
+    (emptyActionClick)="navigateToNew()"
+  >
+    <mat-form-field appearance="outline" class="instructor-filter" crudFilters>
+      <mat-label>Instrutor</mat-label>
+      <mat-select (selectionChange)="onInstructorFilterChange($event.value)" [value]="instructorFilter">
+        <mat-option value="all">Todos</mat-option>
+        <mat-option *ngFor="let instructor of instructors" [value]="instructor.id">
+          {{ instructor.fullName }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="instructor-filter">
-          <mat-label>Instrutor</mat-label>
-          <mat-select (selectionChange)="onInstructorFilterChange($event.value)" [value]="instructorFilter">
-            <mat-option value="all">Todos</mat-option>
-            <mat-option *ngFor="let instructor of instructors" [value]="instructor.id">
-              {{ instructor.fullName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+    <mat-form-field appearance="outline" class="status-filter" crudFilters>
+      <mat-label>Status</mat-label>
+      <mat-select (selectionChange)="onActiveFilterChange($event.value)" [value]="activeFilter">
+        <mat-option value="all">Todas</mat-option>
+        <mat-option value="active">Ativas</mat-option>
+        <mat-option value="inactive">Inativas</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="status-filter">
-          <mat-label>Status</mat-label>
-          <mat-select (selectionChange)="onActiveFilterChange($event.value)" [value]="activeFilter">
-            <mat-option value="all">Todos</mat-option>
-            <mat-option value="active">Ativas</mat-option>
-            <mat-option value="inactive">Inativas</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <ng-container tableColumns>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let classGroup">{{ classGroup.name }}</td>
+      </ng-container>
 
-  <mat-card class="table-card">
-    <mat-card-content class="table-content">
-      <table mat-table [dataSource]="dataSource" class="full-width-table">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Nome</th>
-          <td mat-cell *matCellDef="let classGroup">{{ classGroup.name }}</td>
-        </ng-container>
+      <ng-container matColumnDef="instructor">
+        <th mat-header-cell *matHeaderCellDef>Instrutor</th>
+        <td mat-cell *matCellDef="let classGroup">
+          <span *ngIf="hasNoInstructor(classGroup)" class="warning-badge">Sem Instrutor</span>
+          <span *ngIf="!hasNoInstructor(classGroup)">{{ getInstructorName(classGroup.instructorId, classGroup) }}</span>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="instructor">
-          <th mat-header-cell *matHeaderCellDef>Instrutor</th>
-          <td mat-cell *matCellDef="let classGroup">
-            <span *ngIf="hasNoInstructor(classGroup)" class="warning-badge">Sem Instrutor</span>
-            <span *ngIf="!hasNoInstructor(classGroup)">{{ getInstructorName(classGroup.instructorId, classGroup) }}</span>
-          </td>
-        </ng-container>
+      <ng-container matColumnDef="days">
+        <th mat-header-cell *matHeaderCellDef>Dias</th>
+        <td mat-cell *matCellDef="let classGroup">{{ getDaysString(classGroup) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="days">
-          <th mat-header-cell *matHeaderCellDef>Dias</th>
-          <td mat-cell *matCellDef="let classGroup">{{ getDaysString(classGroup) }}</td>
-        </ng-container>
+      <ng-container matColumnDef="time">
+        <th mat-header-cell *matHeaderCellDef>Horário</th>
+        <td mat-cell *matCellDef="let classGroup">{{ formatTime(classGroup.startTime, classGroup.endTime) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="time">
-          <th mat-header-cell *matHeaderCellDef>Horário</th>
-          <td mat-cell *matCellDef="let classGroup">{{ formatTime(classGroup.startTime, classGroup.endTime) }}</td>
-        </ng-container>
+      <ng-container matColumnDef="capacity">
+        <th mat-header-cell *matHeaderCellDef>Capacidade</th>
+        <td mat-cell *matCellDef="let classGroup">{{ classGroup.capacity }} vagas</td>
+      </ng-container>
 
-        <ng-container matColumnDef="capacity">
-          <th mat-header-cell *matHeaderCellDef>Capacidade</th>
-          <td mat-cell *matCellDef="let classGroup">{{ classGroup.capacity }} vagas</td>
-        </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let classGroup">
+          <ds-status-chip [status]="classGroup.active ? 'active' : 'inactive'" [label]="classGroup.active ? 'Ativa' : 'Inativa'"></ds-status-chip>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let classGroup">
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let classGroup">
+          <crud-actions
+            [actions]="crudActions"
+            [item]="classGroup"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+          <button mat-icon-button class="action-button" (click)="deactivateClassGroup(classGroup)" *ngIf="classGroup.active" aria-label="Desativar turma">
+            <mat-icon>toggle_off</mat-icon>
+          </button>
+          <button mat-icon-button class="action-button" (click)="reactivateClassGroup(classGroup)" *ngIf="!classGroup.active" aria-label="Reativar turma">
+            <mat-icon>toggle_on</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+    </ng-container>
+
+    <ng-template cardContent let-classGroup>
+      <mat-card class="crud-item-card" role="listitem" [attr.aria-label]="'Turma: ' + classGroup.name" tabindex="0">
+        <mat-card-content>
+          <div class="card-header">
+            <h3 class="card-title">{{ classGroup.name }}</h3>
             <ds-status-chip [status]="classGroup.active ? 'active' : 'inactive'" [label]="classGroup.active ? 'Ativa' : 'Inativa'"></ds-status-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Ações</th>
-          <td mat-cell *matCellDef="let classGroup">
-            <button mat-icon-button class="action-button" [routerLink]="['/class-groups', classGroup.id]">
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button" [routerLink]="['/class-groups', classGroup.id, 'edit']">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button" (click)="deactivateClassGroup(classGroup)" *ngIf="classGroup.active">
-              <mat-icon>toggle_off</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button" (click)="reactivateClassGroup(classGroup)" *ngIf="!classGroup.active">
-              <mat-icon>toggle_on</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-
-      <div *ngIf="filteredClassGroups.length === 0" class="empty-state-wrapper">
-        <ds-empty-state
-          icon="groups"
-          [title]="searchValue || instructorFilter !== 'all' || activeFilter !== 'all' ? 'Nenhuma turma encontrada' : 'Nenhuma turma cadastrada'"
-          [description]="searchValue || instructorFilter !== 'all' || activeFilter !== 'all' ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando a primeira turma da instituição.'"
-          [showAction]="!searchValue && instructorFilter === 'all' && activeFilter === 'all'"
-          actionText="Cadastrar Primeira Turma"
-          (actionClick)="navigateToNew()">
-        </ds-empty-state>
-      </div>
-    </mat-card-content>
-  </mat-card>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row">
+              <mat-icon class="card-info-icon">person</mat-icon>
+              <span>{{ hasNoInstructor(classGroup) ? 'Sem Instrutor' : getInstructorName(classGroup.instructorId, classGroup) }}</span>
+            </div>
+            <div class="card-info-row">
+              <mat-icon class="card-info-icon">calendar_today</mat-icon>
+              <span>{{ getDaysString(classGroup) }} • {{ formatTime(classGroup.startTime, classGroup.endTime) }}</span>
+            </div>
+            <div class="card-info-row">
+              <mat-icon class="card-info-icon">group</mat-icon>
+              <span>{{ classGroup.capacity }} vagas</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions class="card-actions">
+          <button mat-button color="primary" (click)="onAction({ action: 'view', item: classGroup })" aria-label="Visualizar turma">
+            <mat-icon>visibility</mat-icon>
+            Visualizar
+          </button>
+          <crud-actions
+            [actions]="crudActions"
+            [item]="classGroup"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+        </mat-card-actions>
+      </mat-card>
+    </ng-template>
+  </responsive-crud>
 </div>

@@ -1,0 +1,15 @@
+<div class="crud-empty-state" role="status">
+  <div class="crud-empty-icon-wrapper">
+    <mat-icon class="crud-empty-icon">{{ icon }}</mat-icon>
+  </div>
+  <h3 class="crud-empty-title">{{ title }}</h3>
+  <p *ngIf="description" class="crud-empty-description">{{ description }}</p>
+  <ds-button
+    *ngIf="showAction"
+    [label]="actionText"
+    icon="add"
+    variant="primary"
+    class="crud-empty-cta"
+    (click)="actionClick.emit()"
+  ></ds-button>
+</div>

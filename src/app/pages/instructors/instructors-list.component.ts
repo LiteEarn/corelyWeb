@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,10 +9,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
-import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
+import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { Instructor } from '../../features/instructors/instructor.model';
-import {ReactiveFormsModule} from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 import { TransferDialogComponent } from './transfer-dialog.component';
 import { ToastService } from '../../core/services/toast.service';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
@@ -23,7 +24,6 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatTableModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -33,26 +33,32 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent
+    ResponsiveCrudComponent,
+    CrudActionsComponent,
   ],
   templateUrl: './instructors-list.component.html',
   styleUrl: './instructors-list.component.scss'
 })
 export class InstructorsListComponent implements OnInit {
+  private instructorService = inject(InstructorService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private toastService = inject(ToastService);
+  private featureGateService = inject(FeatureGateService);
+
   displayedColumns: string[] = ['fullName', 'specialty', 'phone', 'active', 'actions'];
+  tabletColumns: string[] = ['fullName', 'active', 'actions'];
   instructors: Instructor[] = [];
   filteredInstructors: Instructor[] = [];
   dataSource = new MatTableDataSource<Instructor>([]);
-  searchValue: string = '';
-  statusFilter: string = 'all';
+  searchValue = '';
+  statusFilter = 'all';
 
-  constructor(
-    private instructorService: InstructorService,
-    private router: Router,
-    private dialog: MatDialog,
-    private toastService: ToastService,
-    private featureGateService: FeatureGateService
-  ) {}
+  readonly crudActions: CrudAction[] = [
+    { label: 'Visualizar', icon: 'visibility', action: 'view' },
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+    { label: 'Transferir Alunos', icon: 'swap_horiz', action: 'transfer' },
+  ];
 
   ngOnInit(): void {
     if (this.featureGateService.canLoadInstructors()) {
@@ -63,7 +69,6 @@ export class InstructorsListComponent implements OnInit {
   loadInstructors(): void {
     this.instructorService.getAll().subscribe({
       next: (data) => {
-        console.log('Instructors API Response', data);
         this.instructors = data;
         this.applyFilters();
       },
@@ -104,6 +109,20 @@ export class InstructorsListComponent implements OnInit {
 
   navigateToNew(): void {
     this.router.navigate(['/instructors/new']);
+  }
+
+  onAction(event: { action: string; item: Instructor }): void {
+    switch (event.action) {
+      case 'view':
+        if (event.item.id) this.router.navigate(['/instructors', event.item.id]);
+        break;
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/instructors', event.item.id, 'edit']);
+        break;
+      case 'transfer':
+        this.openTransferDialog(event.item);
+        break;
+    }
   }
 
   openTransferDialog(instructor: Instructor): void {

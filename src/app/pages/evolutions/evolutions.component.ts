@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -11,8 +11,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { DsPageHeaderComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { CrudToolbarComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { EvolutionService } from '../../features/evolutions/evolution.service';
-import { Evolution, EvolutionFilters } from '../../features/evolutions/evolution.model';
+import { Evolution } from '../../features/evolutions/evolution.model';
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ObjectiveService } from '../../features/objectives/objective.service';
@@ -37,32 +38,36 @@ import { PermissionService } from '../../core/rbac/permission.service';
     MatMenuModule,
     ReactiveFormsModule,
     DsPageHeaderComponent,
-    DsEmptyStateComponent
+    DsEmptyStateComponent,
+    CrudToolbarComponent,
+    CrudActionsComponent,
   ],
   templateUrl: './evolutions.component.html',
   styleUrl: './evolutions.component.scss'
 })
 export class EvolutionsComponent implements OnInit {
+  private evolutionService = inject(EvolutionService);
+  private studentService = inject(StudentService);
+  private objectiveService = inject(ObjectiveService);
+  private permissionService = inject(PermissionService);
+  private router = inject(Router);
+
   evolutions: Evolution[] = [];
   filteredEvolutions: Evolution[] = [];
   students: Student[] = [];
   objectives: Objective[] = [];
-  
-  studentFilter: string = 'all';
-  objectiveFilter: string = 'all';
+
+  studentFilter = 'all';
+  objectiveFilter = 'all';
   startDateFilter: Date | null = null;
   endDateFilter: Date | null = null;
-  titleFilter: string = '';
-  
-  isLoading: boolean = false;
+  titleFilter = '';
+  isLoading = false;
 
-  constructor(
-    private evolutionService: EvolutionService,
-    private studentService: StudentService,
-    private objectiveService: ObjectiveService,
-    private permissionService: PermissionService,
-    private router: Router
-  ) {}
+  readonly crudActions: CrudAction[] = [
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+    { label: 'Excluir', icon: 'delete', action: 'delete' },
+  ];
 
   ngOnInit(): void {
     this.loadEvolutions();
@@ -76,8 +81,7 @@ export class EvolutionsComponent implements OnInit {
     this.isLoading = true;
     this.evolutionService.getAll().subscribe({
       next: (data) => {
-        console.log('Evolutions API Response', data);
-        this.evolutions = data.sort((a, b) => 
+        this.evolutions = data.sort((a, b) =>
           new Date(b.evolutionDate).getTime() - new Date(a.evolutionDate).getTime()
         );
         this.applyFilters();
@@ -92,23 +96,15 @@ export class EvolutionsComponent implements OnInit {
 
   loadStudents(): void {
     this.studentService.getAll().subscribe({
-      next: (data) => {
-        this.students = data;
-      },
-      error: (error) => {
-        console.error('Error loading students:', error);
-      }
+      next: (data) => { this.students = data; },
+      error: (error) => { console.error('Error loading students:', error); }
     });
   }
 
   loadObjectives(): void {
     this.objectiveService.getAll().subscribe({
-      next: (data) => {
-        this.objectives = data;
-      },
-      error: (error) => {
-        console.error('Error loading objectives:', error);
-      }
+      next: (data) => { this.objectives = data; },
+      error: (error) => { console.error('Error loading objectives:', error); }
     });
   }
 
@@ -116,17 +112,15 @@ export class EvolutionsComponent implements OnInit {
     this.filteredEvolutions = this.evolutions.filter(evolution => {
       const matchesStudent = this.studentFilter === 'all' || evolution.studentId === this.studentFilter;
       const matchesObjective = this.objectiveFilter === 'all' || evolution.objectiveId === this.objectiveFilter;
-      
+
       let matchesStartDate = true;
       if (this.startDateFilter) {
-        const evolutionDate = new Date(evolution.evolutionDate);
-        matchesStartDate = evolutionDate >= this.startDateFilter;
+        matchesStartDate = new Date(evolution.evolutionDate) >= this.startDateFilter;
       }
 
       let matchesEndDate = true;
       if (this.endDateFilter) {
-        const evolutionDate = new Date(evolution.evolutionDate);
-        matchesEndDate = evolutionDate <= this.endDateFilter;
+        matchesEndDate = new Date(evolution.evolutionDate) <= this.endDateFilter;
       }
 
       let matchesTitle = true;
@@ -183,19 +177,22 @@ export class EvolutionsComponent implements OnInit {
     this.router.navigate(['/evolutions/new']);
   }
 
-  navigateToEdit(id: string): void {
-    this.router.navigate(['/evolutions', id, 'edit']);
+  onAction(event: { action: string; item: Evolution }): void {
+    switch (event.action) {
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/evolutions', event.item.id, 'edit']);
+        break;
+      case 'delete':
+        if (event.item.id) this.onDelete(event.item.id);
+        break;
+    }
   }
 
   onDelete(id: string): void {
     if (confirm('Tem certeza que deseja excluir esta evolução?')) {
       this.evolutionService.delete(id).subscribe({
-        next: () => {
-          this.loadEvolutions();
-        },
-        error: (error) => {
-          console.error('Error deleting evolution:', error);
-        }
+        next: () => { this.loadEvolutions(); },
+        error: (error) => { console.error('Error deleting evolution:', error); }
       });
     }
   }

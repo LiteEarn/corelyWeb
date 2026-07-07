@@ -1,6 +1,6 @@
 <div class="topbar">
   <div class="topbar-left">
-    <button mat-icon-button class="menu-button" (click)="toggleSidebar.emit()">
+    <button mat-icon-button class="menu-button" (click)="toggleSidebar.emit()" aria-label="Abrir menu de navegação">
       <mat-icon>menu</mat-icon>
     </button>
     <h1 class="topbar-title">Corely</h1>
@@ -10,10 +10,11 @@
     <div class="user-info"
          [matMenuTriggerFor]="userMenu"
          aria-haspopup="true"
+         aria-expanded="false"
          tabindex="0"
          role="button">
       <mat-icon class="user-icon">account_circle</mat-icon>
-      <div class="user-details">
+      <div class="user-details" aria-label="Informações do usuário">
         <span class="user-name">{{ userName() }}</span>
         <span class="user-role">{{ roleDisplay }}</span>
         <span class="user-studio" *ngIf="studioName">{{ studioName }}</span>

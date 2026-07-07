@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,9 +10,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
+import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { EvaluationService } from '../../features/evaluations/evaluation.service';
-import { Evaluation, EvaluationFilters } from '../../features/evaluations/evaluation.model';
+import { Evaluation } from '../../features/evaluations/evaluation.model';
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -24,7 +25,6 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatTableModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -36,27 +36,32 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent
+    ResponsiveCrudComponent,
+    CrudActionsComponent,
   ],
   templateUrl: './evaluations.component.html',
   styleUrl: './evaluations.component.scss'
 })
 export class EvaluationsComponent implements OnInit {
+  private evaluationService = inject(EvaluationService);
+  private studentService = inject(StudentService);
+  private router = inject(Router);
+  private featureGateService = inject(FeatureGateService);
+
   displayedColumns: string[] = ['student', 'evaluationDate', 'weight', 'height', 'imc', 'actions'];
+  tabletColumns: string[] = ['student', 'evaluationDate', 'imc', 'actions'];
   evaluations: Evaluation[] = [];
   filteredEvaluations: Evaluation[] = [];
   dataSource = new MatTableDataSource<Evaluation>([]);
   students: Student[] = [];
-  studentFilter: string = 'all';
+  studentFilter = 'all';
   startDateFilter: Date | null = null;
   endDateFilter: Date | null = null;
 
-  constructor(
-    private evaluationService: EvaluationService,
-    private studentService: StudentService,
-    private featureGateService: FeatureGateService,
-    private router: Router
-  ) {}
+  readonly crudActions: CrudAction[] = [
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+    { label: 'Excluir', icon: 'delete', action: 'delete' },
+  ];
 
   ngOnInit(): void {
     if (this.featureGateService.canLoadEvaluations()) {
@@ -70,7 +75,6 @@ export class EvaluationsComponent implements OnInit {
   loadEvaluations(): void {
     this.evaluationService.getAll().subscribe({
       next: (data) => {
-        console.log('Evaluations API Response', data);
         this.evaluations = data;
         this.applyFilters();
       },
@@ -147,20 +151,23 @@ export class EvaluationsComponent implements OnInit {
     this.router.navigate(['/evaluations/new']);
   }
 
-  navigateToEdit(id: string): void {
-    this.router.navigate(['/evaluations', id, 'edit']);
+  onAction(event: { action: string; item: Evaluation }): void {
+    switch (event.action) {
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/evaluations', event.item.id, 'edit']);
+        break;
+      case 'delete':
+        if (event.item.id) this.onDelete(event.item.id);
+        break;
+    }
   }
 
   onDelete(id: string): void {
     if (!this.featureGateService.canManageEvaluations()) return;
     if (confirm('Tem certeza que deseja excluir esta avaliação?')) {
       this.evaluationService.delete(id).subscribe({
-        next: () => {
-          this.loadEvaluations();
-        },
-        error: (error) => {
-          console.error('Error deleting evaluation:', error);
-        }
+        next: () => { this.loadEvaluations(); },
+        error: (error) => { console.error('Error deleting evaluation:', error); }
       });
     }
   }

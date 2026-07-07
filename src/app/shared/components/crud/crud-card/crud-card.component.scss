@@ -1,0 +1,12 @@
+@import '../../../design-system/variables';
+@import '../../../layout/responsive';
+
+.crud-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: $ds-spacing-lg;
+
+  @include respond-above(tablet) {
+    display: none;
+  }
+}
