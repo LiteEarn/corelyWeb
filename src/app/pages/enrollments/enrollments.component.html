@@ -1,105 +1,123 @@
 <div class="enrollments-page">
-  <ds-page-header title="Matrículas" subtitle="Gerencie as matrículas dos alunos nas turmas" [showActionButton]="true"
-    actionButtonText="Nova Matrícula" (actionButtonClick)="navigateToNew()">
+  <ds-page-header
+    title="Matrículas"
+    subtitle="Gerencie as matrículas dos alunos nas turmas"
+    [showActionButton]="true"
+    actionButtonText="Nova Matrícula"
+    (actionButtonClick)="navigateToNew()">
   </ds-page-header>
 
-  <mat-card class="filters-card">
-    <mat-card-content class="filters-content">
-      <div class="filters-section">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Buscar matrícula</mat-label>
-          <input matInput #searchInput (input)="onSearchChange(searchInput.value)" placeholder="Buscar por aluno ou turma">
-          <mat-icon matPrefix class="search-icon">search</mat-icon>
-        </mat-form-field>
+  <responsive-crud
+    searchPlaceholder="Buscar por aluno ou turma..."
+    [searchValue]="searchValue"
+    (searchChange)="onSearchChange($event)"
+    [showNewButton]="true"
+    newButtonText="Nova Matrícula"
+    (newClick)="navigateToNew()"
+    [dataSource]="dataSource"
+    [displayedColumns]="displayedColumns"
+    [tabletColumns]="tabletColumns"
+    [items]="filteredEnrollments"
+    [isLoading]="isLoading"
+    emptyIcon="assignment_ind"
+    emptyTitle="Nenhuma matrícula encontrada"
+    emptyDescription="Cadastre a primeira matrícula para começar."
+    [emptyShowAction]="studentFilter === 'all' && classGroupFilter === 'all' && statusFilter === 'all' && !searchValue"
+    emptyActionText="Cadastrar Primeira Matrícula"
+    (emptyActionClick)="navigateToNew()"
+  >
+    <mat-form-field appearance="outline" class="filter-field" crudFilters>
+      <mat-label>Aluno</mat-label>
+      <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
+        <mat-option value="all">Todos</mat-option>
+        <mat-option *ngFor="let student of students" [value]="student.id">{{ student.fullName }}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="student-filter">
-          <mat-label>Aluno</mat-label>
-          <mat-select (selectionChange)="onStudentFilterChange($event.value)" [value]="studentFilter">
-            <mat-option value="all">Todos</mat-option>
-            <mat-option *ngFor="let student of students" [value]="student.id">
-              {{ student.fullName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field" crudFilters>
+      <mat-label>Turma</mat-label>
+      <mat-select (selectionChange)="onClassGroupFilterChange($event.value)" [value]="classGroupFilter">
+        <mat-option value="all">Todas</mat-option>
+        <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">{{ classGroup.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="class-group-filter">
-          <mat-label>Turma</mat-label>
-          <mat-select (selectionChange)="onClassGroupFilterChange($event.value)" [value]="classGroupFilter">
-            <mat-option value="all">Todas</mat-option>
-            <mat-option *ngFor="let classGroup of classGroups" [value]="classGroup.id">
-              {{ classGroup.name }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field" crudFilters>
+      <mat-label>Status</mat-label>
+      <mat-select (selectionChange)="onStatusFilterChange($event.value)" [value]="statusFilter">
+        <mat-option value="all">Todos</mat-option>
+        <mat-option value="active">Ativa</mat-option>
+        <mat-option value="inactive">Inativa</mat-option>
+        <mat-option value="cancelled">Cancelada</mat-option>
+        <mat-option value="completed">Concluída</mat-option>
+      </mat-select>
+    </mat-form-field>
 
-        <mat-form-field appearance="outline" class="status-filter">
-          <mat-label>Status</mat-label>
-          <mat-select (selectionChange)="onStatusFilterChange($event.value)" [value]="statusFilter">
-            <mat-option value="all">Todos</mat-option>
-            <mat-option value="active">Ativa</mat-option>
-            <mat-option value="inactive">Inativa</mat-option>
-            <mat-option value="cancelled">Cancelada</mat-option>
-            <mat-option value="completed">Concluída</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
+    <ng-container tableColumns>
+      <ng-container matColumnDef="studentName">
+        <th mat-header-cell *matHeaderCellDef>Aluno</th>
+        <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentName }}</td>
+      </ng-container>
 
-  <mat-card class="table-card">
-    <mat-card-content class="table-content">
-      <app-loading *ngIf="isLoading"></app-loading>
+      <ng-container matColumnDef="classGroupName">
+        <th mat-header-cell *matHeaderCellDef>Turma</th>
+        <td mat-cell *matCellDef="let enrollment">{{ enrollment.classGroupName }}</td>
+      </ng-container>
 
-      <table mat-table [dataSource]="dataSource" class="full-width-table" [class.hidden-table]="isLoading">
-        <ng-container matColumnDef="studentName">
-          <th mat-header-cell *matHeaderCellDef>Aluno</th>
-          <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentName }}</td>
-        </ng-container>
+      <ng-container matColumnDef="enrollmentDate">
+        <th mat-header-cell *matHeaderCellDef>Data Matrícula</th>
+        <td mat-cell *matCellDef="let enrollment">{{ formatDate(enrollment.enrollmentDate) }}</td>
+      </ng-container>
 
-        <ng-container matColumnDef="classGroupName">
-          <th mat-header-cell *matHeaderCellDef>Turma</th>
-          <td mat-cell *matCellDef="let enrollment">{{ enrollment.classGroupName }}</td>
-        </ng-container>
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let enrollment">
+          <ds-status-chip [status]="enrollment.status" [label]="getStatusLabel(enrollment.status)"></ds-status-chip>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="enrollmentDate">
-          <th mat-header-cell *matHeaderCellDef>Data Matrícula</th>
-          <td mat-cell *matCellDef="let enrollment">{{ formatDate(enrollment.enrollmentDate) }}</td>
-        </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Ações</th>
+        <td mat-cell *matCellDef="let enrollment">
+          <crud-actions
+            [actions]="crudActions"
+            [item]="enrollment"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+        </td>
+      </ng-container>
+    </ng-container>
 
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let enrollment">
+    <ng-template cardContent let-enrollment>
+      <mat-card class="crud-item-card" role="listitem" [attr.aria-label]="'Matrícula: ' + enrollment.studentName" tabindex="0">
+        <mat-card-content>
+          <div class="card-header">
+            <h3 class="card-title">{{ enrollment.studentName || 'Aluno' }}</h3>
             <ds-status-chip [status]="enrollment.status" [label]="getStatusLabel(enrollment.status)"></ds-status-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Ações</th>
-          <td mat-cell *matCellDef="let enrollment">
-            <button mat-icon-button class="action-button" [routerLink]="['/enrollments', enrollment.id]">
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button" [routerLink]="['/enrollments', enrollment.id, 'edit']">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="action-button" (click)="deleteEnrollment(enrollment)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-
-      <div *ngIf="!isLoading && filteredEnrollments.length === 0" class="empty-state-wrapper">
-        <ds-empty-state icon="assignment_ind"
-          [title]="studentFilter !== 'all' || classGroupFilter !== 'all' || statusFilter !== 'all' || searchValue ? 'Nenhuma matrícula encontrada' : 'Nenhuma matrícula cadastrada'"
-          [description]="studentFilter !== 'all' || classGroupFilter !== 'all' || statusFilter !== 'all' || searchValue ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando a primeira matrícula da instituição.'"
-          [showAction]="studentFilter === 'all' && classGroupFilter === 'all' && statusFilter === 'all' && !searchValue"
-          actionText="Cadastrar Primeira Matrícula" (actionClick)="navigateToNew()">
-        </ds-empty-state>
-      </div>
-    </mat-card-content>
-  </mat-card>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row">
+              <mat-icon class="card-info-icon">group</mat-icon>
+              <span>{{ enrollment.classGroupName || 'Turma não informada' }}</span>
+            </div>
+            <div class="card-info-row" *ngIf="enrollment.enrollmentDate">
+              <mat-icon class="card-info-icon">calendar_today</mat-icon>
+              <span>{{ formatDate(enrollment.enrollmentDate) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions class="card-actions">
+          <button mat-button color="primary" (click)="onAction({ action: 'view', item: enrollment })" aria-label="Visualizar matrícula">
+            <mat-icon>visibility</mat-icon>
+            Visualizar
+          </button>
+          <crud-actions
+            [actions]="crudActions"
+            [item]="enrollment"
+            (actionClick)="onAction($event)"
+          ></crud-actions>
+        </mat-card-actions>
+      </mat-card>
+    </ng-template>
+  </responsive-crud>
 </div>

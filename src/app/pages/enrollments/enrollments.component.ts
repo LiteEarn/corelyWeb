@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,7 +11,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject, takeUntil } from 'rxjs';
-import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
+import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { Enrollment } from '../../features/enrollments/enrollment.model';
 import { StudentService } from '../../features/students/student.service';
@@ -30,7 +31,6 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatTableModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -41,36 +41,42 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent,
-    LoadingComponent
+    ResponsiveCrudComponent,
+    CrudActionsComponent,
+    LoadingComponent,
   ],
   templateUrl: './enrollments.component.html',
   styleUrl: './enrollments.component.scss'
 })
 export class EnrollmentsComponent implements OnInit, OnDestroy {
+  private enrollmentService = inject(EnrollmentService);
+  private studentService = inject(StudentService);
+  private classGroupService = inject(ClassGroupService);
+  private router = inject(Router);
+  private dialog = inject(MatDialog);
+  private toastService = inject(ToastService);
+  private featureGateService = inject(FeatureGateService);
+
   displayedColumns: string[] = ['studentName', 'classGroupName', 'enrollmentDate', 'status', 'actions'];
+  tabletColumns: string[] = ['studentName', 'classGroupName', 'status', 'actions'];
   enrollments: Enrollment[] = [];
   filteredEnrollments: Enrollment[] = [];
   dataSource = new MatTableDataSource<Enrollment>([]);
   students: Student[] = [];
   classGroups: ClassGroup[] = [];
-  searchValue: string = '';
-  studentFilter: string = 'all';
-  classGroupFilter: string = 'all';
-  statusFilter: string = 'all';
-  isLoading: boolean = false;
+  searchValue = '';
+  studentFilter = 'all';
+  classGroupFilter = 'all';
+  statusFilter = 'all';
+  isLoading = false;
 
   private destroy$ = new Subject<void>();
-  private dialog = inject(MatDialog);
-  private toastService = inject(ToastService);
 
-  constructor(
-    private enrollmentService: EnrollmentService,
-    private studentService: StudentService,
-    private classGroupService: ClassGroupService,
-    private router: Router,
-    private featureGateService: FeatureGateService
-  ) { }
+  readonly crudActions: CrudAction[] = [
+    { label: 'Visualizar', icon: 'visibility', action: 'view' },
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+    { label: 'Excluir', icon: 'delete', action: 'delete' },
+  ];
 
   ngOnInit(): void {
     if (this.featureGateService.canLoadEnrollments()) {
@@ -106,23 +112,15 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
 
   loadStudents(): void {
     this.studentService.getAll({ active: true }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-        this.students = data;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.handleHttpError(error, 'Erro ao carregar alunos');
-      }
+      next: (data) => { this.students = data; },
+      error: (error: HttpErrorResponse) => { this.handleHttpError(error, 'Erro ao carregar alunos'); }
     });
   }
 
   loadClassGroups(): void {
     this.classGroupService.getAll({ active: true }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (data) => {
-        this.classGroups = data;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.handleHttpError(error, 'Erro ao carregar turmas');
-      }
+      next: (data) => { this.classGroups = data; },
+      error: (error: HttpErrorResponse) => { this.handleHttpError(error, 'Erro ao carregar turmas'); }
     });
   }
 
@@ -132,14 +130,9 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
         (enrollment.studentName && enrollment.studentName.toLowerCase().includes(this.searchValue.toLowerCase())) ||
         (enrollment.classGroupName && enrollment.classGroupName.toLowerCase().includes(this.searchValue.toLowerCase()));
 
-      const matchesStudent = this.studentFilter === 'all' ||
-        enrollment.studentId === this.studentFilter;
-
-      const matchesClassGroup = this.classGroupFilter === 'all' ||
-        enrollment.classGroupId === this.classGroupFilter;
-
-      const matchesStatus = this.statusFilter === 'all' ||
-        enrollment.status === this.statusFilter;
+      const matchesStudent = this.studentFilter === 'all' || enrollment.studentId === this.studentFilter;
+      const matchesClassGroup = this.classGroupFilter === 'all' || enrollment.classGroupId === this.classGroupFilter;
+      const matchesStatus = this.statusFilter === 'all' || enrollment.status === this.statusFilter;
 
       return matchesSearch && matchesStudent && matchesClassGroup && matchesStatus;
     });
@@ -151,27 +144,13 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
     this.applyFilters();
   }
 
-  onStudentFilterChange(value: string): void {
-    this.studentFilter = value;
-    this.applyFilters();
-  }
-
-  onClassGroupFilterChange(value: string): void {
-    this.classGroupFilter = value;
-    this.applyFilters();
-  }
-
-  onStatusFilterChange(value: string): void {
-    this.statusFilter = value;
-    this.applyFilters();
-  }
+  onStudentFilterChange(value: string): void { this.studentFilter = value; this.applyFilters(); }
+  onClassGroupFilterChange(value: string): void { this.classGroupFilter = value; this.applyFilters(); }
+  onStatusFilterChange(value: string): void { this.statusFilter = value; this.applyFilters(); }
 
   getStatusLabel(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'active': 'Ativa',
-      'inactive': 'Inativa',
-      'cancelled': 'Cancelada',
-      'completed': 'Concluída'
+      'active': 'Ativa', 'inactive': 'Inativa', 'cancelled': 'Cancelada', 'completed': 'Concluída'
     };
     return statusMap[status] || status;
   }
@@ -179,6 +158,24 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
   formatDate(date: string): string {
     const d = new Date(date);
     return d.toLocaleDateString('pt-BR');
+  }
+
+  navigateToNew(): void {
+    this.router.navigate(['/enrollments/new']);
+  }
+
+  onAction(event: { action: string; item: Enrollment }): void {
+    switch (event.action) {
+      case 'view':
+        if (event.item.id) this.router.navigate(['/enrollments', event.item.id]);
+        break;
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/enrollments', event.item.id, 'edit']);
+        break;
+      case 'delete':
+        this.deleteEnrollment(event.item);
+        break;
+    }
   }
 
   deleteEnrollment(enrollment: Enrollment): void {
@@ -210,23 +207,12 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
     });
   }
 
-  navigateToNew(): void {
-    this.router.navigate(['/enrollments/new']);
-  }
-
   private handleHttpError(error: HttpErrorResponse, defaultMessage: string): void {
     let message = defaultMessage;
-
-    if (error.status === 400) {
-      message = error.error?.message || 'Requisição inválida. Verifique os dados e tente novamente.';
-    } else if (error.status === 404) {
-      message = error.error?.message || 'Recurso não encontrado.';
-    } else if (error.status === 409) {
-      message = error.error?.message || 'Conflito de dados. O registro já existe ou está em uso.';
-    } else if (error.status === 500) {
-      message = error.error?.message || 'Erro interno do servidor. Tente novamente mais tarde.';
-    }
-
+    if (error.status === 400) message = error.error?.message || 'Requisição inválida.';
+    else if (error.status === 404) message = error.error?.message || 'Recurso não encontrado.';
+    else if (error.status === 409) message = error.error?.message || 'Conflito de dados.';
+    else if (error.status === 500) message = error.error?.message || 'Erro interno do servidor.';
     this.toastService.error(message);
   }
 }
