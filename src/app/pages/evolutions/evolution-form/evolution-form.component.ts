@@ -12,6 +12,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { DsPageFormComponent, DsPageHeaderComponent, DsPageCardComponent } from '../../../shared/design-system';
+import { ResponsiveFormGridComponent, ResponsiveFormSectionComponent } from '../../../shared/components';
 import { EvolutionService } from '../../../features/evolutions/evolution.service';
 import { Evolution } from '../../../features/evolutions/evolution.model';
 import { StudentService } from '../../../features/students/student.service';
@@ -39,7 +40,9 @@ import { PermissionService } from '../../../core/rbac/permission.service';
     TextFieldModule,
     DsPageFormComponent,
     DsPageHeaderComponent,
-    DsPageCardComponent
+    DsPageCardComponent,
+    ResponsiveFormGridComponent,
+    ResponsiveFormSectionComponent
   ],
   templateUrl: './evolution-form.component.html',
   styleUrl: './evolution-form.component.scss'
@@ -141,12 +144,7 @@ export class EvolutionFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    console.log('EvolutionForm onSubmit executado');
-
-    if (this.isSubmitting) {
-      console.log('EvolutionForm submit já em andamento, ignorando');
-      return;
-    }
+    if (this.isSubmitting) return;
 
     this.isFormSubmitted = true;
 
@@ -161,8 +159,6 @@ export class EvolutionFormComponent implements OnInit {
       evolutionDate: this.formatDateForApi(formValue.evolutionDate),
       studioId: this.currentStudioService.getStudioId()
     };
-
-    console.log('Evolution payload:', evolution);
 
     this.isLoading = true;
     this.isSubmitting = true;

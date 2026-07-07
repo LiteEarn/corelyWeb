@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DsPageFormComponent, DsPageHeaderComponent, DsPageCardComponent } from '../../../shared/design-system';
+import { ResponsiveFormGridComponent, ResponsiveFormSectionComponent } from '../../../shared/components';
 import { FeatureGateService } from '../../../core/rbac/feature-gate.service';
 import { StudentService } from '../../../features/students/student.service';
 import { Student } from '../../../features/students/student.model';
@@ -34,7 +35,9 @@ import { CurrentStudioService } from '../../../core/services/current-studio.serv
     MatNativeDateModule,
     DsPageFormComponent,
     DsPageHeaderComponent,
-    DsPageCardComponent
+    DsPageCardComponent,
+    ResponsiveFormGridComponent,
+    ResponsiveFormSectionComponent
   ],
   templateUrl: './student-form.component.html',
   styleUrl: './student-form.component.scss'
