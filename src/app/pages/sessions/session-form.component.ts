@@ -11,6 +11,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DsPageFormComponent, DsPageHeaderComponent, DsPageCardComponent } from '../../shared/design-system';
+import { ResponsiveFormGridComponent, ResponsiveFormSectionComponent } from '../../shared/components';
 import { SessionService } from '../../features/sessions/session.service';
 import { Session } from '../../features/sessions/session.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
@@ -36,7 +37,9 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     MatNativeDateModule,
     DsPageFormComponent,
     DsPageHeaderComponent,
-    DsPageCardComponent
+    DsPageCardComponent,
+    ResponsiveFormGridComponent,
+    ResponsiveFormSectionComponent
   ],
   templateUrl: './session-form.component.html',
   styleUrl: './session-form.component.scss'
@@ -176,20 +179,17 @@ export class SessionFormComponent implements OnInit {
     return this.isEditMode ? 'Atualizar' : 'Criar';
   }
 
-  // Método para verificar se deve mostrar erro
   shouldShowError(fieldName: string): boolean {
     const field = this.sessionForm.get(fieldName);
     return !!(field && field.errors && (field.touched || this.isFormSubmitted));
   }
 
-  // Método para obter mensagem de erro
   getFieldError(fieldName: string): string {
     const field = this.sessionForm.get(fieldName);
     if (!field || !field.errors || (!field.touched && !this.isFormSubmitted)) {
       return '';
     }
 
-    // Verifica erros customizados primeiro
     if (field.errors['required']) {
       return field.errors['required'].message || `${fieldName} é obrigatório`;
     }

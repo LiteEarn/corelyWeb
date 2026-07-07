@@ -5,7 +5,6 @@
   [disabled]="sessionForm.invalid"
   (cancel)="onCancel()"
   (submit)="onSubmit()">
-
   <div class="form-header">
     <ds-page-header
       [showBackButton]="true"
@@ -19,9 +18,8 @@
   <div class="form-content">
     <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
       <form [formGroup]="sessionForm">
-        <div class="form-section">
-          <h2 class="section-title">Informações da Aula</h2>
-          <div class="form-grid">
+        <app-responsive-form-section title="Informações da Aula">
+          <app-responsive-form-grid>
             <mat-form-field appearance="outline" class="form-field full-width">
               <mat-label>Título</mat-label>
               <input matInput formControlName="title" placeholder="Digite o título da aula">
@@ -86,8 +84,8 @@
                 <mat-option value="cancelled">Cancelada</mat-option>
               </mat-select>
             </mat-form-field>
-          </div>
-        </div>
+          </app-responsive-form-grid>
+        </app-responsive-form-section>
       </form>
     </ds-page-card>
   </div>

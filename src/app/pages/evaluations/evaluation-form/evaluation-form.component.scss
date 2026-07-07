@@ -8,32 +8,6 @@
   padding: 0 $ds-spacing-xxl;
 }
 
-.form-section {
-  margin-bottom: $ds-spacing-xxl;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  .section-title {
-    font-size: $ds-fontSize-xl;
-    font-weight: $ds-fontWeight-semibold;
-    color: $ds-neutral900;
-    margin: 0 0 $ds-spacing-xl 0;
-    letter-spacing: -0.2px;
-  }
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $ds-spacing-xl;
-
-  .full-width {
-    grid-column: 1 / -1;
-  }
-}
-
 .imc-display {
   display: flex;
   align-items: center;
@@ -87,11 +61,6 @@
 
   .form-content {
     padding: 0 $ds-spacing-lg;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-    gap: $ds-spacing-lg;
   }
 }
 

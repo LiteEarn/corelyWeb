@@ -9,7 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { DsPageFormComponent, DsPageHeaderComponent, DsPageCardComponent } from '../../shared/design-system';
+import { ResponsiveFormGridComponent, ResponsiveFormSectionComponent } from '../../shared/components';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
 import { PhoneMaskUtil, CustomValidators } from '../../shared/utils';
@@ -29,7 +30,11 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     MatInputModule,
     MatSelectModule,
     MatSlideToggleModule,
-    PageHeaderComponent
+    DsPageFormComponent,
+    DsPageHeaderComponent,
+    DsPageCardComponent,
+    ResponsiveFormGridComponent,
+    ResponsiveFormSectionComponent
   ],
   templateUrl: './instructor-form.component.html',
   styleUrl: './instructor-form.component.scss'
@@ -148,21 +153,17 @@ export class InstructorFormComponent implements OnInit {
     this.router.navigate(['/instructors']);
   }
 
-  // Método para aplicar máscara de telefone
   onPhoneInput(event: any): void {
     const input = event.target;
     const value = input.value;
     const maskedValue = PhoneMaskUtil.applyMask(value);
 
-    // Atualiza o valor do input com a máscara
     input.value = maskedValue;
 
-    // Atualiza o form control com apenas números
     const numbersOnly = PhoneMaskUtil.removeMask(maskedValue);
     this.instructorForm.get('phone')?.setValue(numbersOnly, { emitEvent: false });
   }
 
-  // Método para verificar se deve mostrar erro
   shouldShowError(fieldName: string): boolean {
     const field = this.instructorForm.get(fieldName);
     return !!(field && field.errors && (field.touched || this.isFormSubmitted));
@@ -174,7 +175,6 @@ export class InstructorFormComponent implements OnInit {
       return '';
     }
 
-    // Verifica erros customizados primeiro
     if (field.errors['required']) {
       return field.errors['required'].message || `${fieldName} é obrigatório`;
     }
