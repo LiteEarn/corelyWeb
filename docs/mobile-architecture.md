@@ -246,6 +246,90 @@ All CRUD pages (Students, Instructors, Class Groups, Enrollments, Objectives, Ev
 - CSS media queries only for layout, not for logic
 - Signals for reactive breakpoint detection
 
+## Responsive Forms Architecture (MOB-004)
+
+### Overview
+
+All forms (Students, Instructors, Class Groups, Enrollments, Objectives, Evaluations, Evolutions, Sessions) use a standardized responsive architecture based on reusable components from the Design System.
+
+### Component Tree
+
+```
+┌──────────────────────────────────────────────┐
+│  DsPageForm (container + footer)             │
+│  - scroll-to-first-error on submit           │
+│  - responsive footer (full-width on mobile)  │
+├──────────────────────────────────────────────┤
+│  DsPageHeader (title + back button)          │
+├──────────────────────────────────────────────┤
+│  DsPageCard (content card)                   │
+│  ┌──────────────────────────────────────┐    │
+│  │  ResponsiveFormSection (optional     │    │
+│  │  expansion panel)                    │    │
+│  │  ┌──────────────────────────────┐    │    │
+│  │  │  ResponsiveFormGrid          │    │    │
+│  │  │  Desktop: 2-3 cols           │    │    │
+│  │  │  Tablet: 2 cols              │    │    │
+│  │  │  Mobile: 1 col               │    │    │
+│  │  │  ┌──────────────────┐       │    │    │
+│  │  │  │ mat-form-field   │       │    │    │
+│  │  │  │ .full-width      │       │    │    │
+│  │  │  └──────────────────┘       │    │    │
+│  │  └──────────────────────────────┘    │    │
+│  └──────────────────────────────────────┘    │
+├──────────────────────────────────────────────┤
+│  DsPageForm Footer                           │
+│  Desktop: [Cancelar] [Salvar] (right)        │
+│  Mobile:  [Salvar] (full-width)              │
+│           [Cancelar] (full-width)            │
+└──────────────────────────────────────────────┘
+```
+
+### Reusable Components
+
+**`ResponsiveFormGridComponent`** - CSS-only responsive grid:
+- `desktopColumns` input: 2 or 3 columns (default: 2)
+- Tablet (600-959px): 2 columns
+- Mobile (<600px): 1 column
+- `.full-width` class spans all columns
+
+**`ResponsiveFormSectionComponent`** - Form section wrapper:
+- `title` input: section title
+- `useExpansionPanel` input: enables `mat-expansion-panel` for long forms
+- `expanded` input: initial expansion state
+
+**`ResponsiveFormActionsComponent`** - Standalone action buttons:
+- Desktop: buttons right-aligned
+- Mobile: buttons full-width, stacked
+- Min touch target: 44px
+- Loading state with spinner
+
+### Scroll to First Error
+
+`DsPageFormComponent` automatically scrolls to the first invalid field on submit:
+- Finds `.mat-mdc-form-field.ng-invalid`
+- Smooth scrolls to the field
+- Focuses the first input/select/textarea
+
+### Layout Breakpoints
+
+| Breakpoint | Grid Columns | Button Layout | Padding     |
+|------------|-------------|---------------|-------------|
+| Desktop (>=960px) | 2-3 cols | Right-aligned | 32px        |
+| Tablet (600-959px) | 2 cols | Right-aligned | 24px        |
+| Mobile (<600px) | 1 col | Full-width, stacked | 16px |
+
+### Standardization Rules
+
+1. **All forms use** `DsPageFormComponent` as container
+2. **Fields use** `ResponsiveFormGridComponent` for layout
+3. **Sections use** `ResponsiveFormSectionComponent` for grouping
+4. **No duplicated CSS** - shared via `_responsive-forms.scss`
+5. **Error messages** use `shouldShowError()` + `getFieldError()` pattern
+6. **Loading state** passed to `DsPageForm [loading]` input
+7. **Touch targets** minimum 44px for all interactive elements
+8. **No window.innerWidth or HostListener** - uses `ResponsiveService` + CSS media queries
+
 ## Como usar
 
 ### Injetar NavigationService:
@@ -289,3 +373,6 @@ export class MyComponent {
 - Always inject `ResponsiveService` for viewport queries
 - Use `NavigationService` for drawer/sidebar state
 - Use SCSS mixins for media queries instead of hardcoded breakpoints
+- Use `ResponsiveFormGridComponent` for form field layout
+- Use `ResponsiveFormSectionComponent` for section grouping
+- Always set min-height: 44px on touch targets
