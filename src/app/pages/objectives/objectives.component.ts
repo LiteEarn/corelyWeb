@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
+import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
+import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { ObjectiveService } from '../../features/objectives/objective.service';
-import { Objective, ObjectiveFilters, ObjectiveStatus } from '../../features/objectives/objective.model';
+import { Objective, ObjectiveStatus } from '../../features/objectives/objective.model';
 import { StudentService } from '../../features/students/student.service';
 import { Student } from '../../features/students/student.model';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -22,7 +23,6 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   imports: [
     CommonModule,
     RouterModule,
-    MatTableModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -32,27 +32,33 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    DsEmptyStateComponent
+    ResponsiveCrudComponent,
+    CrudActionsComponent,
   ],
   templateUrl: './objectives.component.html',
   styleUrl: './objectives.component.scss'
 })
 export class ObjectivesComponent implements OnInit {
+  private objectiveService = inject(ObjectiveService);
+  private studentService = inject(StudentService);
+  private router = inject(Router);
+  private featureGateService = inject(FeatureGateService);
+
   displayedColumns: string[] = ['title', 'student', 'status', 'startDate', 'targetDate', 'actions'];
+  tabletColumns: string[] = ['title', 'student', 'status', 'actions'];
   objectives: Objective[] = [];
   filteredObjectives: Objective[] = [];
   dataSource = new MatTableDataSource<Objective>([]);
   students: Student[] = [];
-  searchValue: string = '';
+  searchValue = '';
   statusFilter: ObjectiveStatus | 'all' = 'all';
-  studentFilter: string = 'all';
+  studentFilter = 'all';
 
-  constructor(
-    private objectiveService: ObjectiveService,
-    private studentService: StudentService,
-    private featureGateService: FeatureGateService,
-    private router: Router
-  ) {}
+  readonly crudActions: CrudAction[] = [
+    { label: 'Visualizar', icon: 'visibility', action: 'view' },
+    { label: 'Editar', icon: 'edit', action: 'edit' },
+    { label: 'Excluir', icon: 'delete', action: 'delete' },
+  ];
 
   ngOnInit(): void {
     if (this.featureGateService.canLoadObjectives()) {
@@ -66,7 +72,6 @@ export class ObjectivesComponent implements OnInit {
   loadObjectives(): void {
     this.objectiveService.getAll().subscribe({
       next: (data) => {
-        console.log('Objectives API Response', data);
         this.objectives = data;
         this.applyFilters();
       },
@@ -94,7 +99,6 @@ export class ObjectivesComponent implements OnInit {
         (objective.description && objective.description.toLowerCase().includes(this.searchValue.toLowerCase()));
 
       const matchesStatus = this.statusFilter === 'all' || objective.status === this.statusFilter;
-
       const matchesStudent = this.studentFilter === 'all' || objective.studentId === this.studentFilter;
 
       return matchesSearch && matchesStatus && matchesStudent;
@@ -150,24 +154,26 @@ export class ObjectivesComponent implements OnInit {
     this.router.navigate(['/objectives/new']);
   }
 
-  navigateToDetails(id: string): void {
-    this.router.navigate(['/objectives', id]);
-  }
-
-  navigateToEdit(id: string): void {
-    this.router.navigate(['/objectives', id, 'edit']);
+  onAction(event: { action: string; item: Objective }): void {
+    switch (event.action) {
+      case 'view':
+        if (event.item.id) this.router.navigate(['/objectives', event.item.id]);
+        break;
+      case 'edit':
+        if (event.item.id) this.router.navigate(['/objectives', event.item.id, 'edit']);
+        break;
+      case 'delete':
+        if (event.item.id) this.onDelete(event.item.id);
+        break;
+    }
   }
 
   onDelete(id: string): void {
     if (!this.featureGateService.canManageObjectives()) return;
     if (confirm('Tem certeza que deseja excluir este objetivo?')) {
       this.objectiveService.delete(id).subscribe({
-        next: () => {
-          this.loadObjectives();
-        },
-        error: (error) => {
-          console.error('Error deleting objective:', error);
-        }
+        next: () => { this.loadObjectives(); },
+        error: (error) => { console.error('Error deleting objective:', error); }
       });
     }
   }
