@@ -4,6 +4,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
 import { EnrollmentFormComponent } from './enrollment-form.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { StudentService } from '../../features/students/student.service';
 import { ClassGroupService } from '../../features/class-groups/class-group.service';
@@ -30,10 +31,20 @@ describe('EnrollmentFormComponent', () => {
     classGroupService.getAll.and.returnValue(of([]));
     enrollmentService.create.and.returnValue(of({} as any));
 
+    const featureGateService = jasmine.createSpyObj('FeatureGateService', [
+      'canLoadStudentDropdown', 'canLoadClassGroupDropdown',
+      'canLoadEnrollments', 'canManageEnrollments',
+    ]);
+    featureGateService.canLoadStudentDropdown.and.returnValue(true);
+    featureGateService.canLoadClassGroupDropdown.and.returnValue(true);
+    featureGateService.canLoadEnrollments.and.returnValue(true);
+    featureGateService.canManageEnrollments.and.returnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [EnrollmentFormComponent],
       providers: [
         provideNoopAnimations(),
+        { provide: FeatureGateService, useValue: featureGateService },
         { provide: StudentService, useValue: studentService },
         { provide: EnrollmentService, useValue: enrollmentService },
         { provide: ClassGroupService, useValue: classGroupService },

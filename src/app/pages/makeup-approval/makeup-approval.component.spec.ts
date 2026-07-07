@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
 import { MakeupApprovalComponent } from './makeup-approval.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { MakeupRequestService } from '../../features/makeup-requests/makeup-request.service';
 import { StudentService } from '../../features/students/student.service';
 import { InstructorService } from '../../features/instructors/instructor.service';
@@ -84,10 +85,18 @@ describe('MakeupApprovalComponent', () => {
     instructorService.getAll.and.returnValue(of([mockInstructor]));
     studentService.getAll.and.returnValue(of([]));
 
+    const featureGateService = jasmine.createSpyObj('FeatureGateService', [
+      'canLoadInstructors', 'canLoadMakeupRequests', 'canManageMakeupRequests',
+    ]);
+    featureGateService.canLoadInstructors.and.returnValue(true);
+    featureGateService.canLoadMakeupRequests.and.returnValue(true);
+    featureGateService.canManageMakeupRequests.and.returnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [MakeupApprovalComponent],
       providers: [
         provideNoopAnimations(),
+        { provide: FeatureGateService, useValue: featureGateService },
         { provide: MakeupRequestService, useValue: makeupRequestService },
         { provide: StudentService, useValue: studentService },
         { provide: InstructorService, useValue: instructorService },

@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
 
 import { DashboardComponent } from './dashboard.component';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { DashboardService } from './dashboard.service';
 import { ToastService } from '../../core/services/toast.service';
 import { DashboardOperationalResponse } from './dashboard.model';
@@ -141,10 +142,16 @@ describe('DashboardComponent', () => {
     toastService = jasmine.createSpyObj('ToastService', ['error']);
     router = jasmine.createSpyObj('Router', ['navigate']);
 
+    const featureGateService = jasmine.createSpyObj('FeatureGateService', [
+      'canViewDashboard',
+    ]);
+    featureGateService.canViewDashboard.and.returnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
         provideNoopAnimations(),
+        { provide: FeatureGateService, useValue: featureGateService },
         { provide: DashboardService, useValue: dashboardService },
         { provide: ToastService, useValue: toastService },
         { provide: Router, useValue: router },
