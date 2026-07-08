@@ -51,7 +51,6 @@ export class ClassGroupsComponent implements OnInit {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['name', 'instructor', 'days', 'time', 'capacity', 'status', 'actions'];
-  tabletColumns: string[] = ['name', 'instructor', 'time', 'status', 'actions'];
   classGroups: ClassGroup[] = [];
   filteredClassGroups: ClassGroup[] = [];
   dataSource = new MatTableDataSource<ClassGroup>([]);

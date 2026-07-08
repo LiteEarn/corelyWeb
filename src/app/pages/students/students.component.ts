@@ -42,7 +42,6 @@ export class StudentsComponent implements OnInit {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['fullName', 'phone', 'email', 'active', 'actions'];
-  tabletColumns: string[] = ['fullName', 'active', 'actions'];
   students: Student[] = [];
   filteredStudents: Student[] = [];
   dataSource = new MatTableDataSource<Student>([]);

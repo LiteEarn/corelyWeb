@@ -49,7 +49,6 @@ export class EvaluationsComponent implements OnInit {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['student', 'evaluationDate', 'weight', 'height', 'imc', 'actions'];
-  tabletColumns: string[] = ['student', 'evaluationDate', 'imc', 'actions'];
   evaluations: Evaluation[] = [];
   filteredEvaluations: Evaluation[] = [];
   dataSource = new MatTableDataSource<Evaluation>([]);

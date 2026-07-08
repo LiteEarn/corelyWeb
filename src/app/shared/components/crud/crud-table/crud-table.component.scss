@@ -1,63 +1,60 @@
-@import '../../../design-system/variables';
-@import '../../../layout/responsive';
-
 .crud-table-wrapper {
+  width: 100%;
   overflow-x: auto;
-
-  &--hidden {
-    @include respond-below(tablet) {
-      display: none;
-    }
-  }
 }
 
 .crud-table-loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: $ds-spacing-md;
-  padding: $ds-spacing-xxl;
-  color: $ds-textSecondary;
+  gap: 8px;
+  padding: 48px 16px;
+  color: #94a3b8;
+  font-size: 14px;
 
   .spinner {
     animation: spin 1s linear infinite;
   }
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 .crud-table {
   width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
 
-  &--tablet {
-    .mat-column-actions {
-      width: 48px;
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td.mat-mdc-cell {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tr.mat-mdc-row {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: none;
     }
   }
 }
 
-::ng-deep {
-  .crud-table .mat-mdc-header-row {
-    background: $ds-neutral100;
-  }
-
-  .crud-table .mat-mdc-header-cell {
-    color: $ds-textSecondary;
-    font-weight: $ds-fontWeight-semibold;
-    font-size: $ds-fontSize-sm;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .crud-table .mat-mdc-row:hover {
-    background: rgba(15, 23, 42, 0.02);
-  }
-
-  .crud-table .mat-mdc-cell {
-    color: $ds-neutral900;
-    font-size: $ds-fontSize-md;
-  }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

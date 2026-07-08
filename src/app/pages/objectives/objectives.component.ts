@@ -45,7 +45,6 @@ export class ObjectivesComponent implements OnInit {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['title', 'student', 'status', 'startDate', 'targetDate', 'actions'];
-  tabletColumns: string[] = ['title', 'student', 'status', 'actions'];
   objectives: Objective[] = [];
   filteredObjectives: Objective[] = [];
   dataSource = new MatTableDataSource<Objective>([]);

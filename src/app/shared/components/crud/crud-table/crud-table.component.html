@@ -1,6 +1,6 @@
 <div
+  *ngIf="responsive.layoutMode() !== LayoutMode.MOBILE"
   class="crud-table-wrapper"
-  [class.crud-table-wrapper--hidden]="responsive.layoutMode() === LayoutMode.MOBILE"
 >
   <div *ngIf="isLoading" class="crud-table-loading">
     <mat-icon class="spinner">refresh</mat-icon>
@@ -12,13 +12,12 @@
     mat-table
     [dataSource]="dataSource"
     class="crud-table"
-    [class.crud-table--tablet]="responsive.layoutMode() === LayoutMode.TABLET"
     role="table"
     aria-label="Tabela de registros"
   >
     <ng-content></ng-content>
 
-    <tr mat-header-row *matHeaderRowDef="effectiveColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: effectiveColumns;"></tr>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 </div>

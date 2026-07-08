@@ -58,7 +58,6 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['studentName', 'classGroupName', 'enrollmentDate', 'status', 'actions'];
-  tabletColumns: string[] = ['studentName', 'classGroupName', 'status', 'actions'];
   enrollments: Enrollment[] = [];
   filteredEnrollments: Enrollment[] = [];
   dataSource = new MatTableDataSource<Enrollment>([]);

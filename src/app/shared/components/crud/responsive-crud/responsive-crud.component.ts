@@ -37,7 +37,6 @@ export class ResponsiveCrudComponent {
 
   @Input() dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   @Input() displayedColumns: string[] = [];
-  @Input() tabletColumns: string[] = [];
   @Input() isLoading = false;
 
   @Input() items: any[] = [];
