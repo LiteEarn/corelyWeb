@@ -1,0 +1,163 @@
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid;
+  position: relative;
+  transition: all 0.2s ease;
+  animation: fadeSlideIn 0.3s ease both;
+}
+
+.alert-card:hover {
+  transform: translateX(2px);
+}
+
+.alert-card:focus-visible {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+.severity-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.severity-error:focus-visible {
+  outline-color: #dc2626;
+}
+
+.severity-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.severity-warning:focus-visible {
+  outline-color: #d97706;
+}
+
+.severity-info {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.severity-info:focus-visible {
+  outline-color: #0284c7;
+}
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.severity-error .alert-icon { color: #dc2626; }
+.severity-warning .alert-icon { color: #d97706; }
+.severity-info .alert-icon { color: #0284c7; }
+
+.alert-severity-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.badge-severity-error {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+.badge-severity-warning {
+  background: #fde68a;
+  color: #92400e;
+}
+
+.badge-severity-info {
+  background: #bae6fd;
+  color: #075985;
+}
+
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.alert-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.severity-error .alert-title { color: #991b1b; }
+.severity-warning .alert-title { color: #92400e; }
+.severity-info .alert-title { color: #075985; }
+
+.alert-message {
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.severity-error .alert-message { color: #7f1d1d; }
+.severity-warning .alert-message { color: #78350f; }
+.severity-info .alert-message { color: #0c4a6e; }
+
+.alert-action {
+  position: absolute;
+  top: 12px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.alert-action:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-card:nth-child(1) { animation-delay: 0ms; }
+.alert-card:nth-child(2) { animation-delay: 50ms; }
+.alert-card:nth-child(3) { animation-delay: 100ms; }
+.alert-card:nth-child(4) { animation-delay: 150ms; }
+.alert-card:nth-child(5) { animation-delay: 200ms; }
+
+@media (min-width: 600px) {
+  .alert-card:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,26 @@
+<div class="alert-list" role="list" aria-label="Alertas">
+  <div *ngFor="let alert of alerts; trackBy: trackByAlertTitle"
+    class="alert-card"
+    [ngClass]="getSeverityClass(alert.severity)"
+    role="listitem"
+    tabindex="0"
+    [attr.aria-label]="alert.severity === 'ERROR' ? 'Crítico: ' : 'Alerta: ' + alert.title">
+    <div class="alert-header">
+      <mat-icon class="alert-icon" [attr.aria-hidden]="true">{{ getAlertIcon(alert.type) }}</mat-icon>
+      <span class="alert-severity-badge" [ngClass]="'badge-' + getSeverityClass(alert.severity)">
+        {{ getSeverityLabel(alert.severity) }}
+      </span>
+    </div>
+    <div class="alert-body">
+      <span class="alert-title">{{ alert.title }}</span>
+      <span class="alert-message">{{ alert.message }}</span>
+    </div>
+    <button *ngIf="alert.actionRoute"
+      class="alert-action"
+      (click)="resolve.emit(alert)"
+      [attr.aria-label]="'Resolver: ' + alert.title"
+      type="button">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+<div class="kpi-carousel" role="region" aria-label="Indicadores">
+  <button *ngIf="canScrollPrev" class="kpi-nav kpi-nav-prev" (click)="scrollPrev()" aria-label="Anterior" type="button">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
+  <div class="kpi-carousel-track" [style.transform]="'translateX(-' + scrollIndex * 50 + '%)'">
+    <div *ngFor="let item of items; trackBy: trackByIndex" class="kpi-carousel-slide">
+      <mat-card class="kpi-card" [ngClass]="'kpi-' + item.color">
+        <mat-card-content class="kpi-card-content">
+          <div class="kpi-card-icon" [ngClass]="'icon-' + item.color">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <div class="kpi-card-info">
+            <span class="kpi-card-value">{{ item.value }}</span>
+            <span class="kpi-card-label">{{ item.label }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <button *ngIf="canScrollNext" class="kpi-nav kpi-nav-next" (click)="scrollNext()" aria-label="Próximo" type="button">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+
+  <div class="kpi-dots" role="tablist" aria-label="Navegação por indicadores">
+    <button *ngFor="let item of items; let i = index"
+      class="kpi-dot"
+      [class.kpi-dot-active]="i >= scrollIndex && i < scrollIndex + 2"
+      (click)="scrollTo(i)"
+      [attr.aria-label]="'Ir para ' + item.label"
+      [attr.aria-selected]="i >= scrollIndex && i < scrollIndex + 2"
+      role="tab"
+      type="button">
+    </button>
+  </div>
+</div>

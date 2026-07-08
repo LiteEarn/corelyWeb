@@ -1,0 +1,73 @@
+.occupancy-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.occupancy-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.occupancy-item:hover {
+  border-color: #0F766E;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.1);
+}
+
+.occupancy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.occupancy-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.occupancy-percent {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F766E;
+}
+
+.occupancy-bar-wrapper {
+  width: 100%;
+}
+
+.occupancy-bar {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.occupancy-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.occupancy-footer-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+}
+
+.occupancy-count {
+  font-size: 13px;
+  color: #475569;
+}
+
+@media (min-width: 600px) {
+  .occupancy-cards {
+    display: none;
+  }
+}

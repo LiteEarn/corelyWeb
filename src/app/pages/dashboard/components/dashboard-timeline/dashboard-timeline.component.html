@@ -1,0 +1,34 @@
+<div class="timeline" role="list" aria-label="Próximas aulas">
+  <div *ngFor="let session of sessions; trackBy: trackBySessionId" class="timeline-item" role="listitem">
+    <div class="timeline-marker">
+      <span class="timeline-time">{{ formatTime(session.startTime) }}</span>
+      <div class="timeline-line"></div>
+    </div>
+    <div class="timeline-card" tabindex="0" [attr.aria-label]="'Aula: ' + session.className + ' às ' + formatTime(session.startTime)">
+      <div class="timeline-card-header">
+        <span class="timeline-class">{{ session.className }}</span>
+        <ds-status-chip
+          [status]="getSessionStatus(session.status)"
+          [label]="getSessionStatusLabel(session.status)">
+        </ds-status-chip>
+      </div>
+      <div class="timeline-card-body">
+        <div class="timeline-info">
+          <mat-icon class="timeline-info-icon">person</mat-icon>
+          <span class="timeline-info-text">{{ session.instructorName }}</span>
+        </div>
+        <div class="timeline-info">
+          <mat-icon class="timeline-info-icon">group</mat-icon>
+          <span class="timeline-info-text">{{ session.enrolledStudents }} alunos</span>
+        </div>
+      </div>
+      <ds-button
+        label="Abrir Aula"
+        variant="primary"
+        size="sm"
+        icon="launch"
+        (click)="openSession.emit(session.id)">
+      </ds-button>
+    </div>
+  </div>
+</div>

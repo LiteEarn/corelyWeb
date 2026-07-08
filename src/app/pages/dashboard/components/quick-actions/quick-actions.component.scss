@@ -1,0 +1,75 @@
+.quick-actions {
+  animation: fadeIn 0.4s ease;
+}
+
+.quick-actions-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.quick-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 80px;
+  min-width: 0;
+}
+
+.quick-action-btn:hover {
+  border-color: var(--action-color);
+  background: color-mix(in srgb, var(--action-color) 5%, white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--action-color) 15%, transparent);
+}
+
+.quick-action-btn:focus-visible {
+  outline: 2px solid var(--action-color);
+  outline-offset: 2px;
+}
+
+.quick-action-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: var(--action-color);
+}
+
+.quick-action-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  line-height: 1.2;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 599.98px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 959.98px) {
+  .quick-actions-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
