@@ -31,7 +31,7 @@
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Telefone</mat-label>
               <input matInput formControlName="phone" placeholder="(XX) XXXXX-XXXX"
-                     (input)="onPhoneInput($event)" maxlength="15">
+                     (input)="onPhoneInput($event)" maxlength="15" inputmode="numeric">
               <mat-error *ngIf="shouldShowError('phone')">
                 {{ getFieldError('phone') }}
               </mat-error>
@@ -39,7 +39,7 @@
 
             <mat-form-field appearance="outline" class="form-field">
               <mat-label>Email</mat-label>
-              <input matInput type="email" formControlName="email" placeholder="email@exemplo.com">
+              <input matInput type="email" formControlName="email" placeholder="email@exemplo.com" inputmode="email">
               <mat-error *ngIf="shouldShowError('email')">
                 {{ getFieldError('email') }}
               </mat-error>

@@ -31,6 +31,16 @@
   }
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $ds-spacing-xl;
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+}
+
 .warning-message {
   display: flex;
   align-items: center;
@@ -58,6 +68,11 @@
 
   .form-content {
     padding: 0 $ds-spacing-lg;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: $ds-spacing-lg;
   }
 }
 

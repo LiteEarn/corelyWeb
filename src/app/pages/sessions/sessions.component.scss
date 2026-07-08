@@ -91,6 +91,12 @@
   overflow: hidden;
   background: $ds-white;
 
+  ::ng-deep .mat-mdc-table {
+    @media (max-width: 768px) {
+      min-width: 650px;
+    }
+  }
+
   .table-content {
     padding: 0;
   }
@@ -159,6 +165,10 @@
 
   .empty-state-wrapper {
     padding: 64px $ds-spacing-lg;
+  }
+
+  .table-card {
+    overflow-x: auto;
   }
 }
 

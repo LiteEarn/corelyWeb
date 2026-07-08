@@ -448,7 +448,7 @@
 
 .save-fab-container {
   position: fixed;
-  bottom: $ds-spacing-xl;
+  bottom: calc($ds-spacing-xl + env(safe-area-inset-bottom, 0px));
   right: $ds-spacing-xl;
   z-index: $ds-zIndex-fixed;
 }
@@ -621,7 +621,7 @@
   .save-fab-container {
     left: $ds-spacing-lg;
     right: $ds-spacing-lg;
-    bottom: $ds-spacing-lg;
+    bottom: calc($ds-spacing-lg + env(safe-area-inset-bottom, 0px));
   }
 
   .save-fab {
