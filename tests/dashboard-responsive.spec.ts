@@ -1,7 +1,33 @@
 import { test, expect } from '@playwright/test';
 
+const MOCK_DASHBOARD = {
+  summary: {
+    kpis: { classesToday: 9, classesInProgress: 5, activeStudents: 76, studentsPresentToday: 23, pendingMakeups: 30, averageOccupancy: 95, todayAttendanceRate: 52 },
+    averageOccupancy: 95,
+    todayAttendanceRate: 52,
+  },
+  upcomingSessions: [
+    { id: 's1', classGroupId: 'cg-1', className: 'Alongamento', instructorId: 'i1', instructorName: 'Ricardo Souza', startTime: '08:00:00', endTime: '09:00:00', enrolledStudents: 10, status: 'IN_PROGRESS' },
+    { id: 's2', classGroupId: 'cg-2', className: 'Pilates Avancado', instructorId: 'i2', instructorName: 'Fernanda Lima', startTime: '08:00:00', endTime: '09:00:00', enrolledStudents: 3, status: 'IN_PROGRESS' },
+  ],
+  pendingMakeupRequests: [
+    { id: 'm1', classGroupId: 'cg-3', studentName: 'Monica Santos Almeida', className: 'Gestantes', absenceDate: '2026-06-26', reason: 'Imprevisto pessoal' },
+  ],
+  classOccupancy: [
+    { classGroupId: 'cg-1', className: 'Alongamento', capacity: 10, enrolled: 10, occupancyPercent: 100 },
+    { classGroupId: 'cg-2', className: 'Gestantes', capacity: 6, enrolled: 6, occupancyPercent: 100 },
+  ],
+  alerts: [
+    { title: 'Turma Lotada', message: "Turma 'Alongamento' está com 100% de ocupação", severity: 'ERROR', type: 'FULL_CLASS', actionLabel: 'Ver turma', actionRoute: '/class-groups', actionId: 'cg-1' },
+    { title: 'Muitas Reposições', message: '30 reposições pendentes aguardando aprovação', severity: 'WARNING', type: 'PENDING_MAKEUP', actionLabel: 'Ver reposições', actionRoute: '/makeup-requests', actionId: null },
+  ],
+};
+
 test.describe('Dashboard Responsivo', () => {
   test.beforeEach(async ({ page }) => {
+    await page.route('**/api/dashboard/operational', async route => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_DASHBOARD) });
+    });
     await page.goto('/dashboard');
   });
 
