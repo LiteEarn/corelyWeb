@@ -13,23 +13,26 @@
   </crud-toolbar>
 
   <div class="responsive-crud-content">
-    <crud-table
-      *ngIf="!isEmpty"
-      [dataSource]="dataSource"
-      [displayedColumns]="displayedColumns"
-      [isLoading]="isLoading"
+    <div
+      *ngIf="!isEmpty && responsive.layoutMode() !== LayoutMode.MOBILE"
+      class="crud-table-wrapper"
     >
-      <ng-content select="[tableColumns]"></ng-content>
-    </crud-table>
+      <ng-content select="[crudTable]"></ng-content>
+    </div>
+
+    <div *ngIf="isLoading && !isEmpty" class="crud-table-loading">
+      <mat-icon class="spinner">refresh</mat-icon>
+      <span>Carregando...</span>
+    </div>
 
     <crud-card
-      *ngIf="!isEmpty"
+      *ngIf="!isEmpty && responsive.layoutMode() === LayoutMode.MOBILE"
       [items]="items"
       [trackBy]="trackBy"
-      [cardTemplate]="cardTemplate"
+      [cardTemplate]="cardTemplate || defaultCardTemplate"
     >
-      <ng-template #cardTemplate let-item>
-        <ng-content select="[cardContent]" [ngTemplateOutletContext]="{ $implicit: item }"></ng-content>
+      <ng-template #defaultCardTemplate let-item>
+        <div class="crud-card-default">Card content not provided</div>
       </ng-template>
     </crud-card>
 

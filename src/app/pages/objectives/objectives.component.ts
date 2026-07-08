@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,6 +34,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     DsStatusChipComponent,
     ResponsiveCrudComponent,
     CrudActionsComponent,
+    MatTableModule,
   ],
   templateUrl: './objectives.component.html',
   styleUrl: './objectives.component.scss'
@@ -52,6 +53,7 @@ export class ObjectivesComponent implements OnInit {
   searchValue = '';
   statusFilter: ObjectiveStatus | 'all' = 'all';
   studentFilter = 'all';
+  isLoading = false;
 
   readonly crudActions: CrudAction[] = [
     { label: 'Visualizar', icon: 'visibility', action: 'view' },
@@ -69,13 +71,16 @@ export class ObjectivesComponent implements OnInit {
   }
 
   loadObjectives(): void {
+    this.isLoading = true;
     this.objectiveService.getAll().subscribe({
       next: (data) => {
         this.objectives = data;
         this.applyFilters();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading objectives:', error);
+        this.isLoading = false;
       }
     });
   }

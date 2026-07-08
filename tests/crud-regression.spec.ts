@@ -59,6 +59,7 @@ async function setupAuth(page: any) {
   await page.route('**/api/auth/me', async (route: any) => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_USER) });
   });
+  await page.goto('/');
   await page.evaluate(() => {
     localStorage.setItem('access_token', 'mock-token');
     localStorage.setItem('refresh_token', 'mock-refresh-token');

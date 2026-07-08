@@ -14,16 +14,15 @@
     [showNewButton]="true"
     newButtonText="Nova Matrícula"
     (newClick)="navigateToNew()"
-    [dataSource]="dataSource"
-    [displayedColumns]="displayedColumns"
-    [items]="filteredEnrollments"
     [isLoading]="isLoading"
+    [items]="filteredEnrollments"
     emptyIcon="assignment_ind"
     emptyTitle="Nenhuma matrícula encontrada"
     emptyDescription="Cadastre a primeira matrícula para começar."
     [emptyShowAction]="studentFilter === 'all' && classGroupFilter === 'all' && statusFilter === 'all' && !searchValue"
     emptyActionText="Cadastrar Primeira Matrícula"
     (emptyActionClick)="navigateToNew()"
+    [cardTemplate]="enrollmentCard"
   >
     <mat-form-field appearance="outline" class="filter-field" crudFilters>
       <mat-label>Aluno</mat-label>
@@ -52,7 +51,7 @@
       </mat-select>
     </mat-form-field>
 
-    <ng-container tableColumns>
+    <table crudTable mat-table [dataSource]="dataSource" class="crud-table">
       <ng-container matColumnDef="studentName">
         <th mat-header-cell *matHeaderCellDef>Aluno</th>
         <td mat-cell *matCellDef="let enrollment">{{ enrollment.studentName }}</td>
@@ -85,9 +84,11 @@
           ></crud-actions>
         </td>
       </ng-container>
-    </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
 
-    <ng-template cardContent let-enrollment>
+    <ng-template #enrollmentCard let-enrollment>
       <mat-card class="crud-item-card" role="listitem" [attr.aria-label]="'Matrícula: ' + enrollment.studentName" tabindex="0">
         <mat-card-content>
           <div class="card-header">

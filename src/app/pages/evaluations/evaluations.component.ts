@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +38,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     DsStatusChipComponent,
     ResponsiveCrudComponent,
     CrudActionsComponent,
+    MatTableModule,
   ],
   templateUrl: './evaluations.component.html',
   styleUrl: './evaluations.component.scss'
@@ -56,6 +57,7 @@ export class EvaluationsComponent implements OnInit {
   studentFilter = 'all';
   startDateFilter: Date | null = null;
   endDateFilter: Date | null = null;
+  isLoading = false;
 
   readonly crudActions: CrudAction[] = [
     { label: 'Editar', icon: 'edit', action: 'edit' },
@@ -72,13 +74,16 @@ export class EvaluationsComponent implements OnInit {
   }
 
   loadEvaluations(): void {
+    this.isLoading = true;
     this.evaluationService.getAll().subscribe({
       next: (data) => {
         this.evaluations = data;
         this.applyFilters();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading evaluations:', error);
+        this.isLoading = false;
       }
     });
   }

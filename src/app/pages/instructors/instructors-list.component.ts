@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +35,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     DsStatusChipComponent,
     ResponsiveCrudComponent,
     CrudActionsComponent,
+    MatTableModule,
   ],
   templateUrl: './instructors-list.component.html',
   styleUrl: './instructors-list.component.scss'
@@ -52,6 +53,7 @@ export class InstructorsListComponent implements OnInit {
   dataSource = new MatTableDataSource<Instructor>([]);
   searchValue = '';
   statusFilter = 'all';
+  isLoading = false;
 
   readonly crudActions: CrudAction[] = [
     { label: 'Visualizar', icon: 'visibility', action: 'view' },
@@ -66,13 +68,16 @@ export class InstructorsListComponent implements OnInit {
   }
 
   loadInstructors(): void {
+    this.isLoading = true;
     this.instructorService.getAll().subscribe({
       next: (data) => {
         this.instructors = data;
         this.applyFilters();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading instructors:', error);
+        this.isLoading = false;
       }
     });
   }

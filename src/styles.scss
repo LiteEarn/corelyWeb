@@ -67,3 +67,41 @@ body {
   background-color: #3B82F6 !important;
   color: white !important;
 }
+
+// CRUD table styles (shared across all pages)
+.crud-table {
+  width: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+
+  th.mat-mdc-header-cell {
+    font-weight: 600;
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td.mat-mdc-cell {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  tr.mat-mdc-row {
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}

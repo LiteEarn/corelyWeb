@@ -14,8 +14,7 @@
     [showNewButton]="true"
     newButtonText="Novo Objetivo"
     (newClick)="navigateToNew()"
-    [dataSource]="dataSource"
-    [displayedColumns]="displayedColumns"
+    [isLoading]="isLoading"
     [items]="filteredObjectives"
     emptyIcon="flag"
     emptyTitle="Nenhum objetivo encontrado"
@@ -23,6 +22,7 @@
     [emptyShowAction]="!searchValue && statusFilter === 'all' && studentFilter === 'all'"
     emptyActionText="Novo Objetivo"
     (emptyActionClick)="navigateToNew()"
+    [cardTemplate]="objectiveCard"
   >
     <mat-form-field appearance="outline" class="filter-field" crudFilters>
       <mat-label>Status</mat-label>
@@ -42,7 +42,7 @@
       </mat-select>
     </mat-form-field>
 
-    <ng-container tableColumns>
+    <table crudTable mat-table [dataSource]="dataSource" class="crud-table">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Objetivo</th>
         <td mat-cell *matCellDef="let objective">{{ objective.title }}</td>
@@ -80,9 +80,11 @@
           ></crud-actions>
         </td>
       </ng-container>
-    </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
 
-    <ng-template cardContent let-objective>
+    <ng-template #objectiveCard let-objective>
       <mat-card class="crud-item-card" role="listitem" [attr.aria-label]="'Objetivo: ' + objective.title" tabindex="0">
         <mat-card-content>
           <div class="card-header">
