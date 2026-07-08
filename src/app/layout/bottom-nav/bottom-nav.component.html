@@ -1,0 +1,13 @@
+<nav class="bottom-nav" role="navigation" aria-label="Navegação inferior">
+  <a
+    *ngFor="let item of navigation.bottomNavItems()"
+    class="bottom-nav-item"
+    [class.bottom-nav-item-active]="!item.action && isActive(item.route!)"
+    [routerLink]="item.route || null"
+    (click)="item.action === 'more' ? onMoreClick() : null"
+    [attr.aria-label]="item.label"
+  >
+    <mat-icon class="bottom-nav-icon">{{ item.icon }}</mat-icon>
+    <span class="bottom-nav-label">{{ item.label }}</span>
+  </a>
+</nav>
