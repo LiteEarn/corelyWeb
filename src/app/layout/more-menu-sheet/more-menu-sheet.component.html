@@ -1,0 +1,28 @@
+<div
+  class="more-sheet-overlay"
+  [class.more-sheet-open]="navigation.isMoreSheetOpen()"
+  (click)="onBackdropClick($event)"
+>
+  <div class="more-sheet-panel" [class.more-sheet-panel-open]="navigation.isMoreSheetOpen()">
+    <div class="more-sheet-header">
+      <span class="more-sheet-title">Mais</span>
+      <button mat-icon-button aria-label="Fechar" (click)="navigation.closeMoreSheet()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <nav class="more-sheet-body" role="navigation" aria-label="Menu mais">
+      <a
+        *ngFor="let item of navigation.moreMenuItems()"
+        class="more-sheet-item"
+        [routerLink]="item.route"
+        routerLinkActive="more-sheet-item-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="onItemClick()"
+        [attr.aria-label]="item.label"
+      >
+        <mat-icon class="more-sheet-item-icon">{{ item.icon }}</mat-icon>
+        <span class="more-sheet-item-label">{{ item.label }}</span>
+      </a>
+    </nav>
+  </div>
+</div>

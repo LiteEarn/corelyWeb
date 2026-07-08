@@ -86,7 +86,20 @@
 }
 
 @media (max-width: 768px) {
+  .topbar {
+    height: 56px;
+    padding: 0 16px;
+  }
+
   .user-details {
     display: none;
+  }
+
+  .user-dropdown-icon {
+    display: none;
+  }
+
+  .user-info {
+    padding: 4px 8px;
   }
 }

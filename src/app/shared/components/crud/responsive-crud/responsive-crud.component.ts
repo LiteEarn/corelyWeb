@@ -1,10 +1,9 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, TemplateRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatIconModule } from '@angular/material/icon';
 import { ResponsiveService } from '../../../layout/responsive.service';
 import { LayoutMode } from '../../../layout/layout-mode.enum';
 import { CrudToolbarComponent } from '../crud-toolbar/crud-toolbar.component';
-import { CrudTableComponent } from '../crud-table/crud-table.component';
 import { CrudCardComponent } from '../crud-card/crud-card.component';
 import { CrudEmptyStateComponent } from '../crud-empty-state/crud-empty-state.component';
 
@@ -13,8 +12,8 @@ import { CrudEmptyStateComponent } from '../crud-empty-state/crud-empty-state.co
   standalone: true,
   imports: [
     CommonModule,
+    MatIconModule,
     CrudToolbarComponent,
-    CrudTableComponent,
     CrudCardComponent,
     CrudEmptyStateComponent,
   ],
@@ -35,13 +34,11 @@ export class ResponsiveCrudComponent {
   @Input() newButtonText = 'Novo';
   @Output() newClick = new EventEmitter<void>();
 
-  @Input() dataSource: MatTableDataSource<any> = new MatTableDataSource<any>([]);
-  @Input() displayedColumns: string[] = [];
-  @Input() tabletColumns: string[] = [];
   @Input() isLoading = false;
 
   @Input() items: any[] = [];
   @Input() trackBy: (index: number, item: any) => any = (index: number) => index;
+  @Input() cardTemplate: TemplateRef<any> | null = null;
 
   get isEmpty(): boolean {
     return !this.isLoading && this.items.length === 0;

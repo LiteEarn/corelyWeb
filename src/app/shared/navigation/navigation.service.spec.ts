@@ -77,6 +77,10 @@ describe('NavigationService', () => {
       service.close();
       expect(service.isDrawerOpen()).toBeFalse();
     });
+
+    it('should not have bottom sheet open', () => {
+      expect(service.isMoreSheetOpen()).toBeFalse();
+    });
   });
 
   describe('Tablet mode', () => {
@@ -139,6 +143,37 @@ describe('NavigationService', () => {
       service.open();
       service.closeDrawer();
       expect(service.isDrawerOpen()).toBeFalse();
+    });
+
+    it('should be mobile', () => {
+      expect(service.isMobile()).toBeTrue();
+    });
+
+    it('should have bottom nav items', () => {
+      const items = service.bottomNavItems();
+      expect(items.length).toBe(5);
+      expect(items[0].label).toBe('Dashboard');
+      expect(items[4].action).toBe('more');
+    });
+
+    describe('bottom sheet', () => {
+      it('should be closed by default', () => {
+        expect(service.isMoreSheetOpen()).toBeFalse();
+      });
+
+      it('should toggle more sheet', () => {
+        service.toggleMoreSheet();
+        expect(service.isMoreSheetOpen()).toBeTrue();
+        service.toggleMoreSheet();
+        expect(service.isMoreSheetOpen()).toBeFalse();
+      });
+
+      it('should open and close more sheet', () => {
+        service.openMoreSheet();
+        expect(service.isMoreSheetOpen()).toBeTrue();
+        service.closeMoreSheet();
+        expect(service.isMoreSheetOpen()).toBeFalse();
+      });
     });
   });
 });

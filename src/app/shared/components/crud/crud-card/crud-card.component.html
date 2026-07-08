@@ -1,4 +1,9 @@
-<div class="crud-card-list" role="list" aria-label="Lista de registros">
+<div
+  *ngIf="responsive.layoutMode() === LayoutMode.MOBILE"
+  class="crud-card-list"
+  role="list"
+  aria-label="Lista de registros"
+>
   <ng-container *ngFor="let item of items; trackBy: trackBy">
     <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: item }"></ng-container>
   </ng-container>

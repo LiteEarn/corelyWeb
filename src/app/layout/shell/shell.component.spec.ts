@@ -110,4 +110,24 @@ describe('ShellComponent', () => {
     component.onDrawerClose();
     expect(navigationService.closeDrawer).toHaveBeenCalled();
   });
+
+  it('should close drawer on backdrop click', () => {
+    spyOn(navigationService, 'closeDrawer');
+    component.onBackdropClick();
+    expect(navigationService.closeDrawer).toHaveBeenCalled();
+  });
+
+  describe('mobile bottom sheet', () => {
+    beforeEach(() => {
+      setLayoutMode(LayoutMode.MOBILE);
+      fixture.detectChanges();
+    });
+
+    it('should close more sheet on ESC', () => {
+      navigationService.openMoreSheet();
+      expect(navigationService.isMoreSheetOpen()).toBeTrue();
+      component.onKeydownEscape();
+      expect(navigationService.isMoreSheetOpen()).toBeFalse();
+    });
+  });
 });

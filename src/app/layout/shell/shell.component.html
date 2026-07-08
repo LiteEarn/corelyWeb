@@ -4,16 +4,20 @@
     [opened]="navigation.sidenavOpened()"
     class="app-sidenav"
     [class.sidenav-collapsed]="navigation.isCollapsed()"
-    (keydown.escape)="onDrawerClose()">
+    (keydown.escape)="onDrawerClose()"
+    (backdropClick)="onBackdropClick()">
     <app-sidebar></app-sidebar>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="content-wrapper">
+    <div class="content-wrapper" [class.has-bottom-nav]="navigation.isMobile()">
       <app-topbar (toggleSidebar)="onToggleMenu()"></app-topbar>
-      <div class="shell-content">
+      <div class="shell-content" [class.shell-content-mobile]="navigation.isMobile()">
         <router-outlet></router-outlet>
       </div>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+
+<app-bottom-nav *ngIf="navigation.isMobile()"></app-bottom-nav>
+<app-more-menu-sheet *ngIf="navigation.isMobile()"></app-more-menu-sheet>

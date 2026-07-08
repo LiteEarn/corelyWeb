@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,6 +44,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ResponsiveCrudComponent,
     CrudActionsComponent,
     LoadingComponent,
+    MatTableModule,
   ],
   templateUrl: './enrollments.component.html',
   styleUrl: './enrollments.component.scss'
@@ -58,7 +59,6 @@ export class EnrollmentsComponent implements OnInit, OnDestroy {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['studentName', 'classGroupName', 'enrollmentDate', 'status', 'actions'];
-  tabletColumns: string[] = ['studentName', 'classGroupName', 'status', 'actions'];
   enrollments: Enrollment[] = [];
   filteredEnrollments: Enrollment[] = [];
   dataSource = new MatTableDataSource<Enrollment>([]);

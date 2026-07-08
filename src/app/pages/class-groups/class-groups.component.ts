@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,6 +38,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     DsStatusChipComponent,
     ResponsiveCrudComponent,
     CrudActionsComponent,
+    MatTableModule,
   ],
   templateUrl: './class-groups.component.html',
   styleUrl: './class-groups.component.scss'
@@ -51,7 +52,6 @@ export class ClassGroupsComponent implements OnInit {
   private featureGateService = inject(FeatureGateService);
 
   displayedColumns: string[] = ['name', 'instructor', 'days', 'time', 'capacity', 'status', 'actions'];
-  tabletColumns: string[] = ['name', 'instructor', 'time', 'status', 'actions'];
   classGroups: ClassGroup[] = [];
   filteredClassGroups: ClassGroup[] = [];
   dataSource = new MatTableDataSource<ClassGroup>([]);
@@ -59,6 +59,7 @@ export class ClassGroupsComponent implements OnInit {
   searchValue = '';
   instructorFilter = 'all';
   activeFilter = 'all';
+  isLoading = false;
 
   readonly crudActions: CrudAction[] = [
     { label: 'Visualizar', icon: 'visibility', action: 'view' },
@@ -76,13 +77,16 @@ export class ClassGroupsComponent implements OnInit {
 
   loadClassGroups(): void {
     if (!this.featureGateService.canLoadClassGroups()) return;
+    this.isLoading = true;
     this.classGroupService.getAll().subscribe({
       next: (data) => {
         this.classGroups = data;
         this.applyFilters();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading class groups:', error);
+        this.isLoading = false;
       }
     });
   }
