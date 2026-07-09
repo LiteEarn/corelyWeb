@@ -1,49 +1,8 @@
 <div class="daily-agenda-page">
   <ds-page-header
     title="Agenda do Dia"
-    subtitle="Visualize e acompanhe todas as aulas programadas para o dia."
+    subtitle="Visualize todas as aulas programadas para o dia."
   ></ds-page-header>
-
-  <mat-card class="filters-card">
-    <mat-card-content class="filters-content">
-      <div class="filters-row">
-        <mat-form-field appearance="outline" class="filter-field date-field">
-          <mat-label>Data</mat-label>
-          <input
-            matInput
-            [matDatepicker]="picker"
-            [value]="selectedDate"
-            (dateChange)="onDateChange($event.value)"
-          />
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-
-        <button
-          mat-stroked-button
-          class="filter-field today-btn"
-          (click)="goToToday()"
-          [disabled]="isToday()"
-        >
-          <mat-icon>today</mat-icon>
-          Hoje
-        </button>
-
-        <mat-form-field *ngIf="instructors.length > 0" appearance="outline" class="filter-field instructor-field">
-          <mat-label>Instrutor</mat-label>
-          <mat-select
-            [value]="instructorFilter"
-            (selectionChange)="onInstructorFilterChange($event.value)"
-          >
-            <mat-option value="all">Todos</mat-option>
-            <mat-option *ngFor="let instructor of instructors" [value]="instructor.id">
-              {{ instructor.fullName }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </mat-card-content>
-  </mat-card>
 
   <div class="agenda-content">
     <div class="date-header">
@@ -55,8 +14,8 @@
         </div>
       </div>
       <span *ngIf="!loading && !error" class="session-count">
-        {{ filteredCards.length }}
-        {{ filteredCards.length === 1 ? 'aula' : 'aulas' }}
+        {{ sessions.length }}
+        {{ sessions.length === 1 ? 'sessão' : 'sessões' }}
       </span>
     </div>
 
@@ -74,167 +33,34 @@
       ></ds-empty-state>
     </div>
 
-    <div *ngIf="!loading && !error && filteredCards.length === 0" class="state-container">
+    <div *ngIf="!loading && !error && sessions.length === 0" class="state-container">
       <ds-empty-state
         icon="event_busy"
-        title="Nenhuma aula encontrada"
-        description="Não existem aulas programadas para os filtros selecionados."
-        [showAction]="true"
-        actionText="Hoje"
-        actionIcon="today"
-        (actionClick)="clearFilters()"
+        title="Nenhuma sessão encontrada"
+        description="Não existem aulas programadas para esta data."
       ></ds-empty-state>
     </div>
 
-    <div *ngIf="!loading && !error && filteredCards.length > 0" class="cards-list">
+    <div *ngIf="!loading && !error && sessions.length > 0" class="cards-list">
       <mat-card
-        *ngFor="let card of filteredCards"
+        *ngFor="let session of sessions"
         class="session-card"
-        [class.card-expanded]="card.expanded"
         [class.card-past]="isPast()"
-        (click)="toggleCard(card)"
       >
         <div class="card-main">
           <div class="card-time">
-            <span class="time-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
+            <span class="time-value">{{ formatTime(session.startTime, session.endTime) }}</span>
           </div>
 
           <div class="card-info">
-            <h3 class="card-title">{{ card.session.title }}</h3>
-            <span class="card-instructor">
-              <mat-icon>person</mat-icon>
-              {{ card.instructorName }}
-            </span>
-          </div>
-
-          <div class="card-occupancy">
-            <mat-icon>people</mat-icon>
-            <span>{{ getOccupancyLabel(card) }}</span>
+            <h3 class="card-title">{{ session.title }}</h3>
           </div>
 
           <div class="card-status">
             <ds-status-chip
-              [status]="getStatusChip(card.session.status).status"
-              [label]="getStatusChip(card.session.status).label"
+              [status]="getStatusChip(session.status).status"
+              [label]="getStatusChip(session.status).label"
             ></ds-status-chip>
-          </div>
-
-          <div class="card-expand-icon">
-            <mat-icon>{{ card.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </div>
-        </div>
-
-          <div *ngIf="card.expanded" class="card-detail">
-          <div class="detail-section">
-            <h4 class="detail-title">Detalhes da Aula</h4>
-
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span class="detail-label">Turma</span>
-                <span class="detail-value">{{ card.session.title }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Instrutor</span>
-                <span class="detail-value">{{ card.instructorName }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Horário</span>
-                <span class="detail-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Status</span>
-                <ds-status-chip
-                  [status]="getStatusChip(card.session.status).status"
-                  [label]="getStatusChip(card.session.status).label"
-                ></ds-status-chip>
-              </div>
-            </div>
-
-            <div class="card-actions" *ngIf="card.session.status === 'SCHEDULED' || card.session.status === 'IN_PROGRESS'">
-              <div (click)="$event.stopPropagation()">
-                <ds-button
-                  *ngIf="card.session.status === 'SCHEDULED'"
-                  variant="primary"
-                  size="sm"
-                  label="Iniciar Aula"
-                  icon="play_arrow"
-                  [loading]="sessionActionLoading[card.session.id!] === 'start'"
-                  [disabled]="!!sessionActionLoading[card.session.id!]"
-                  (click)="startSession(card)"
-                ></ds-button>
-              </div>
-              <div (click)="$event.stopPropagation()">
-                <ds-button
-                  *ngIf="card.session.status === 'IN_PROGRESS'"
-                  variant="primary"
-                  size="sm"
-                  label="Finalizar Aula"
-                  icon="stop"
-                  [loading]="sessionActionLoading[card.session.id!] === 'complete'"
-                  [disabled]="!!sessionActionLoading[card.session.id!]"
-                  (click)="completeSession(card)"
-                ></ds-button>
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <h4 class="detail-title">
-              Alunos Matriculados
-              <span *ngIf="getSessionStudents(card).length > 0" class="student-count-badge">
-                {{ getSessionStudents(card).length }}
-              </span>
-            </h4>
-
-            <div *ngIf="getSessionStudents(card).length === 0" class="no-students">
-              <mat-icon>person_off</mat-icon>
-              <span>Nenhum aluno vinculado a esta aula.</span>
-            </div>
-
-            <div *ngIf="getSessionStudents(card).length > 0" class="students-list">
-              <div *ngFor="let student of getSessionStudents(card)" class="student-row" [class.saving]="student.saving">
-                <div class="student-info">
-                  <span class="student-name">{{ student.studentName }}</span>
-                  <ds-status-chip
-                    [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
-                    [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
-                  ></ds-status-chip>
-                </div>
-                <div class="attendance-toggle-group">
-                  <button
-                    type="button"
-                    class="att-toggle att-present"
-                    [class.selected]="student.attendanceStatus === 'PRESENT'"
-                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
-                    (click)="setAttendance(student, 'PRESENT', card); $event.stopPropagation()"
-                  >
-                    <mat-icon>check_circle</mat-icon>
-                    <span>Presente</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="att-toggle att-absent"
-                    [class.selected]="student.attendanceStatus === 'ABSENT'"
-                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
-                    (click)="setAttendance(student, 'ABSENT', card); $event.stopPropagation()"
-                  >
-                    <mat-icon>cancel</mat-icon>
-                    <span>Falta</span>
-                  </button>
-                  <button
-                    type="button"
-                    class="att-toggle att-justified"
-                    [class.selected]="student.attendanceStatus === 'JUSTIFIED'"
-                    [disabled]="student.saving || card.session.status !== 'IN_PROGRESS'"
-                    (click)="setAttendance(student, 'JUSTIFIED', card); $event.stopPropagation()"
-                  >
-                    <mat-icon>assignment_late</mat-icon>
-                    <span>Justificada</span>
-                  </button>
-                  <mat-spinner *ngIf="student.saving" diameter="16" class="att-spinner"></mat-spinner>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </mat-card>
