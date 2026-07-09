@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const MOCK_DASHBOARD = {
   summary: {
-    kpis: { classesToday: 9, classesInProgress: 5, activeStudents: 76, studentsPresentToday: 23, pendingMakeups: 30, averageOccupancy: 95, todayAttendanceRate: 52 },
+    kpis: { classesToday: 9, classesInProgress: 5, activeStudents: 76, studentsPresentToday: 23, pendingMakeups: 30 },
     averageOccupancy: 95,
     todayAttendanceRate: 52,
   },

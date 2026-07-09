@@ -252,14 +252,14 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de alunos carregam no mobile', async ({ page }) => {
       await page.goto('/students');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(3);
     });
 
     test('tabela não aparece no mobile', async ({ page }) => {
       await page.goto('/students');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       await expect(page.locator('table.crud-table')).not.toBeVisible();
     });
 
@@ -279,7 +279,7 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de instrutores carregam no mobile', async ({ page }) => {
       await page.goto('/instructors');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(2);
     });
@@ -295,7 +295,7 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de turmas carregam no mobile', async ({ page }) => {
       await page.goto('/class-groups');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(3);
     });
@@ -312,7 +312,7 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de matrículas carregam no mobile', async ({ page }) => {
       await page.goto('/enrollments');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(3);
     });
@@ -328,7 +328,7 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de avaliações carregam no mobile', async ({ page }) => {
       await page.goto('/evaluations');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(2);
     });
@@ -344,7 +344,7 @@ test.describe('CRUD Pages - Mobile Regression', () => {
 
     test('cards de objetivos carregam no mobile', async ({ page }) => {
       await page.goto('/objectives');
-      await page.waitForSelector('app-crud-card', { timeout: 10000 });
+      await page.waitForSelector('responsive-card-list', { timeout: 10000 });
       const cards = page.locator('mat-card.crud-item-card');
       await expect(cards).toHaveCount(2);
     });

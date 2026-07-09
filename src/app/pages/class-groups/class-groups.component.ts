@@ -10,7 +10,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
-import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
+import { ResponsiveCrudLayoutComponent } from '../../shared/components';
+import { CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { ClassGroupService } from '../../features/class-groups/class-group.service';
 import { ClassGroup } from '../../features/class-groups/class-group.model';
 import { InstructorService } from '../../features/instructors/instructor.service';
@@ -36,7 +37,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    ResponsiveCrudComponent,
+    ResponsiveCrudLayoutComponent,
     CrudActionsComponent,
     MatTableModule,
   ],

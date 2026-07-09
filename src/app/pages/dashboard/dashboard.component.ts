@@ -117,14 +117,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get kpiItems() {
     if (!this.data) return [];
     const k = this.data.summary.kpis;
+    const s = this.data.summary;
     return [
       { label: 'Aulas Hoje', value: k.classesToday, icon: 'today', color: 'primary' as const },
       { label: 'Em Andamento', value: k.classesInProgress, icon: 'play_circle', color: 'accent' as const },
       { label: 'Alunos Ativos', value: k.activeStudents, icon: 'people', color: 'primary' as const },
       { label: 'Presentes Hoje', value: k.studentsPresentToday, icon: 'person', color: 'primary' as const },
       { label: 'Reposições Pendentes', value: k.pendingMakeups, icon: 'refresh', color: 'warn' as const },
-      { label: 'Ocupação Média', value: `${k.averageOccupancy}%`, icon: 'bar_chart', color: 'primary' as const },
-      { label: 'Frequência Hoje', value: `${k.todayAttendanceRate}%`, icon: 'fact_check', color: 'accent' as const },
+      { label: 'Ocupação Média', value: `${s.averageOccupancy}%`, icon: 'bar_chart', color: 'primary' as const },
+      { label: 'Frequência Hoje', value: `${s.todayAttendanceRate}%`, icon: 'fact_check', color: 'accent' as const },
     ];
   }
 
@@ -145,11 +146,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get computedAverageOccupancy(): number {
-    return this.data?.summary?.kpis?.averageOccupancy ?? 0;
+    return this.data?.summary?.averageOccupancy ?? 0;
   }
 
   get computedAttendanceRate(): number {
-    return this.data?.summary?.kpis?.todayAttendanceRate ?? 0;
+    return this.data?.summary?.todayAttendanceRate ?? 0;
   }
 
   retry(): void {

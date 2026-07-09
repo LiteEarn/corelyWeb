@@ -12,7 +12,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject, takeUntil } from 'rxjs';
 import { DsPageHeaderComponent, DsStatusChipComponent } from '../../shared/design-system';
-import { ResponsiveCrudComponent, CrudActionsComponent, CrudAction } from '../../shared/components/crud';
+import { ResponsiveCrudLayoutComponent } from '../../shared/components';
+import { CrudActionsComponent, CrudAction } from '../../shared/components/crud';
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { Enrollment } from '../../features/enrollments/enrollment.model';
 import { StudentService } from '../../features/students/student.service';
@@ -41,7 +42,7 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
     ReactiveFormsModule,
     DsPageHeaderComponent,
     DsStatusChipComponent,
-    ResponsiveCrudComponent,
+    ResponsiveCrudLayoutComponent,
     CrudActionsComponent,
     LoadingComponent,
     MatTableModule,
