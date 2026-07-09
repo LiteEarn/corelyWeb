@@ -1,0 +1,282 @@
+<div class="daily-schedule-page">
+  <ds-page-header
+    title="Agenda Operacional do Dia"
+    subtitle="Acompanhe todas as sessões do dia em ordem cronológica."
+  ></ds-page-header>
+
+  <div class="kpi-grid" *ngIf="data">
+    <mat-card *ngFor="let kpi of kpis" class="kpi-card">
+      <mat-card-content class="kpi-content">
+        <div class="kpi-icon" [class]="kpi.color">
+          <mat-icon>{{ kpi.icon }}</mat-icon>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ getKpiValue(kpi.key) }}</span>
+          <span class="kpi-label">{{ kpi.label }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="filters-card">
+    <mat-card-content class="filters-content">
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field date-field">
+          <mat-label>Data</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [value]="filters.date"
+            (dateChange)="onDateChange($event.value!)"
+          />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <button
+          mat-stroked-button
+          class="filter-field today-btn"
+          (click)="goToToday()"
+          [disabled]="isToday()"
+        >
+          <mat-icon>today</mat-icon>
+          Hoje
+        </button>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Instrutor</mat-label>
+          <mat-select
+            [value]="filters.instructorId"
+            (selectionChange)="filters.instructorId = $event.value; onFilterChange()"
+          >
+            <mat-option value="all">Todos</mat-option>
+            <mat-option *ngFor="let inst of instructors" [value]="inst.id">
+              {{ inst.fullName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [value]="filters.status"
+            (selectionChange)="filters.status = $event.value; onFilterChange()"
+          >
+            <mat-option *ngFor="let opt of statusOptions" [value]="opt.value">
+              {{ opt.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Turma</mat-label>
+          <mat-select
+            [value]="filters.classGroupId"
+            (selectionChange)="filters.classGroupId = $event.value; onFilterChange()"
+          >
+            <mat-option value="all">Todas</mat-option>
+            <mat-option *ngFor="let cg of classGroups" [value]="cg.id">
+              {{ cg.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="schedule-content">
+    <div class="date-header">
+      <div class="date-info">
+        <h2 class="date-day-name">{{ getDayName(filters.date) }}</h2>
+        <div class="date-row">
+          <span class="date-full">{{ getFormattedDate(filters.date) }}</span>
+          <span *ngIf="isToday()" class="today-badge">Hoje</span>
+        </div>
+      </div>
+      <span *ngIf="!loading && !error && data" class="session-count">
+        {{ data.sessions.length }}
+        {{ data.sessions.length === 1 ? 'aula' : 'aulas' }}
+      </span>
+    </div>
+
+    <app-loading *ngIf="loading"></app-loading>
+
+    <div *ngIf="!loading && error" class="state-container">
+      <ds-empty-state
+        icon="error_outline"
+        title="Erro ao carregar"
+        [description]="error"
+        [showAction]="true"
+        actionText="Tentar novamente"
+        actionIcon="refresh"
+        (actionClick)="loadSchedule()"
+      ></ds-empty-state>
+    </div>
+
+    <div *ngIf="!loading && !error && data && data.sessions.length === 0" class="state-container">
+      <ds-empty-state
+        icon="event_busy"
+        title="Nenhuma aula encontrada"
+        description="Não existem aulas programadas para os filtros selecionados."
+        [showAction]="true"
+        actionText="Limpar filtros"
+        actionIcon="clear"
+        (actionClick)="clearFilters()"
+      ></ds-empty-state>
+    </div>
+
+    <div *ngIf="!loading && !error && data && data.sessions.length > 0" class="sessions-list">
+      <div class="timeline-desktop">
+        <div class="timeline-header">
+          <span class="col-time">Horário</span>
+          <span class="col-group">Turma</span>
+          <span class="col-instructor">Instrutor</span>
+          <span class="col-capacity">Vagas</span>
+          <span class="col-enrolled">Matriculados</span>
+          <span class="col-present">Presentes</span>
+          <span class="col-status">Status</span>
+          <span class="col-actions">Ações</span>
+        </div>
+        <div
+          *ngFor="let session of data.sessions"
+          class="timeline-row"
+          [class.row-in-progress]="session.status === 'IN_PROGRESS'"
+          [class.row-cancelled]="session.status === 'CANCELLED'"
+          [class.row-completed]="session.status === 'COMPLETED'"
+        >
+          <div class="timeline-marker">
+            <span class="marker-dot"></span>
+          </div>
+          <span class="col-time">{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</span>
+          <span class="col-group">{{ session.classGroupName }}</span>
+          <span class="col-instructor">{{ getInstructorName(session) }}</span>
+          <span class="col-capacity">{{ session.capacity }}</span>
+          <span class="col-enrolled">{{ session.enrolledCount }}</span>
+          <span class="col-present">{{ session.presentCount }}</span>
+          <div class="col-status">
+            <ds-status-chip
+              [status]="getStatusChip(session.status).status"
+              [label]="getStatusChip(session.status).label"
+            ></ds-status-chip>
+          </div>
+          <div class="col-actions actions-cell" (click)="$event.stopPropagation()">
+            <button
+              *ngIf="session.status === 'SCHEDULED'"
+              mat-icon-button
+              matTooltip="Iniciar aula"
+              [disabled]="!!sessionActionLoading[session.id]"
+              (click)="startSession(session)"
+            >
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+            <button
+              *ngIf="session.status === 'IN_PROGRESS'"
+              mat-icon-button
+              matTooltip="Finalizar aula"
+              [disabled]="!!sessionActionLoading[session.id]"
+              (click)="completeSession(session)"
+            >
+              <mat-icon>stop</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Cancelar aula"
+              [disabled]="!!sessionActionLoading[session.id] || session.status === 'CANCELLED' || session.status === 'COMPLETED'"
+              (click)="cancelSession(session)"
+            >
+              <mat-icon>cancel</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Ver alunos"
+              [routerLink]="['/students']"
+            >
+              <mat-icon>people</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              matTooltip="Abrir turma"
+              [routerLink]="['/class-groups', session.classGroupId]"
+            >
+              <mat-icon>school</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-mobile">
+        <mat-card
+          *ngFor="let session of data.sessions"
+          class="session-card"
+          [class.card-in-progress]="session.status === 'IN_PROGRESS'"
+          [class.card-cancelled]="session.status === 'CANCELLED'"
+          [class.card-completed]="session.status === 'COMPLETED'"
+        >
+          <div class="card-header">
+            <div class="card-time">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</span>
+            </div>
+            <ds-status-chip
+              [status]="getStatusChip(session.status).status"
+              [label]="getStatusChip(session.status).label"
+            ></ds-status-chip>
+          </div>
+          <div class="card-body">
+            <div class="card-row">
+              <span class="card-label">Turma</span>
+              <span class="card-value">{{ session.classGroupName }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Instrutor</span>
+              <span class="card-value">{{ getInstructorName(session) }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Vagas</span>
+              <span class="card-value">{{ session.capacity }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Matriculados</span>
+              <span class="card-value">{{ session.enrolledCount }}</span>
+            </div>
+            <div class="card-row">
+              <span class="card-label">Presentes</span>
+              <span class="card-value">{{ session.presentCount }}</span>
+            </div>
+          </div>
+          <div class="card-actions">
+            <button
+              *ngIf="session.status === 'SCHEDULED'"
+              mat-stroked-button
+              color="primary"
+              [disabled]="!!sessionActionLoading[session.id]"
+              (click)="startSession(session)"
+            >
+              <mat-icon>play_arrow</mat-icon>
+              Iniciar
+            </button>
+            <button
+              *ngIf="session.status === 'IN_PROGRESS'"
+              mat-stroked-button
+              color="primary"
+              [disabled]="!!sessionActionLoading[session.id]"
+              (click)="completeSession(session)"
+            >
+              <mat-icon>stop</mat-icon>
+              Finalizar
+            </button>
+            <button
+              mat-stroked-button
+              color="warn"
+              [disabled]="!!sessionActionLoading[session.id] || session.status === 'CANCELLED' || session.status === 'COMPLETED'"
+              (click)="cancelSession(session)"
+            >
+              <mat-icon>cancel</mat-icon>
+              Cancelar
+            </button>
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

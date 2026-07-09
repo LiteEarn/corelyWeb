@@ -263,31 +263,12 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
           enrollmentStatus: e.status,
         }));
 
-        return this.enrollmentService.getAll({ classGroupId: card.classGroupId, active: true }).pipe(
-          switchMap((allEnrollments) => {
-            const existingIds = new Set(activeEnrollments.map((e) => e.studentId));
-            const additional = allEnrollments.filter(
-              (e) => !existingIds.has(e.studentId) && e.studentName
-            );
-            for (const a of additional) {
-              students.push({
-                studentId: a.studentId,
-                studentName: a.studentName || '',
-                enrollmentStatus: a.status,
-              });
-            }
-            card._students = students;
+        card._students = students;
 
-            if (card.session.id) {
-              return this.attendanceService.getBySessionId(card.session.id);
-            }
-            return of([]);
-          }),
-          catchError(() => {
-            card._students = students;
-            return of([]);
-          })
-        );
+        if (card.session.id) {
+          return this.attendanceService.getBySessionId(card.session.id);
+        }
+        return of([]);
       }),
       takeUntil(this.destroy$)
     ).subscribe({
