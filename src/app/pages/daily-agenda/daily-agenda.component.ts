@@ -11,8 +11,9 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTableModule } from '@angular/material/table';
 import { Subject, of } from 'rxjs';
-import { switchMap, takeUntil, catchError } from 'rxjs/operators';
+import { takeUntil, finalize } from 'rxjs/operators';
 import {
   DsPageHeaderComponent,
   DsEmptyStateComponent,
@@ -43,9 +44,9 @@ interface SessionCard {
 interface SessionStudent {
   studentId: string;
   studentName: string;
+  studentPhone?: string;
   enrollmentStatus: string;
   attendanceStatus?: AttendanceStatus;
-  saving?: boolean;
 }
 
 @Component({
@@ -64,6 +65,7 @@ interface SessionStudent {
     MatInputModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    MatTableModule,
     DsPageHeaderComponent,
     DsEmptyStateComponent,
     DsStatusChipComponent,
@@ -82,6 +84,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   error: string | null = null;
   sessionActionLoading: Record<string, 'start' | 'complete' | null> = {};
+  studentColumns: string[] = ['name', 'phone', 'status', 'presence'];
 
   private allSessions: Session[] = [];
   private classGroups: { id: string; name: string }[] = [];
@@ -127,14 +130,15 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
       filters.instructorId = this.instructorFilter;
     }
 
-    this.sessionService.getAll(filters).pipe(takeUntil(this.destroy$)).subscribe({
+    this.sessionService.getAll(filters).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => (this.loading = false))
+    ).subscribe({
       next: (sessions) => {
-        this.allSessions = sessions;
+        this.allSessions = sessions || [];
         this.buildSessionCards();
-        this.loading = false;
       },
       error: () => {
-        this.loading = false;
         this.error = 'Erro ao carregar as aulas. Tente novamente.';
         this.toastService.error('Erro ao carregar as aulas. Tente novamente.');
       },
@@ -145,6 +149,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     this.instructorService.getAll({ active: true }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.instructors = data;
+        this.buildSessionCards();
       },
     });
   }
@@ -153,25 +158,19 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     this.classGroupService.getAll({ active: true }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.classGroups = data.map((cg) => ({ id: cg.id!, name: cg.name }));
+        this.buildSessionCards();
       },
     });
   }
 
   private buildSessionCards(): void {
-    const dateStr = this.formatDate(this.selectedDate);
-
-    const daySessions = this.allSessions.filter((s) => s.scheduledDate === dateStr);
-
-    this.sessionCards = daySessions.map((session) => {
+    this.sessionCards = this.allSessions.map((session) => {
       const instructor = this.instructors.find((i) => i.id === session.instructorId);
-      const classGroup = this.classGroups.find(
-        (cg) => cg.name.toLowerCase() === session.title.toLowerCase()
-      );
 
       return {
         session,
         instructorName: instructor ? instructor.fullName : session.instructorId || 'Não encontrado',
-        classGroupId: classGroup?.id,
+        classGroupId: session.classGroupId,
         enrolledCount: undefined,
         expanded: false,
       };
@@ -252,51 +251,32 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     if (!card.classGroupId || !this.featureGateService.canLoadEnrolledStudents()) return;
 
     this.enrollmentService.getStudentsByClassGroupId(card.classGroupId).pipe(
-      switchMap((enrollments) => {
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (enrollments) => {
         const activeEnrollments = enrollments.filter(
           (e) => e.studentActive !== false && e.active !== false
         );
 
-        const students = activeEnrollments.map((e) => ({
+        card._students = activeEnrollments.map((e) => ({
           studentId: e.studentId,
           studentName: e.studentName || '',
+          studentPhone: e.studentPhone,
           enrollmentStatus: e.status,
         }));
 
-        return this.enrollmentService.getAll({ classGroupId: card.classGroupId, active: true }).pipe(
-          switchMap((allEnrollments) => {
-            const existingIds = new Set(activeEnrollments.map((e) => e.studentId));
-            const additional = allEnrollments.filter(
-              (e) => !existingIds.has(e.studentId) && e.studentName
-            );
-            for (const a of additional) {
-              students.push({
-                studentId: a.studentId,
-                studentName: a.studentName || '',
-                enrollmentStatus: a.status,
-              });
-            }
-            card._students = students;
-
-            if (card.session.id) {
-              return this.attendanceService.getBySessionId(card.session.id);
-            }
-            return of([]);
-          }),
-          catchError(() => {
-            card._students = students;
-            return of([]);
-          })
-        );
-      }),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (attendances) => {
-        if (attendances.length > 0) {
-          const attMap = new Map(attendances.map((a) => [a.studentId, a.status]));
-          for (const student of card._students || []) {
-            student.attendanceStatus = attMap.get(student.studentId);
-          }
+        if (card.session.id) {
+          this.attendanceService.getBySessionId(card.session.id).pipe(takeUntil(this.destroy$)).subscribe({
+            next: (attendances) => {
+              if (attendances.length > 0) {
+                const attMap = new Map(attendances.map((a) => [a.studentId, a.status]));
+                for (const student of card._students || []) {
+                  student.attendanceStatus = attMap.get(student.studentId);
+                }
+              }
+            },
+            error: () => {},
+          });
         }
       },
       error: () => {
@@ -306,72 +286,26 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     });
   }
 
-  setAttendance(student: SessionStudent, status: AttendanceStatus, card: SessionCard): void {
-    if (!this.featureGateService.canManageAttendance()) return;
-    if (student.saving || !card.session.id) return;
-
-    if (student.attendanceStatus === status) return;
-
-    student.saving = true;
-
-    this.attendanceService.createAttendance(card.session.id, {
-      studentId: student.studentId,
-      status,
-    }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        student.attendanceStatus = status;
-        student.saving = false;
-        this.toastService.success('Presença registrada.');
-      },
-      error: () => {
-        student.saving = false;
-        this.toastService.error('Não foi possível registrar a presença.');
-      },
-    });
-  }
-
-  startSession(card: SessionCard): void {
-    if (!this.featureGateService.canStartSession()) return;
-    const sessionId = card.session.id;
-    if (!sessionId || this.sessionActionLoading[sessionId]) return;
-
-    this.sessionActionLoading[sessionId] = 'start';
-
-    this.sessionService.start(sessionId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (updated) => {
-        card.session.status = updated.status;
-        this.sessionActionLoading[sessionId] = null;
-        this.toastService.success('Aula iniciada.');
-      },
-      error: () => {
-        this.sessionActionLoading[sessionId] = null;
-        this.toastService.error('Não foi possível iniciar a aula.');
-      },
-    });
-  }
-
-  completeSession(card: SessionCard): void {
-    if (!this.featureGateService.canCompleteSession()) return;
-    const sessionId = card.session.id;
-    if (!sessionId || this.sessionActionLoading[sessionId]) return;
-
-    this.sessionActionLoading[sessionId] = 'complete';
-
-    this.sessionService.complete(sessionId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (updated) => {
-        card.session.status = updated.status;
-        this.sessionActionLoading[sessionId] = null;
-        this.toastService.success('Aula finalizada.');
-      },
-      error: () => {
-        this.sessionActionLoading[sessionId] = null;
-        this.toastService.error('Não foi possível finalizar a aula.');
-      },
-    });
-  }
-
   getSessionStudents(card: SessionCard): SessionStudent[] {
     return card._students || [];
+  }
+
+  getPresenceLabel(status?: AttendanceStatus): string {
+    const map: Record<string, string> = {
+      PRESENT: 'Presente',
+      ABSENT: 'Ausente',
+      JUSTIFIED: 'Justificado',
+    };
+    return status ? map[status] || '-' : '-';
+  }
+
+  getPresenceStatus(status?: AttendanceStatus): ChipStatus {
+    const map: Record<string, ChipStatus> = {
+      PRESENT: 'success',
+      ABSENT: 'cancelled',
+      JUSTIFIED: 'warning',
+    };
+    return status ? map[status] || 'pending' : 'pending';
   }
 
   getDayName(date: Date): string {

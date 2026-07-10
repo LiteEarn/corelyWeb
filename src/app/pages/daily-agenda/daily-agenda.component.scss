@@ -315,118 +315,72 @@
   }
 }
 
-.card-actions {
-  display: flex;
-  gap: $ds-spacing-md;
-  margin-top: $ds-spacing-lg;
-}
+.students-table-wrapper {
+  overflow-x: auto;
 
-.students-list {
-  display: flex;
-  flex-direction: column;
-  gap: $ds-spacing-sm;
-}
-
-.student-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: $ds-spacing-md $ds-spacing-lg;
-  background: $ds-white;
-  border-radius: $ds-borderRadius-sm;
-  border: 1px solid $ds-border;
-  gap: $ds-spacing-lg;
-}
-
-.student-info {
-  display: flex;
-  align-items: center;
-  gap: $ds-spacing-md;
-  flex: 1;
-  min-width: 0;
-
-  .student-name {
-    font-size: $ds-fontSize-md;
-    font-weight: $ds-fontWeight-medium;
-    color: $ds-text;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-.attendance-toggle-group {
-  display: inline-flex;
-  align-items: center;
-  gap: $ds-spacing-xs;
-  flex-shrink: 0;
-
-  .att-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border: 1px solid $ds-border;
-    border-radius: $ds-borderRadius-sm;
+  .students-table {
+    width: 100%;
     background: $ds-white;
-    cursor: pointer;
-    font-size: $ds-fontSize-xs;
-    font-weight: $ds-fontWeight-medium;
-    color: $ds-textSecondary;
-    transition: all $ds-transition-fast;
-    white-space: nowrap;
-    line-height: 1;
+    border-radius: $ds-borderRadius-sm;
+    border: 1px solid $ds-border;
 
-    mat-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-
-    &:hover:not(:disabled) {
+    .mat-mdc-header-row {
       background: $ds-background;
-      border-color: $ds-neutral300;
     }
 
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .mat-mdc-header-cell {
+      font-size: $ds-fontSize-xs;
+      font-weight: $ds-fontWeight-semibold;
+      color: $ds-textSecondary;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: $ds-spacing-md $ds-spacing-lg;
+      border-bottom-color: $ds-border;
     }
 
-    &.att-present {
-      &.selected {
-        background: $ds-successLight;
-        border-color: $ds-success;
-        color: $ds-successDark;
-      }
+    .mat-mdc-cell {
+      font-size: $ds-fontSize-md;
+      color: $ds-text;
+      padding: $ds-spacing-md $ds-spacing-lg;
+      border-bottom-color: $ds-border;
     }
 
-    &.att-absent {
-      &.selected {
-        background: #fef2f2;
-        border-color: $ds-danger;
-        color: $ds-danger;
-      }
+    .mat-mdc-row:last-child .mat-mdc-cell {
+      border-bottom: none;
     }
 
-    &.att-justified {
-      &.selected {
-        background: #fffbeb;
-        border-color: $ds-warningDark;
-        color: $ds-warningDark;
-      }
+    .mat-column-name {
+      min-width: 160px;
     }
-  }
 
-  .att-spinner {
-    margin-left: $ds-spacing-xs;
+    .mat-column-phone {
+      min-width: 120px;
+    }
+
+    .mat-column-status {
+      min-width: 80px;
+    }
+
+    .mat-column-presence {
+      min-width: 100px;
+    }
+
+    .student-name-cell {
+      font-weight: $ds-fontWeight-medium;
+    }
+
+    .student-phone-cell {
+      color: $ds-textSecondary;
+    }
   }
 }
 
-.student-row.saving {
-  .attendance-toggle-group .att-toggle {
-    pointer-events: none;
-  }
+.students-cards {
+  display: none;
+}
+
+.presence-badge {
+  display: inline-flex;
 }
 
 @media (max-width: 1024px) {
@@ -511,15 +465,45 @@
     grid-template-columns: 1fr;
   }
 
-  .student-row {
-    flex-direction: column;
-    align-items: flex-start;
+  .students-table-wrapper {
+    display: none;
+  }
 
-    .attendance-toggle-group {
-      width: 100%;
-      justify-content: center;
-      padding-top: $ds-spacing-sm;
+  .students-cards {
+    display: flex;
+    flex-direction: column;
+    gap: $ds-spacing-sm;
+  }
+
+  .student-mobile-card {
+    background: $ds-white;
+    border-radius: $ds-borderRadius-sm;
+    border: 1px solid $ds-border;
+    padding: $ds-spacing-md $ds-spacing-lg;
+  }
+
+  .student-mobile-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $ds-spacing-xs 0;
+
+    & + .student-mobile-row {
       border-top: 1px solid $ds-border;
     }
+  }
+
+  .student-mobile-label {
+    font-size: $ds-fontSize-xs;
+    color: $ds-textTertiary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: $ds-fontWeight-medium;
+  }
+
+  .student-mobile-value {
+    font-size: $ds-fontSize-md;
+    color: $ds-text;
+    font-weight: $ds-fontWeight-medium;
   }
 }

@@ -14,7 +14,6 @@ import { AttendanceService } from '../../features/attendance/attendance.service'
 import { Session } from '../../features/sessions/session.model';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { Enrollment } from '../../features/enrollments/enrollment.model';
-import { By } from '@angular/platform-browser';
 
 function todayStr(): string {
   const d = new Date();
@@ -59,6 +58,7 @@ describe('DailyAgendaComponent', () => {
     id: 'enr-1',
     studentId: 'student-1',
     studentName: 'Maria Souza',
+    studentPhone: '11988888888',
     classGroupId: 'cg-1',
     status: 'ACTIVE',
     enrollmentDate: '2026-01-01',
@@ -68,6 +68,7 @@ describe('DailyAgendaComponent', () => {
     id: 'enr-2',
     studentId: 'student-2',
     studentName: 'João Pedro',
+    studentPhone: '11977777777',
     classGroupId: 'cg-1',
     status: 'ACTIVE',
     enrollmentDate: '2026-01-01',
@@ -180,186 +181,7 @@ describe('DailyAgendaComponent', () => {
     });
   });
 
-  describe('action buttons', () => {
-    it('shows Iniciar Aula button when SCHEDULED', () => {
-      component.sessionCards = [{
-        session: { ...mockSession, status: 'SCHEDULED' },
-        instructorName: 'Ana Silva',
-        classGroupId: 'cg-1',
-        enrolledCount: 2,
-        expanded: true,
-      }];
-      component.filteredCards = component.sessionCards;
-      fixture.detectChanges();
-
-      const btn = fixture.debugElement.query(By.css('.card-actions ds-button'));
-      expect(btn).toBeTruthy();
-      expect(btn.componentInstance.label).toBe('Iniciar Aula');
-    });
-
-    it('shows Finalizar Aula button when IN_PROGRESS', () => {
-      component.sessionCards = [{
-        session: { ...mockSession, status: 'IN_PROGRESS' },
-        instructorName: 'Ana Silva',
-        classGroupId: 'cg-1',
-        enrolledCount: 2,
-        expanded: true,
-      }];
-      component.filteredCards = component.sessionCards;
-      fixture.detectChanges();
-
-      const btn = fixture.debugElement.query(By.css('.card-actions ds-button'));
-      expect(btn).toBeTruthy();
-      expect(btn.componentInstance.label).toBe('Finalizar Aula');
-    });
-
-    it('hides action button when COMPLETED', () => {
-      component.sessionCards = [{
-        session: { ...mockSession, status: 'COMPLETED' },
-        instructorName: 'Ana Silva',
-        classGroupId: 'cg-1',
-        enrolledCount: 2,
-        expanded: true,
-      }];
-      component.filteredCards = component.sessionCards;
-      fixture.detectChanges();
-
-      const btn = fixture.debugElement.query(By.css('.card-actions'));
-      expect(btn).toBeFalsy();
-    });
-
-    it('hides action button when CANCELLED', () => {
-      component.sessionCards = [{
-        session: { ...mockSession, status: 'CANCELLED' },
-        instructorName: 'Ana Silva',
-        classGroupId: 'cg-1',
-        enrolledCount: 2,
-        expanded: true,
-      }];
-      component.filteredCards = component.sessionCards;
-      fixture.detectChanges();
-
-      const btn = fixture.debugElement.query(By.css('.card-actions'));
-      expect(btn).toBeFalsy();
-    });
-  });
-
-  describe('startSession', () => {
-    it('calls start and updates status on success', () => {
-      const updatedSession = { ...mockSession, status: 'IN_PROGRESS' };
-      sessionService.start.and.returnValue(of(updatedSession));
-
-      const card = {
-        session: { ...mockSession },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.startSession(card);
-
-      expect(sessionService.start).toHaveBeenCalledWith('session-1');
-      expect(card.session.status).toBe('IN_PROGRESS');
-      expect(toastService.success).toHaveBeenCalledWith('Aula iniciada.');
-    });
-
-    it('calls start and shows error toast on failure', () => {
-      sessionService.start.and.returnValue(throwError(() => new Error('Erro')));
-
-      const card = {
-        session: { ...mockSession },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.startSession(card);
-
-      expect(sessionService.start).toHaveBeenCalledWith('session-1');
-      expect(card.session.status).not.toBe('IN_PROGRESS');
-      expect(toastService.error).toHaveBeenCalledWith('Não foi possível iniciar a aula.');
-    });
-
-    it('does not call start if already loading', () => {
-      const card = {
-        session: { ...mockSession },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.sessionActionLoading['session-1'] = 'start';
-      component.startSession(card);
-
-      expect(sessionService.start).not.toHaveBeenCalled();
-    });
-
-    it('sets loading state before API call', () => {
-      sessionService.start.and.returnValue(of({ ...mockSession, status: 'IN_PROGRESS' }));
-
-      const card = {
-        session: { ...mockSession },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.startSession(card);
-
-      expect(component.sessionActionLoading['session-1']).toBeNull();
-    });
-  });
-
-  describe('completeSession', () => {
-    it('calls complete and updates status on success', () => {
-      const updatedSession = { ...mockSession, status: 'COMPLETED' };
-      sessionService.complete.and.returnValue(of(updatedSession));
-
-      const card = {
-        session: { ...mockSession, status: 'IN_PROGRESS' },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.completeSession(card);
-
-      expect(sessionService.complete).toHaveBeenCalledWith('session-1');
-      expect(card.session.status).toBe('COMPLETED');
-      expect(toastService.success).toHaveBeenCalledWith('Aula finalizada.');
-    });
-
-    it('calls complete and shows error toast on failure', () => {
-      sessionService.complete.and.returnValue(throwError(() => new Error('Erro')));
-
-      const card = {
-        session: { ...mockSession, status: 'IN_PROGRESS' },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.completeSession(card);
-
-      expect(sessionService.complete).toHaveBeenCalledWith('session-1');
-      expect(toastService.error).toHaveBeenCalledWith('Não foi possível finalizar a aula.');
-    });
-
-    it('does not call complete if already loading', () => {
-      const card = {
-        session: { ...mockSession, status: 'IN_PROGRESS' },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.sessionActionLoading['session-1'] = 'complete';
-      component.completeSession(card);
-
-      expect(sessionService.complete).not.toHaveBeenCalled();
-    });
-
-    it('clears loading state after API call', () => {
-      sessionService.complete.and.returnValue(of({ ...mockSession, status: 'COMPLETED' }));
-
-      const card = {
-        session: { ...mockSession, status: 'IN_PROGRESS' },
-        instructorName: 'Ana Silva',
-        expanded: false,
-      };
-      component.completeSession(card);
-
-      expect(component.sessionActionLoading['session-1']).toBeNull();
-    });
-  });
-
-  describe('attendance registration', () => {
+  describe('student list', () => {
     beforeEach(() => {
       component.sessionCards = [{
         session: mockSession,
@@ -368,180 +190,136 @@ describe('DailyAgendaComponent', () => {
         enrolledCount: 2,
         expanded: true,
         _students: [
-          { studentId: 'student-1', studentName: 'Maria Souza', enrollmentStatus: 'ACTIVE' },
-          { studentId: 'student-2', studentName: 'João Pedro', enrollmentStatus: 'ACTIVE' },
+          { studentId: 'student-1', studentName: 'Maria Souza', studentPhone: '11988888888', enrollmentStatus: 'ACTIVE' },
+          { studentId: 'student-2', studentName: 'João Pedro', studentPhone: '11977777777', enrollmentStatus: 'ACTIVE' },
         ],
       }];
       component.filteredCards = component.sessionCards;
+      fixture.detectChanges();
     });
 
-    it('registers PRESENT attendance', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(attendanceService.createAttendance).toHaveBeenCalledWith('session-1', {
-        studentId: 'student-1',
-        status: 'PRESENT',
-      });
-      expect(student.attendanceStatus).toBe('PRESENT');
-      expect(student.saving).toBeFalse();
-      expect(toastService.success).toHaveBeenCalledWith('Presença registrada.');
+    it('renders student table when students are loaded', () => {
+      const table = fixture.nativeElement.querySelector('.students-table');
+      expect(table).toBeTruthy();
     });
 
-    it('registers ABSENT attendance', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'ABSENT', component.sessionCards[0]);
-
-      expect(attendanceService.createAttendance).toHaveBeenCalledWith('session-1', {
-        studentId: 'student-1',
-        status: 'ABSENT',
-      });
-      expect(student.attendanceStatus).toBe('ABSENT');
-      expect(toastService.success).toHaveBeenCalledWith('Presença registrada.');
+    it('renders student names', () => {
+      const cells = fixture.nativeElement.querySelectorAll('.student-name-cell');
+      expect(cells.length).toBe(2);
+      expect(cells[0].textContent).toContain('Maria Souza');
+      expect(cells[1].textContent).toContain('João Pedro');
     });
 
-    it('registers JUSTIFIED attendance', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'JUSTIFIED', component.sessionCards[0]);
-
-      expect(attendanceService.createAttendance).toHaveBeenCalledWith('session-1', {
-        studentId: 'student-1',
-        status: 'JUSTIFIED',
-      });
-      expect(student.attendanceStatus).toBe('JUSTIFIED');
-      expect(toastService.success).toHaveBeenCalledWith('Presença registrada.');
+    it('renders student phones', () => {
+      const cells = fixture.nativeElement.querySelectorAll('.student-phone-cell');
+      expect(cells.length).toBe(2);
+      expect(cells[0].textContent).toContain('11988888888');
+      expect(cells[1].textContent).toContain('11977777777');
     });
 
-    it('updates existing attendance status', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
+    it('shows dash when phone is not available', () => {
+      const card = component.sessionCards[0];
+      card._students = [
+        { studentId: 's1', studentName: 'Aluno Sem Telefone', enrollmentStatus: 'ACTIVE' },
+      ];
+      fixture.detectChanges();
 
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-      expect(student.attendanceStatus).toBe('PRESENT');
-      expect(attendanceService.createAttendance).toHaveBeenCalledTimes(1);
-
-      component.setAttendance(student, 'ABSENT', component.sessionCards[0]);
-      expect(student.attendanceStatus).toBe('ABSENT');
-      expect(attendanceService.createAttendance).toHaveBeenCalledTimes(2);
+      const cells = fixture.nativeElement.querySelectorAll('.student-phone-cell');
+      expect(cells[0].textContent).toContain('-');
     });
 
-    it('shows loading per student while saving', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(student.saving).toBeFalse();
+    it('shows presence badge as placeholder', () => {
+      const badges = fixture.nativeElement.querySelectorAll('.presence-badge');
+      expect(badges.length).toBe(2);
     });
 
-    it('does not save when already saving', () => {
-      const student = component.sessionCards[0]._students![0];
-      student.saving = true;
-
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(attendanceService.createAttendance).not.toHaveBeenCalled();
-    });
-
-    it('handles error and shows toast', () => {
-      attendanceService.createAttendance.and.returnValue(throwError(() => new Error('Erro')));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(student.saving).toBeFalse();
-      expect(student.attendanceStatus).toBeUndefined();
-      expect(toastService.error).toHaveBeenCalledWith('Não foi possível registrar a presença.');
-    });
-
-    it('does not save if session has no id', () => {
-      const cardWithoutId = {
-        ...component.sessionCards[0],
-        session: { ...mockSession, id: undefined },
-      };
-      const student = cardWithoutId._students![0];
-
-      component.setAttendance(student, 'PRESENT', cardWithoutId);
-
-      expect(attendanceService.createAttendance).not.toHaveBeenCalled();
-    });
-
-    it('shows success toast on successful registration', () => {
-      attendanceService.createAttendance.and.returnValue(of({} as any));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(toastService.success).toHaveBeenCalledWith('Presença registrada.');
-    });
-
-    it('shows error toast on failed registration', () => {
-      attendanceService.createAttendance.and.returnValue(throwError(() => new Error('Erro')));
-
-      const student = component.sessionCards[0]._students![0];
-      component.setAttendance(student, 'PRESENT', component.sessionCards[0]);
-
-      expect(toastService.error).toHaveBeenCalledWith('Não foi possível registrar a presença.');
+    it('shows presence badge label as dash when no attendance', () => {
+      const badges = fixture.nativeElement.querySelectorAll('.presence-badge ds-status-chip');
+      expect(badges.length).toBe(2);
     });
   });
 
-  describe('presence toggles disabled state', () => {
-    it('enables toggles when status is IN_PROGRESS', () => {
-      const card = {
-        session: { ...mockSession, status: 'IN_PROGRESS' },
+  describe('student list - empty state', () => {
+    it('shows empty state when no students', () => {
+      component.sessionCards = [{
+        session: mockSession,
+        instructorName: 'Ana Silva',
+        classGroupId: 'cg-1',
+        enrolledCount: 0,
         expanded: true,
-        _students: [
-          { studentId: 's1', studentName: 'Aluno', enrollmentStatus: 'ACTIVE' },
-        ],
-      };
+        _students: [],
+      }];
+      component.filteredCards = component.sessionCards;
+      fixture.detectChanges();
 
-      const togglesDisabled = card.session.status !== 'IN_PROGRESS';
-      expect(togglesDisabled).toBeFalse();
+      const emptyEl = fixture.nativeElement.querySelector('.no-students');
+      expect(emptyEl).toBeTruthy();
+      expect(emptyEl.textContent).toContain('Nenhum aluno matriculado');
+    });
+  });
+
+  describe('student list - loading', () => {
+    it('calls enrollmentService on expand when no students loaded', () => {
+      const card = {
+        session: mockSession,
+        instructorName: 'Ana Silva',
+        classGroupId: 'cg-1',
+        enrolledCount: undefined,
+        expanded: false,
+        _students: undefined,
+      };
+      component.toggleCard(card);
+      expect(enrollmentService.getStudentsByClassGroupId).toHaveBeenCalledWith('cg-1');
     });
 
-    it('disables toggles when status is SCHEDULED', () => {
+    it('does not call enrollmentService if already loaded', () => {
+      enrollmentService.getStudentsByClassGroupId.calls.reset();
       const card = {
-        session: { ...mockSession, status: 'SCHEDULED' },
-        expanded: true,
-        _students: [
-          { studentId: 's1', studentName: 'Aluno', enrollmentStatus: 'ACTIVE' },
-        ],
+        session: mockSession,
+        instructorName: 'Ana Silva',
+        classGroupId: 'cg-1',
+        enrolledCount: 2,
+        expanded: false,
+        _students: [{ studentId: 's1', studentName: 'Aluno', enrollmentStatus: 'ACTIVE' }],
       };
+      component.toggleCard(card);
+      expect(enrollmentService.getStudentsByClassGroupId).not.toHaveBeenCalled();
+    });
+  });
 
-      const togglesDisabled = card.session.status !== 'IN_PROGRESS';
-      expect(togglesDisabled).toBeTrue();
+  describe('getPresenceLabel', () => {
+    it('returns Presente for PRESENT', () => {
+      expect(component.getPresenceLabel('PRESENT')).toBe('Presente');
     });
 
-    it('disables toggles when status is COMPLETED', () => {
-      const card = {
-        session: { ...mockSession, status: 'COMPLETED' },
-        expanded: true,
-        _students: [
-          { studentId: 's1', studentName: 'Aluno', enrollmentStatus: 'ACTIVE' },
-        ],
-      };
-
-      const togglesDisabled = card.session.status !== 'IN_PROGRESS';
-      expect(togglesDisabled).toBeTrue();
+    it('returns Ausente for ABSENT', () => {
+      expect(component.getPresenceLabel('ABSENT')).toBe('Ausente');
     });
 
-    it('disables toggles when status is CANCELLED', () => {
-      const card = {
-        session: { ...mockSession, status: 'CANCELLED' },
-        expanded: true,
-        _students: [
-          { studentId: 's1', studentName: 'Aluno', enrollmentStatus: 'ACTIVE' },
-        ],
-      };
+    it('returns Justificado for JUSTIFIED', () => {
+      expect(component.getPresenceLabel('JUSTIFIED')).toBe('Justificado');
+    });
 
-      const togglesDisabled = card.session.status !== 'IN_PROGRESS';
-      expect(togglesDisabled).toBeTrue();
+    it('returns dash for undefined', () => {
+      expect(component.getPresenceLabel(undefined)).toBe('-');
+    });
+  });
+
+  describe('getPresenceStatus', () => {
+    it('returns success for PRESENT', () => {
+      expect(component.getPresenceStatus('PRESENT')).toBe('success');
+    });
+
+    it('returns cancelled for ABSENT', () => {
+      expect(component.getPresenceStatus('ABSENT')).toBe('cancelled');
+    });
+
+    it('returns warning for JUSTIFIED', () => {
+      expect(component.getPresenceStatus('JUSTIFIED')).toBe('warning');
+    });
+
+    it('returns pending for undefined', () => {
+      expect(component.getPresenceStatus(undefined)).toBe('pending');
     });
   });
 });
