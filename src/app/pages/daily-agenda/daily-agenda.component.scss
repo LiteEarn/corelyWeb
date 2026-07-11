@@ -152,10 +152,111 @@
   }
 }
 
-.cards-list {
+// ── Timeline ──────────────────────────────────────
+
+.timeline {
+  position: relative;
+}
+
+.timeline-period {
+  margin-bottom: $ds-spacing-xl;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.period-header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: $ds-spacing-md;
+  padding: $ds-spacing-md $ds-spacing-lg;
+  margin-bottom: $ds-spacing-lg;
+  background: $ds-background;
+  border-radius: $ds-borderRadius-md;
+  border: 1px solid $ds-border;
+  cursor: pointer;
+  user-select: none;
+  transition: background $ds-transition-fast;
+
+  &:hover {
+    background: darken($ds-background, 2%);
+  }
+
+  .period-title {
+    font-size: $ds-fontSize-lg;
+    font-weight: $ds-fontWeight-bold;
+    color: $ds-text;
+  }
+
+  .period-count {
+    font-size: $ds-fontSize-sm;
+    color: $ds-textSecondary;
+    margin-left: auto;
+  }
+
+  .period-toggle {
+    color: $ds-textTertiary;
+  }
+}
+
+.period-cards {
+  position: relative;
+  padding-left: 40px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: $ds-border;
+  border-radius: 1px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: $ds-spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -40px;
+  top: 24px;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    background: $ds-white;
+    border-radius: 50%;
+  }
+
+  &.dot-scheduled mat-icon {
+    color: $ds-primary;
+  }
+
+  &.dot-in_progress mat-icon {
+    color: $ds-success;
+  }
+
+  &.dot-completed mat-icon {
+    color: $ds-textTertiary;
+  }
+
+  &.dot-cancelled mat-icon {
+    color: $ds-error;
+  }
 }
 
 .session-card {
@@ -189,7 +290,7 @@
 }
 
 .card-time {
-  min-width: 110px;
+  min-width: 60px;
   flex-shrink: 0;
 
   .time-value {
@@ -242,6 +343,11 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+  }
+
+  .present-count {
+    color: $ds-success;
+    font-weight: $ds-fontWeight-medium;
   }
 }
 
@@ -568,6 +674,32 @@
   .agenda-content .date-header .date-full {
     font-size: $ds-fontSize-3xl;
   }
+
+  .period-cards {
+    padding-left: 32px;
+  }
+
+  .timeline-dot {
+    left: -32px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .timeline-line {
+    left: 15px;
+  }
+
+  .card-main {
+    gap: $ds-spacing-md;
+  }
+
+  .card-occupancy .present-count {
+    display: none;
+  }
 }
 
 @media (max-width: 768px) {
@@ -607,6 +739,18 @@
     }
   }
 
+  .period-cards {
+    padding-left: 0;
+  }
+
+  .timeline-line {
+    display: none;
+  }
+
+  .timeline-dot {
+    display: none;
+  }
+
   .session-card .card-main {
     flex-wrap: wrap;
     gap: $ds-spacing-md;
@@ -622,6 +766,10 @@
 
   .card-time {
     min-width: auto;
+  }
+
+  .card-time .time-value {
+    font-size: $ds-fontSize-lg;
   }
 
   .card-info .card-title {

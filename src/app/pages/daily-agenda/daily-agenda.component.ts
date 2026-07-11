@@ -46,6 +46,13 @@ interface SessionCard {
   _students?: SessionStudent[];
 }
 
+interface PeriodGroup {
+  key: string;
+  label: string;
+  cards: SessionCard[];
+  collapsed: boolean;
+}
+
 interface SessionStudent {
   studentId: string;
   enrollmentId?: string;
@@ -86,6 +93,7 @@ interface SessionStudent {
 export class DailyAgendaComponent implements OnInit, OnDestroy {
   sessionCards: SessionCard[] = [];
   filteredCards: SessionCard[] = [];
+  periods: PeriodGroup[] = [];
   instructors: Instructor[] = [];
   selectedDate: Date = new Date();
   instructorFilter: string = 'all';
@@ -93,7 +101,6 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   error: string | null = null;
   sessionActionLoading: Record<string, boolean> = {};
   savingAttendance: { [key: string]: boolean } = {};
-  studentColumns: string[] = ['name', 'phone', 'status', 'presence'];
   pendingChangesBlocked = false;
 
   private allSessions: Session[] = [];
@@ -280,6 +287,62 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
         card.session.instructorId === this.instructorFilter
       );
     });
+    this.buildTimeline();
+  }
+
+  private buildTimeline(): void {
+    const groups: PeriodGroup[] = [
+      { key: 'morning', label: 'Manhã', cards: [], collapsed: false },
+      { key: 'afternoon', label: 'Tarde', cards: [], collapsed: false },
+      { key: 'evening', label: 'Noite', cards: [], collapsed: false },
+    ];
+
+    for (const card of this.filteredCards) {
+      const period = this.getPeriod(card.session.startTime);
+      const group = groups.find((g) => g.key === period);
+      if (group) {
+        group.cards.push(card);
+      }
+    }
+
+    const prevExpanded = new Map<string, boolean>();
+    for (const period of this.periods) {
+      prevExpanded.set(period.key, period.collapsed);
+    }
+    for (const group of groups) {
+      if (prevExpanded.has(group.key)) {
+        group.collapsed = prevExpanded.get(group.key)!;
+      }
+    }
+
+    this.periods = groups.filter((g) => g.cards.length > 0);
+  }
+
+  getPeriod(startTime: string): string {
+    const hour = parseInt(startTime.split(':')[0], 10);
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 18) return 'afternoon';
+    return 'evening';
+  }
+
+  getTimelineIcon(card: SessionCard): string {
+    const status = card.session.status;
+    if (status === 'IN_PROGRESS') return 'play_circle';
+    if (status === 'COMPLETED') return 'check_circle';
+    if (status === 'CANCELLED') return 'cancel';
+    return 'radio_button_unchecked';
+  }
+
+  trackByCardId(_index: number, card: SessionCard): string {
+    return card.session.id || _index.toString();
+  }
+
+  togglePeriod(period: PeriodGroup): void {
+    period.collapsed = !period.collapsed;
+  }
+
+  trackByPeriodKey(_index: number, period: PeriodGroup): string {
+    return period.key;
   }
 
   toggleCard(card: SessionCard): void {
@@ -605,6 +668,10 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     const enrolled = card.enrolledCount ?? 0;
     const capacity = card.session.maxStudents ?? 0;
     return `${enrolled}/${capacity} alunos`;
+  }
+
+  getPresentCount(card: SessionCard): number {
+    return (card._students || []).filter((s) => s.attendanceStatus === 'PRESENT').length;
   }
 
   formatTime(startTime: string, endTime: string): string {

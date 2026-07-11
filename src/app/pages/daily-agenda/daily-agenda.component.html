@@ -102,281 +102,307 @@
       ></ds-empty-state>
     </div>
 
-    <div *ngIf="!loading && !error && filteredCards.length > 0" class="cards-list">
-      <mat-card
-        *ngFor="let card of filteredCards"
-        class="session-card"
-        [class.card-expanded]="card.expanded"
-        [class.card-past]="isPast()"
-      >
-        <div class="card-main" (click)="toggleCard(card)">
-          <div class="card-time">
-            <span class="time-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
+    <div *ngIf="!loading && !error && filteredCards.length > 0" class="timeline">
+      <ng-container *ngFor="let period of periods; trackBy: trackByPeriodKey">
+        <div class="timeline-period">
+          <div class="period-header" (click)="togglePeriod(period)">
+            <span class="period-title">{{ period.label }}</span>
+            <span class="period-count">{{ period.cards.length }} {{ period.cards.length === 1 ? 'aula' : 'aulas' }}</span>
+            <mat-icon class="period-toggle">{{ period.collapsed ? 'expand_more' : 'expand_less' }}</mat-icon>
           </div>
 
-           <div class="card-info">
-             <h3 class="card-title">{{ card.session.classGroupName }}</h3>
-             <span class="card-instructor">
-               <mat-icon>person</mat-icon>
-               {{ card.instructorName }}
-             </span>
-           </div>
+          <div *ngIf="!period.collapsed" class="period-cards">
+            <div class="timeline-line"></div>
 
-          <div class="card-occupancy">
-            <mat-icon>people</mat-icon>
-            <span>{{ getOccupancyLabel(card) }}</span>
-          </div>
-
-          <div class="card-status">
-            <ds-status-chip
-              [status]="getStatusChip(card.session.status).status"
-              [label]="getStatusChip(card.session.status).label"
-            ></ds-status-chip>
-          </div>
-
-          <div class="card-expand-icon">
-            <mat-icon>{{ card.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
-          </div>
-        </div>
-
-        <div *ngIf="card.expanded" class="card-detail">
-          <div class="detail-section">
-            <h4 class="detail-title">Detalhes da Aula</h4>
-
-            <div class="detail-grid">
-               <div class="detail-item">
-                 <span class="detail-label">Turma</span>
-                 <span class="detail-value">{{ card.session.classGroupName }}</span>
-               </div>
-              <div class="detail-item">
-                <span class="detail-label">Instrutor</span>
-                <span class="detail-value">{{ card.instructorName }}</span>
+            <div
+              *ngFor="let card of period.cards; trackBy: trackByCardId"
+              class="timeline-item"
+              [class.timeline-item-expanded]="card.expanded"
+            >
+              <div class="timeline-dot" [class]="'dot-' + card.session.status.toLowerCase()">
+                <mat-icon>{{ getTimelineIcon(card) }}</mat-icon>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">Horário</span>
-                <span class="detail-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Status</span>
-                <ds-status-chip
-                  [status]="getStatusChip(card.session.status).status"
-                  [label]="getStatusChip(card.session.status).label"
-                ></ds-status-chip>
-              </div>
-            </div>
 
-            <div *ngIf="!isSessionReadonly(card)" class="session-actions">
-              <button
-                *ngIf="canStart(card)"
-                mat-flat-button
-                color="primary"
-                class="session-action-btn"
-                (click)="startSession(card); $event.stopPropagation()"
-                [disabled]="sessionActionLoading[card.session.id!]"
+              <mat-card
+                class="session-card"
+                [class.card-expanded]="card.expanded"
+                [class.card-past]="isPast()"
               >
-                <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">play_arrow</mat-icon>
-                <mat-progress-spinner
-                  *ngIf="sessionActionLoading[card.session.id!]"
-                  diameter="20"
-                  mode="indeterminate"
-                  color="primary"
-                ></mat-progress-spinner>
-                {{ sessionActionLoading[card.session.id!] ? 'Iniciando...' : 'Iniciar Aula' }}
-              </button>
+                <div class="card-main" (click)="toggleCard(card)">
+                  <div class="card-time">
+                    <span class="time-value">{{ card.session.startTime | slice:0:5 }}</span>
+                  </div>
 
-              <button
-                *ngIf="canComplete(card)"
-                mat-flat-button
-                color="primary"
-                class="session-action-btn"
-                (click)="completeSession(card); $event.stopPropagation()"
-                [disabled]="sessionActionLoading[card.session.id!]"
-              >
-                <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">check_circle</mat-icon>
-                <mat-progress-spinner
-                  *ngIf="sessionActionLoading[card.session.id!]"
-                  diameter="20"
-                  mode="indeterminate"
-                  color="primary"
-                ></mat-progress-spinner>
-                {{ sessionActionLoading[card.session.id!] ? 'Finalizando...' : 'Finalizar Aula' }}
-              </button>
+                  <div class="card-info">
+                    <h3 class="card-title">{{ card.session.classGroupName }}</h3>
+                    <span class="card-instructor">
+                      <mat-icon>person</mat-icon>
+                      {{ card.instructorName }}
+                    </span>
+                  </div>
 
-              <button
-                *ngIf="canCancel(card)"
-                mat-stroked-button
-                color="warn"
-                class="session-action-btn session-action-btn-cancel"
-                (click)="cancelSession(card); $event.stopPropagation()"
-                [disabled]="sessionActionLoading[card.session.id!]"
-              >
-                <mat-icon>cancel</mat-icon>
-                Cancelar Aula
-              </button>
-            </div>
-          </div>
+                  <div class="card-occupancy">
+                    <mat-icon>people</mat-icon>
+                    <span>{{ getOccupancyLabel(card) }}</span>
+                    <span *ngIf="getPresentCount(card) > 0" class="present-count">
+                      {{ getPresentCount(card) }} presente{{ getPresentCount(card) > 1 ? 's' : '' }}
+                    </span>
+                  </div>
 
-          <div class="detail-section">
-            <h4 class="detail-title">
-              Alunos da Turma
-              <span *ngIf="getSessionStudents(card).length > 0" class="student-count-badge">
-                {{ getSessionStudents(card).length }}
-              </span>
-            </h4>
-
-            <div *ngIf="getSessionStudents(card).length === 0" class="no-students">
-              <mat-icon>person_off</mat-icon>
-              <span>Nenhum aluno matriculado nesta turma.</span>
-            </div>
-
-            <div *ngIf="getSessionStudents(card).length > 0" class="students-table-wrapper">
-              <table mat-table [dataSource]="getSessionStudents(card)" class="students-table">
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Nome</th>
-                  <td mat-cell *matCellDef="let student">
-                    <span class="student-name-cell">{{ student.studentName }}</span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="phone">
-                  <th mat-header-cell *matHeaderCellDef>Telefone</th>
-                  <td mat-cell *matCellDef="let student">
-                    <span class="student-phone-cell">{{ student.studentPhone || '-' }}</span>
-                  </td>
-                </ng-container>
-
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef>Status</th>
-                  <td mat-cell *matCellDef="let student">
+                  <div class="card-status">
                     <ds-status-chip
-                      [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
-                      [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                      [status]="getStatusChip(card.session.status).status"
+                      [label]="getStatusChip(card.session.status).label"
                     ></ds-status-chip>
-                  </td>
-                </ng-container>
+                  </div>
 
-                <ng-container matColumnDef="presence">
-                  <th mat-header-cell *matHeaderCellDef>Presença</th>
-                  <td mat-cell *matCellDef="let student">
-                    <div class="attendance-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
-                      <button
-                        type="button"
-                        class="att-btn"
-                        [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
-                        [class.att-present]="student.attendanceStatus === 'PRESENT'"
-                        (click)="onAttendanceChange(card, student, 'PRESENT')"
-                        [disabled]="isSaving(card) || isSessionReadonly(card)"
-                      >
-                        <mat-icon>check_circle</mat-icon>
-                        Presente
-                      </button>
-                      <button
-                        type="button"
-                        class="att-btn"
-                        [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
-                        [class.att-absent]="student.attendanceStatus === 'ABSENT'"
-                        (click)="onAttendanceChange(card, student, 'ABSENT')"
-                        [disabled]="isSaving(card) || isSessionReadonly(card)"
-                      >
-                        <mat-icon>cancel</mat-icon>
-                        Falta
-                      </button>
-                      <button
-                        type="button"
-                        class="att-btn"
-                        [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
-                        [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
-                        (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
-                        [disabled]="isSaving(card) || isSessionReadonly(card)"
-                      >
-                        <mat-icon>info</mat-icon>
-                        Justif.
-                      </button>
-                    </div>
-                  </td>
-                </ng-container>
-
-                <tr mat-header-row *matHeaderRowDef="studentColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: studentColumns;"></tr>
-              </table>
-            </div>
-
-            <div *ngIf="getSessionStudents(card).length > 0" class="students-cards">
-              <div *ngFor="let student of getSessionStudents(card)" class="student-mobile-card">
-                <div class="student-mobile-row">
-                  <span class="student-mobile-label">Nome</span>
-                  <span class="student-mobile-value">{{ student.studentName }}</span>
-                </div>
-                <div class="student-mobile-row">
-                  <span class="student-mobile-label">Telefone</span>
-                  <span class="student-mobile-value">{{ student.studentPhone || '-' }}</span>
-                </div>
-                <div class="student-mobile-row">
-                  <span class="student-mobile-label">Status</span>
-                  <ds-status-chip
-                    [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
-                    [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
-                  ></ds-status-chip>
-                </div>
-                <div class="student-mobile-row attendance-mobile-row">
-                  <span class="student-mobile-label">Presença</span>
-                  <div class="attendance-controls mobile-att-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
-                    <button
-                      type="button"
-                      class="att-btn att-btn-sm"
-                      [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
-                      [class.att-present]="student.attendanceStatus === 'PRESENT'"
-                      (click)="onAttendanceChange(card, student, 'PRESENT')"
-                      [disabled]="isSaving(card) || isSessionReadonly(card)"
-                    >
-                      <mat-icon>check_circle</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      class="att-btn att-btn-sm"
-                      [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
-                      [class.att-absent]="student.attendanceStatus === 'ABSENT'"
-                      (click)="onAttendanceChange(card, student, 'ABSENT')"
-                      [disabled]="isSaving(card) || isSessionReadonly(card)"
-                    >
-                      <mat-icon>cancel</mat-icon>
-                    </button>
-                    <button
-                      type="button"
-                      class="att-btn att-btn-sm"
-                      [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
-                      [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
-                      (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
-                      [disabled]="isSaving(card) || isSessionReadonly(card)"
-                    >
-                      <mat-icon>info</mat-icon>
-                    </button>
+                  <div class="card-expand-icon">
+                    <mat-icon>{{ card.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div *ngIf="getSessionStudents(card).length > 0 && hasAttendanceChanges(card) && !isSessionReadonly(card)" class="attendance-save-bar">
-              <button
-                mat-flat-button
-                color="primary"
-                class="save-attendance-btn"
-                (click)="saveAttendances(card)"
-                [disabled]="isSaving(card)"
-              >
-                <mat-icon *ngIf="!isSaving(card)">save</mat-icon>
-                <mat-progress-spinner
-                  *ngIf="isSaving(card)"
-                  diameter="20"
-                  mode="indeterminate"
-                  color="primary"
-                ></mat-progress-spinner>
-                {{ isSaving(card) ? 'Salvando...' : 'Salvar Presenças' }}
-              </button>
+                <div *ngIf="card.expanded" class="card-detail">
+                  <div class="detail-section">
+                    <h4 class="detail-title">Detalhes da Aula</h4>
+
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <span class="detail-label">Turma</span>
+                        <span class="detail-value">{{ card.session.classGroupName }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Instrutor</span>
+                        <span class="detail-value">{{ card.instructorName }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Horário</span>
+                        <span class="detail-value">{{ formatTime(card.session.startTime, card.session.endTime) }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <ds-status-chip
+                          [status]="getStatusChip(card.session.status).status"
+                          [label]="getStatusChip(card.session.status).label"
+                        ></ds-status-chip>
+                      </div>
+                    </div>
+
+                    <div *ngIf="!isSessionReadonly(card)" class="session-actions">
+                      <button
+                        *ngIf="canStart(card)"
+                        mat-flat-button
+                        color="primary"
+                        class="session-action-btn"
+                        (click)="startSession(card); $event.stopPropagation()"
+                        [disabled]="sessionActionLoading[card.session.id!]"
+                      >
+                        <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">play_arrow</mat-icon>
+                        <mat-progress-spinner
+                          *ngIf="sessionActionLoading[card.session.id!]"
+                          diameter="20"
+                          mode="indeterminate"
+                          color="primary"
+                        ></mat-progress-spinner>
+                        {{ sessionActionLoading[card.session.id!] ? 'Iniciando...' : 'Iniciar Aula' }}
+                      </button>
+
+                      <button
+                        *ngIf="canComplete(card)"
+                        mat-flat-button
+                        color="primary"
+                        class="session-action-btn"
+                        (click)="completeSession(card); $event.stopPropagation()"
+                        [disabled]="sessionActionLoading[card.session.id!]"
+                      >
+                        <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">check_circle</mat-icon>
+                        <mat-progress-spinner
+                          *ngIf="sessionActionLoading[card.session.id!]"
+                          diameter="20"
+                          mode="indeterminate"
+                          color="primary"
+                        ></mat-progress-spinner>
+                        {{ sessionActionLoading[card.session.id!] ? 'Finalizando...' : 'Finalizar Aula' }}
+                      </button>
+
+                      <button
+                        *ngIf="canCancel(card)"
+                        mat-stroked-button
+                        color="warn"
+                        class="session-action-btn session-action-btn-cancel"
+                        (click)="cancelSession(card); $event.stopPropagation()"
+                        [disabled]="sessionActionLoading[card.session.id!]"
+                      >
+                        <mat-icon>cancel</mat-icon>
+                        Cancelar Aula
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="detail-section">
+                    <h4 class="detail-title">
+                      Alunos da Turma
+                      <span *ngIf="getSessionStudents(card).length > 0" class="student-count-badge">
+                        {{ getSessionStudents(card).length }}
+                      </span>
+                    </h4>
+
+                    <div *ngIf="getSessionStudents(card).length === 0" class="no-students">
+                      <mat-icon>person_off</mat-icon>
+                      <span>Nenhum aluno matriculado nesta turma.</span>
+                    </div>
+
+                    <div *ngIf="getSessionStudents(card).length > 0" class="students-table-wrapper">
+                      <table mat-table [dataSource]="getSessionStudents(card)" class="students-table">
+                        <ng-container matColumnDef="name">
+                          <th mat-header-cell *matHeaderCellDef>Nome</th>
+                          <td mat-cell *matCellDef="let student">
+                            <span class="student-name-cell">{{ student.studentName }}</span>
+                          </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="phone">
+                          <th mat-header-cell *matHeaderCellDef>Telefone</th>
+                          <td mat-cell *matCellDef="let student">
+                            <span class="student-phone-cell">{{ student.studentPhone || '-' }}</span>
+                          </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                          <th mat-header-cell *matHeaderCellDef>Status</th>
+                          <td mat-cell *matCellDef="let student">
+                            <ds-status-chip
+                              [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
+                              [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                            ></ds-status-chip>
+                          </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="presence">
+                          <th mat-header-cell *matHeaderCellDef>Presença</th>
+                          <td mat-cell *matCellDef="let student">
+                            <div class="attendance-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
+                              <button
+                                type="button"
+                                class="att-btn"
+                                [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
+                                [class.att-present]="student.attendanceStatus === 'PRESENT'"
+                                (click)="onAttendanceChange(card, student, 'PRESENT')"
+                                [disabled]="isSaving(card) || isSessionReadonly(card)"
+                              >
+                                <mat-icon>check_circle</mat-icon>
+                                Presente
+                              </button>
+                              <button
+                                type="button"
+                                class="att-btn"
+                                [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
+                                [class.att-absent]="student.attendanceStatus === 'ABSENT'"
+                                (click)="onAttendanceChange(card, student, 'ABSENT')"
+                                [disabled]="isSaving(card) || isSessionReadonly(card)"
+                              >
+                                <mat-icon>cancel</mat-icon>
+                                Falta
+                              </button>
+                              <button
+                                type="button"
+                                class="att-btn"
+                                [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
+                                [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
+                                (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
+                                [disabled]="isSaving(card) || isSessionReadonly(card)"
+                              >
+                                <mat-icon>info</mat-icon>
+                                Justif.
+                              </button>
+                            </div>
+                          </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['name', 'phone', 'status', 'presence']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['name', 'phone', 'status', 'presence'];"></tr>
+                      </table>
+                    </div>
+
+                    <div *ngIf="getSessionStudents(card).length > 0" class="students-cards">
+                      <div *ngFor="let student of getSessionStudents(card)" class="student-mobile-card">
+                        <div class="student-mobile-row">
+                          <span class="student-mobile-label">Nome</span>
+                          <span class="student-mobile-value">{{ student.studentName }}</span>
+                        </div>
+                        <div class="student-mobile-row">
+                          <span class="student-mobile-label">Telefone</span>
+                          <span class="student-mobile-value">{{ student.studentPhone || '-' }}</span>
+                        </div>
+                        <div class="student-mobile-row">
+                          <span class="student-mobile-label">Status</span>
+                          <ds-status-chip
+                            [status]="student.enrollmentStatus === 'ACTIVE' ? 'active' : 'inactive'"
+                            [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
+                          ></ds-status-chip>
+                        </div>
+                        <div class="student-mobile-row attendance-mobile-row">
+                          <span class="student-mobile-label">Presença</span>
+                          <div class="attendance-controls mobile-att-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
+                            <button
+                              type="button"
+                              class="att-btn att-btn-sm"
+                              [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
+                              [class.att-present]="student.attendanceStatus === 'PRESENT'"
+                              (click)="onAttendanceChange(card, student, 'PRESENT')"
+                              [disabled]="isSaving(card) || isSessionReadonly(card)"
+                            >
+                              <mat-icon>check_circle</mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="att-btn att-btn-sm"
+                              [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
+                              [class.att-absent]="student.attendanceStatus === 'ABSENT'"
+                              (click)="onAttendanceChange(card, student, 'ABSENT')"
+                              [disabled]="isSaving(card) || isSessionReadonly(card)"
+                            >
+                              <mat-icon>cancel</mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="att-btn att-btn-sm"
+                              [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
+                              [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
+                              (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
+                              [disabled]="isSaving(card) || isSessionReadonly(card)"
+                            >
+                              <mat-icon>info</mat-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div *ngIf="getSessionStudents(card).length > 0 && hasAttendanceChanges(card) && !isSessionReadonly(card)" class="attendance-save-bar">
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        class="save-attendance-btn"
+                        (click)="saveAttendances(card)"
+                        [disabled]="isSaving(card)"
+                      >
+                        <mat-icon *ngIf="!isSaving(card)">save</mat-icon>
+                        <mat-progress-spinner
+                          *ngIf="isSaving(card)"
+                          diameter="20"
+                          mode="indeterminate"
+                          color="primary"
+                        ></mat-progress-spinner>
+                        {{ isSaving(card) ? 'Salvando...' : 'Salvar Presenças' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </mat-card>
             </div>
           </div>
         </div>
-      </mat-card>
+      </ng-container>
     </div>
   </div>
 </div>
