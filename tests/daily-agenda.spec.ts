@@ -191,16 +191,80 @@ test.describe('Daily Agenda', () => {
       await expect(phones.nth(2)).toContainText('-');
     });
 
-    test('shows presence badge placeholder', async ({ page }) => {
+    test('shows attendance controls', async ({ page }) => {
       await setupEnrollmentsApi(page);
       await setupAttendanceApi(page);
       await page.goto('/daily-agenda');
       await page.waitForSelector('.session-card');
 
       await page.locator('.session-card').first().click();
-      await page.waitForSelector('.presence-badge');
-      const badges = page.locator('.presence-badge');
-      await expect(badges).toHaveCount(3);
+      await page.waitForSelector('.attendance-controls');
+      const controls = page.locator('.attendance-controls');
+      await expect(controls).toHaveCount(3);
+    });
+
+    test('clicking attendance button changes status', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await setupAttendanceApi(page);
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.att-btn');
+      await page.locator('.att-btn').first().click();
+      await expect(page.locator('.att-btn').first()).toHaveClass(/att-btn-active/);
+    });
+
+    test('shows save button when attendance changes', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await setupAttendanceApi(page);
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.att-btn');
+      await page.locator('.att-btn').first().click();
+      await expect(page.locator('.save-attendance-btn')).toBeVisible();
+    });
+
+    test('saves attendance and shows success', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await page.route('**/api/class-sessions/*/attendance', async (route: any) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+        } else if (route.request().method() === 'PUT') {
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+            { enrollmentId: 'enr-1', status: 'PRESENT', studentName: 'Maria Souza' },
+            { enrollmentId: 'enr-2', status: 'PRESENT', studentName: 'João Pedro' },
+            { enrollmentId: 'enr-3', status: 'PRESENT', studentName: 'Ana Beatriz' },
+          ]) });
+        }
+      });
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.att-btn');
+      await page.locator('.att-btn').first().click();
+      await page.locator('.save-attendance-btn').click();
+      await expect(page.locator('.mat-mdc-snack-bar-container')).toBeVisible();
+    });
+
+    test('recarregar mantém estado da presença', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await page.route('**/api/class-sessions/*/attendance', async (route: any) => {
+        if (route.request().method() === 'GET') {
+          await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+            { enrollmentId: 'enr-1', status: 'PRESENT', studentName: 'Maria Souza' },
+          ]) });
+        }
+      });
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.att-btn');
+      const presentBtns = page.locator('.att-present');
+      await expect(presentBtns).toHaveCount(1);
     });
   });
 
@@ -322,6 +386,18 @@ test.describe('Daily Agenda', () => {
       await page.locator('.session-card').first().click();
       await page.waitForSelector('.student-mobile-card');
       await expect(page.locator('.student-mobile-card')).toHaveCount(3);
+    });
+
+    test('mobile shows attendance controls in cards', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await setupAttendanceApi(page);
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.mobile-att-controls');
+      const controls = page.locator('.mobile-att-controls');
+      await expect(controls).toHaveCount(3);
     });
   });
 });
