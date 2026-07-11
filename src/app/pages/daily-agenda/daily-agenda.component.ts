@@ -13,7 +13,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { Subject, of } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
+import { takeUntil, finalize, switchMap } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import {
   DsPageHeaderComponent,
   DsEmptyStateComponent,
@@ -85,7 +87,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   instructorFilter: string = 'all';
   loading: boolean = false;
   error: string | null = null;
-  sessionActionLoading: Record<string, 'start' | 'complete' | null> = {};
+  sessionActionLoading: Record<string, boolean> = {};
   savingAttendance: { [key: string]: boolean } = {};
   studentColumns: string[] = ['name', 'phone', 'status', 'presence'];
 
@@ -101,6 +103,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     private toastService: ToastService,
     private attendanceService: AttendanceService,
     private featureGateService: FeatureGateService,
+    private dialog: MatDialog,
     @Inject(LOCALE_ID) private locale: string
   ) {}
 
@@ -365,6 +368,151 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
       JUSTIFIED: 'warning',
     };
     return status ? map[status] || 'pending' : 'pending';
+  }
+
+  startSession(card: SessionCard): void {
+    const id = card.session.id;
+    if (!id || this.sessionActionLoading[id]) return;
+
+    this.sessionActionLoading[id] = true;
+    this.sessionService.start(id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => (this.sessionActionLoading[id] = false))
+    ).subscribe({
+      next: () => {
+        card.session.status = 'IN_PROGRESS';
+        this.toastService.success('Aula iniciada com sucesso.');
+      },
+      error: () => {
+        this.toastService.error('Erro ao iniciar aula.');
+      },
+    });
+  }
+
+  completeSession(card: SessionCard): void {
+    const id = card.session.id;
+    if (!id || this.sessionActionLoading[id]) return;
+
+    if (this.hasAttendanceChanges(card)) {
+      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+        width: '400px',
+        data: {
+          title: 'Finalizar Aula',
+          message: 'Existem alterações de presença não salvas. Deseja salvar as presenças antes de finalizar a aula?',
+          confirmText: 'Salvar e Finalizar',
+          cancelText: 'Cancelar',
+        },
+      });
+
+      dialogRef.afterClosed().pipe(
+        takeUntil(this.destroy$)
+      ).subscribe((confirmed) => {
+        if (confirmed) {
+          this.saveAttendancesAndComplete(card);
+        }
+      });
+      return;
+    }
+
+    this.executeComplete(card);
+  }
+
+  private saveAttendancesAndComplete(card: SessionCard): void {
+    const sessionId = card.session.id;
+    if (!sessionId) return;
+
+    const items = this.getModifiedAttendances(card);
+    if (items.length === 0) {
+      this.executeComplete(card);
+      return;
+    }
+
+    this.attendanceService.saveSessionAttendances(sessionId, { attendances: items }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
+        for (const student of card._students || []) {
+          student._originalStatus = student.attendanceStatus;
+        }
+        this.executeComplete(card);
+      },
+      error: () => {
+        this.toastService.error('Erro ao salvar presenças. Aula não finalizada.');
+      },
+    });
+  }
+
+  private executeComplete(card: SessionCard): void {
+    const id = card.session.id;
+    if (!id) return;
+
+    this.sessionActionLoading[id] = true;
+    this.sessionService.complete(id).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => (this.sessionActionLoading[id] = false))
+    ).subscribe({
+      next: () => {
+        card.session.status = 'COMPLETED';
+        this.toastService.success('Aula finalizada com sucesso.');
+      },
+      error: () => {
+        this.toastService.error('Erro ao finalizar aula.');
+      },
+    });
+  }
+
+  cancelSession(card: SessionCard): void {
+    const id = card.session.id;
+    if (!id || this.sessionActionLoading[id]) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Cancelar Aula',
+        message: 'Tem certeza que deseja cancelar esta aula?',
+        confirmText: 'Cancelar Aula',
+        cancelText: 'Voltar',
+      },
+    });
+
+    dialogRef.afterClosed().pipe(
+      takeUntil(this.destroy$),
+      switchMap((confirmed) => {
+        if (!confirmed) return of(null);
+        this.sessionActionLoading[id] = true;
+        return this.sessionService.cancel(id).pipe(
+          finalize(() => (this.sessionActionLoading[id] = false))
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (result) => {
+        if (result) {
+          card.session.status = 'CANCELLED';
+          this.toastService.success('Aula cancelada.');
+        }
+      },
+      error: () => {
+        this.sessionActionLoading[id] = false;
+        this.toastService.error('Erro ao cancelar aula.');
+      },
+    });
+  }
+
+  canStart(card: SessionCard): boolean {
+    return card.session.status === 'SCHEDULED';
+  }
+
+  canComplete(card: SessionCard): boolean {
+    return card.session.status === 'IN_PROGRESS';
+  }
+
+  canCancel(card: SessionCard): boolean {
+    return card.session.status === 'SCHEDULED' || card.session.status === 'IN_PROGRESS';
+  }
+
+  isSessionReadonly(card: SessionCard): boolean {
+    return card.session.status === 'COMPLETED' || card.session.status === 'CANCELLED';
   }
 
   getDayName(date: Date): string {

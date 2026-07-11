@@ -55,4 +55,8 @@ export class SessionService {
   complete(id: string): Observable<Session> {
     return this.http.patch<Session>(`${this.apiUrl}/${id}/complete`, {});
   }
+
+  cancel(id: string): Observable<Session> {
+    return this.http.patch<Session>(`${this.apiUrl}/${id}/cancel`, {});
+  }
 }
