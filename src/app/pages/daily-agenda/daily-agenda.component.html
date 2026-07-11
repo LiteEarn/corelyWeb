@@ -148,6 +148,56 @@
                 ></ds-status-chip>
               </div>
             </div>
+
+            <div *ngIf="!isSessionReadonly(card)" class="session-actions">
+              <button
+                *ngIf="canStart(card)"
+                mat-flat-button
+                color="primary"
+                class="session-action-btn"
+                (click)="startSession(card); $event.stopPropagation()"
+                [disabled]="sessionActionLoading[card.session.id!]"
+              >
+                <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">play_arrow</mat-icon>
+                <mat-progress-spinner
+                  *ngIf="sessionActionLoading[card.session.id!]"
+                  diameter="20"
+                  mode="indeterminate"
+                  color="primary"
+                ></mat-progress-spinner>
+                {{ sessionActionLoading[card.session.id!] ? 'Iniciando...' : 'Iniciar Aula' }}
+              </button>
+
+              <button
+                *ngIf="canComplete(card)"
+                mat-flat-button
+                color="primary"
+                class="session-action-btn"
+                (click)="completeSession(card); $event.stopPropagation()"
+                [disabled]="sessionActionLoading[card.session.id!]"
+              >
+                <mat-icon *ngIf="!sessionActionLoading[card.session.id!]">check_circle</mat-icon>
+                <mat-progress-spinner
+                  *ngIf="sessionActionLoading[card.session.id!]"
+                  diameter="20"
+                  mode="indeterminate"
+                  color="primary"
+                ></mat-progress-spinner>
+                {{ sessionActionLoading[card.session.id!] ? 'Finalizando...' : 'Finalizar Aula' }}
+              </button>
+
+              <button
+                *ngIf="canCancel(card)"
+                mat-stroked-button
+                color="warn"
+                class="session-action-btn session-action-btn-cancel"
+                (click)="cancelSession(card); $event.stopPropagation()"
+                [disabled]="sessionActionLoading[card.session.id!]"
+              >
+                <mat-icon>cancel</mat-icon>
+                Cancelar Aula
+              </button>
+            </div>
           </div>
 
           <div class="detail-section">
@@ -192,14 +242,14 @@
                 <ng-container matColumnDef="presence">
                   <th mat-header-cell *matHeaderCellDef>Presença</th>
                   <td mat-cell *matCellDef="let student">
-                    <div class="attendance-controls" [class.controls-disabled]="isSaving(card)">
+                    <div class="attendance-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
                       <button
                         type="button"
                         class="att-btn"
                         [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
                         [class.att-present]="student.attendanceStatus === 'PRESENT'"
                         (click)="onAttendanceChange(card, student, 'PRESENT')"
-                        [disabled]="isSaving(card)"
+                        [disabled]="isSaving(card) || isSessionReadonly(card)"
                       >
                         <mat-icon>check_circle</mat-icon>
                         Presente
@@ -210,7 +260,7 @@
                         [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
                         [class.att-absent]="student.attendanceStatus === 'ABSENT'"
                         (click)="onAttendanceChange(card, student, 'ABSENT')"
-                        [disabled]="isSaving(card)"
+                        [disabled]="isSaving(card) || isSessionReadonly(card)"
                       >
                         <mat-icon>cancel</mat-icon>
                         Falta
@@ -221,7 +271,7 @@
                         [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
                         [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
                         (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
-                        [disabled]="isSaving(card)"
+                        [disabled]="isSaving(card) || isSessionReadonly(card)"
                       >
                         <mat-icon>info</mat-icon>
                         Justif.
@@ -254,14 +304,14 @@
                 </div>
                 <div class="student-mobile-row attendance-mobile-row">
                   <span class="student-mobile-label">Presença</span>
-                  <div class="attendance-controls mobile-att-controls" [class.controls-disabled]="isSaving(card)">
+                  <div class="attendance-controls mobile-att-controls" [class.controls-disabled]="isSaving(card) || isSessionReadonly(card)">
                     <button
                       type="button"
                       class="att-btn att-btn-sm"
                       [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
                       [class.att-present]="student.attendanceStatus === 'PRESENT'"
                       (click)="onAttendanceChange(card, student, 'PRESENT')"
-                      [disabled]="isSaving(card)"
+                      [disabled]="isSaving(card) || isSessionReadonly(card)"
                     >
                       <mat-icon>check_circle</mat-icon>
                     </button>
@@ -271,7 +321,7 @@
                       [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
                       [class.att-absent]="student.attendanceStatus === 'ABSENT'"
                       (click)="onAttendanceChange(card, student, 'ABSENT')"
-                      [disabled]="isSaving(card)"
+                      [disabled]="isSaving(card) || isSessionReadonly(card)"
                     >
                       <mat-icon>cancel</mat-icon>
                     </button>
@@ -281,7 +331,7 @@
                       [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
                       [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
                       (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
-                      [disabled]="isSaving(card)"
+                      [disabled]="isSaving(card) || isSessionReadonly(card)"
                     >
                       <mat-icon>info</mat-icon>
                     </button>
@@ -290,7 +340,7 @@
               </div>
             </div>
 
-            <div *ngIf="getSessionStudents(card).length > 0 && hasAttendanceChanges(card)" class="attendance-save-bar">
+            <div *ngIf="getSessionStudents(card).length > 0 && hasAttendanceChanges(card) && !isSessionReadonly(card)" class="attendance-save-bar">
               <button
                 mat-flat-button
                 color="primary"

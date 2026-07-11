@@ -492,6 +492,33 @@
   display: inline-flex;
 }
 
+.session-actions {
+  display: flex;
+  gap: $ds-spacing-md;
+  padding-top: $ds-spacing-lg;
+  flex-wrap: wrap;
+
+  .session-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $ds-spacing-sm;
+    min-width: 160px;
+    justify-content: center;
+
+    mat-progress-spinner {
+      display: inline-block;
+    }
+  }
+
+  .session-action-btn-cancel {
+    border-color: $ds-error;
+
+    mat-icon {
+      color: $ds-error;
+    }
+  }
+}
+
 @media (max-width: 1024px) {
   .daily-agenda-page {
     padding: 28px $ds-spacing-lg;
