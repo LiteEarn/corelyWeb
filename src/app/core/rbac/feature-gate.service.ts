@@ -145,6 +145,18 @@ export class FeatureGateService {
     return this.permissionService.hasPermission('SETTINGS_READ');
   }
 
+  canLoadPlans(): boolean {
+    return this.permissionService.hasPermission('PLAN_READ');
+  }
+
+  canManagePlans(): boolean {
+    return this.permissionService.hasPermission('PLAN_WRITE');
+  }
+
+  canManagePlanEnrollments(): boolean {
+    return this.permissionService.hasPermission('PLAN_WRITE');
+  }
+
   canLoadInstructorFilters(): boolean {
     return this.permissionService.hasRole(Role.OWNER)
       || this.permissionService.hasRole(Role.ADMIN);
