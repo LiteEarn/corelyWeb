@@ -214,6 +214,7 @@ describe('DailyAgendaComponent', () => {
         ],
       }];
       component.filteredCards = component.sessionCards;
+      (component as any).buildTimeline();
       fixture.detectChanges();
     });
 
@@ -269,6 +270,7 @@ describe('DailyAgendaComponent', () => {
         _students: [],
       }];
       component.filteredCards = component.sessionCards;
+      (component as any).buildTimeline();
       fixture.detectChanges();
 
       const emptyEl = fixture.nativeElement.querySelector('.no-students');
@@ -475,6 +477,112 @@ describe('DailyAgendaComponent', () => {
     });
   });
 
+  describe('timeline', () => {
+    it('getPeriod returns morning for 05:00-11:59', () => {
+      expect(component.getPeriod('05:00')).toBe('morning');
+      expect(component.getPeriod('08:30')).toBe('morning');
+      expect(component.getPeriod('11:59')).toBe('morning');
+    });
+
+    it('getPeriod returns afternoon for 12:00-17:59', () => {
+      expect(component.getPeriod('12:00')).toBe('afternoon');
+      expect(component.getPeriod('14:00')).toBe('afternoon');
+      expect(component.getPeriod('17:59')).toBe('afternoon');
+    });
+
+    it('getPeriod returns evening for 18:00-04:59', () => {
+      expect(component.getPeriod('18:00')).toBe('evening');
+      expect(component.getPeriod('20:00')).toBe('evening');
+      expect(component.getPeriod('00:00')).toBe('evening');
+      expect(component.getPeriod('04:59')).toBe('evening');
+    });
+
+    it('getTimelineIcon returns correct icon per status', () => {
+      const scheduled = { session: { status: 'SCHEDULED' } } as any;
+      const inProgress = { session: { status: 'IN_PROGRESS' } } as any;
+      const completed = { session: { status: 'COMPLETED' } } as any;
+      const cancelled = { session: { status: 'CANCELLED' } } as any;
+
+      expect(component.getTimelineIcon(scheduled)).toBe('radio_button_unchecked');
+      expect(component.getTimelineIcon(inProgress)).toBe('play_circle');
+      expect(component.getTimelineIcon(completed)).toBe('check_circle');
+      expect(component.getTimelineIcon(cancelled)).toBe('cancel');
+    });
+
+    it('buildTimeline groups cards by period', () => {
+      const morning = { session: { id: 'm1', startTime: '08:00', status: 'SCHEDULED' } } as any;
+      const afternoon = { session: { id: 'a1', startTime: '14:00', status: 'SCHEDULED' } } as any;
+      const evening = { session: { id: 'e1', startTime: '19:00', status: 'SCHEDULED' } } as any;
+
+      component.filteredCards = [morning, afternoon, evening];
+      (component as any).buildTimeline();
+
+      expect(component.periods.length).toBe(3);
+      expect(component.periods[0].key).toBe('morning');
+      expect(component.periods[0].cards.length).toBe(1);
+      expect(component.periods[1].key).toBe('afternoon');
+      expect(component.periods[1].cards.length).toBe(1);
+      expect(component.periods[2].key).toBe('evening');
+      expect(component.periods[2].cards.length).toBe(1);
+    });
+
+    it('buildTimeline omits empty periods', () => {
+      component.filteredCards = [];
+      (component as any).buildTimeline();
+      expect(component.periods.length).toBe(0);
+    });
+
+    it('togglePeriod toggles collapsed state', () => {
+      const period = { key: 'morning', label: 'Manhã', cards: [], collapsed: false };
+      component.togglePeriod(period);
+      expect(period.collapsed).toBeTrue();
+      component.togglePeriod(period);
+      expect(period.collapsed).toBeFalse();
+    });
+
+    it('buildTimeline preserves collapsed state across rebuilds', () => {
+      component.filteredCards = [{ session: { id: 'm1', startTime: '08:00', status: 'SCHEDULED' } } as any];
+      (component as any).buildTimeline();
+      component.periods[0].collapsed = true;
+
+      component.filteredCards = [
+        { session: { id: 'm1', startTime: '08:00', status: 'SCHEDULED' } } as any,
+        { session: { id: 'm2', startTime: '09:00', status: 'SCHEDULED' } } as any,
+      ];
+      (component as any).buildTimeline();
+      expect(component.periods[0].collapsed).toBeTrue();
+    });
+
+    it('getPresentCount returns count of PRESENT students', () => {
+      const card = { _students: [
+        { attendanceStatus: 'PRESENT' },
+        { attendanceStatus: 'ABSENT' },
+        { attendanceStatus: 'PRESENT' },
+        { attendanceStatus: undefined },
+      ] } as any;
+      expect(component.getPresentCount(card)).toBe(2);
+    });
+
+    it('getPresentCount returns 0 when no students', () => {
+      expect(component.getPresentCount({} as any)).toBe(0);
+    });
+
+    it('trackByCardId returns session id', () => {
+      const card = { session: { id: 'abc' } } as any;
+      expect(component.trackByCardId(0, card)).toBe('abc');
+    });
+
+    it('trackByCardId falls back to index when id is undefined', () => {
+      const card = { session: {} } as any;
+      expect(component.trackByCardId(5, card)).toBe('5');
+    });
+
+    it('trackByPeriodKey returns period key', () => {
+      const period = { key: 'morning' } as any;
+      expect(component.trackByPeriodKey(0, period)).toBe('morning');
+    });
+  });
+
   describe('attendance editing', () => {
     let card: any;
     let student: any;
@@ -523,6 +631,7 @@ describe('DailyAgendaComponent', () => {
         ],
       }];
       component.filteredCards = component.sessionCards;
+      (component as any).buildTimeline();
       fixture.detectChanges();
       const el = fixture.nativeElement.querySelector('.attendance-controls');
       expect(el).toBeTruthy();
