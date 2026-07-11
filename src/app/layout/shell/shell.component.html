@@ -1,4 +1,4 @@
-<mat-sidenav-container class="shell-layout" [autosize]="true">
+<mat-sidenav-container class="shell-layout">
   <mat-sidenav
     [mode]="navigation.sidenavMode()"
     [opened]="navigation.sidenavOpened()"
@@ -9,7 +9,7 @@
     <app-sidebar></app-sidebar>
   </mat-sidenav>
 
-  <mat-sidenav-content>
+  <mat-sidenav-content [class.content-expanded]="!navigation.isCollapsed()">
     <div class="content-wrapper" [class.has-bottom-nav]="navigation.isMobile()">
       <app-topbar (toggleSidebar)="onToggleMenu()"></app-topbar>
       <div class="shell-content" [class.shell-content-mobile]="navigation.isMobile()">
