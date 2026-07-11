@@ -379,6 +379,115 @@
   display: none;
 }
 
+.attendance-controls {
+  display: flex;
+  gap: $ds-spacing-xs;
+  flex-wrap: nowrap;
+
+  &.controls-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.att-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px $ds-spacing-sm;
+  border: 1px solid $ds-border;
+  border-radius: $ds-borderRadius-sm;
+  background: $ds-white;
+  color: $ds-textSecondary;
+  font-size: $ds-fontSize-xs;
+  cursor: pointer;
+  transition: all $ds-transition-fast;
+  line-height: 1;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $ds-primary;
+    color: $ds-primary;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &.att-btn-sm {
+    padding: 2px 6px;
+    font-size: 0;
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &.att-present {
+    border-color: $ds-success;
+    background: $ds-successLight;
+    color: $ds-successDark;
+  }
+
+  &.att-absent {
+    border-color: $ds-error;
+    background: $ds-errorLight;
+    color: $ds-errorDark;
+  }
+
+  &.att-justified {
+    border-color: $ds-warning;
+    background: $ds-warningLight;
+    color: $ds-warningDark;
+  }
+
+  &.att-btn-active {
+    font-weight: $ds-fontWeight-semibold;
+  }
+}
+
+.attendance-save-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: $ds-spacing-md $ds-spacing-xl;
+  background: $ds-white;
+  border-top: 1px solid $ds-border;
+
+  .save-attendance-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $ds-spacing-sm;
+    min-width: 180px;
+    justify-content: center;
+
+    mat-progress-spinner {
+      display: inline-block;
+    }
+  }
+}
+
+.attendance-mobile-row {
+  flex-wrap: wrap;
+  gap: $ds-spacing-xs;
+
+  .student-mobile-label {
+    width: 100%;
+  }
+}
+
+.mobile-att-controls {
+  width: 100%;
+  justify-content: flex-end;
+}
+
 .presence-badge {
   display: inline-flex;
 }

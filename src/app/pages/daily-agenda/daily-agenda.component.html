@@ -192,11 +192,40 @@
                 <ng-container matColumnDef="presence">
                   <th mat-header-cell *matHeaderCellDef>Presença</th>
                   <td mat-cell *matCellDef="let student">
-                    <div class="presence-badge">
-                      <ds-status-chip
-                        [status]="getPresenceStatus(student.attendanceStatus)"
-                        [label]="getPresenceLabel(student.attendanceStatus)"
-                      ></ds-status-chip>
+                    <div class="attendance-controls" [class.controls-disabled]="isSaving(card)">
+                      <button
+                        type="button"
+                        class="att-btn"
+                        [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
+                        [class.att-present]="student.attendanceStatus === 'PRESENT'"
+                        (click)="onAttendanceChange(card, student, 'PRESENT')"
+                        [disabled]="isSaving(card)"
+                      >
+                        <mat-icon>check_circle</mat-icon>
+                        Presente
+                      </button>
+                      <button
+                        type="button"
+                        class="att-btn"
+                        [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
+                        [class.att-absent]="student.attendanceStatus === 'ABSENT'"
+                        (click)="onAttendanceChange(card, student, 'ABSENT')"
+                        [disabled]="isSaving(card)"
+                      >
+                        <mat-icon>cancel</mat-icon>
+                        Falta
+                      </button>
+                      <button
+                        type="button"
+                        class="att-btn"
+                        [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
+                        [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
+                        (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
+                        [disabled]="isSaving(card)"
+                      >
+                        <mat-icon>info</mat-icon>
+                        Justif.
+                      </button>
                     </div>
                   </td>
                 </ng-container>
@@ -223,14 +252,61 @@
                     [label]="student.enrollmentStatus === 'ACTIVE' ? 'Ativo' : 'Inativo'"
                   ></ds-status-chip>
                 </div>
-                <div class="student-mobile-row">
+                <div class="student-mobile-row attendance-mobile-row">
                   <span class="student-mobile-label">Presença</span>
-                  <ds-status-chip
-                    [status]="getPresenceStatus(student.attendanceStatus)"
-                    [label]="getPresenceLabel(student.attendanceStatus)"
-                  ></ds-status-chip>
+                  <div class="attendance-controls mobile-att-controls" [class.controls-disabled]="isSaving(card)">
+                    <button
+                      type="button"
+                      class="att-btn att-btn-sm"
+                      [class.att-btn-active]="student.attendanceStatus === 'PRESENT'"
+                      [class.att-present]="student.attendanceStatus === 'PRESENT'"
+                      (click)="onAttendanceChange(card, student, 'PRESENT')"
+                      [disabled]="isSaving(card)"
+                    >
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      class="att-btn att-btn-sm"
+                      [class.att-btn-active]="student.attendanceStatus === 'ABSENT'"
+                      [class.att-absent]="student.attendanceStatus === 'ABSENT'"
+                      (click)="onAttendanceChange(card, student, 'ABSENT')"
+                      [disabled]="isSaving(card)"
+                    >
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                    <button
+                      type="button"
+                      class="att-btn att-btn-sm"
+                      [class.att-btn-active]="student.attendanceStatus === 'JUSTIFIED'"
+                      [class.att-justified]="student.attendanceStatus === 'JUSTIFIED'"
+                      (click)="onAttendanceChange(card, student, 'JUSTIFIED')"
+                      [disabled]="isSaving(card)"
+                    >
+                      <mat-icon>info</mat-icon>
+                    </button>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <div *ngIf="getSessionStudents(card).length > 0 && hasAttendanceChanges(card)" class="attendance-save-bar">
+              <button
+                mat-flat-button
+                color="primary"
+                class="save-attendance-btn"
+                (click)="saveAttendances(card)"
+                [disabled]="isSaving(card)"
+              >
+                <mat-icon *ngIf="!isSaving(card)">save</mat-icon>
+                <mat-progress-spinner
+                  *ngIf="isSaving(card)"
+                  diameter="20"
+                  mode="indeterminate"
+                  color="primary"
+                ></mat-progress-spinner>
+                {{ isSaving(card) ? 'Salvando...' : 'Salvar Presenças' }}
+              </button>
             </div>
           </div>
         </div>

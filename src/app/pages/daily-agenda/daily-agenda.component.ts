@@ -43,10 +43,12 @@ interface SessionCard {
 
 interface SessionStudent {
   studentId: string;
+  enrollmentId?: string;
   studentName: string;
   studentPhone?: string;
   enrollmentStatus: string;
   attendanceStatus?: AttendanceStatus;
+  _originalStatus?: AttendanceStatus;
 }
 
 @Component({
@@ -84,6 +86,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   error: string | null = null;
   sessionActionLoading: Record<string, 'start' | 'complete' | null> = {};
+  savingAttendance: { [key: string]: boolean } = {};
   studentColumns: string[] = ['name', 'phone', 'status', 'presence'];
 
   private allSessions: Session[] = [];
@@ -260,6 +263,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
         card._students = activeEnrollments.map((e) => ({
           studentId: e.studentId,
+          enrollmentId: e.id,
           studentName: e.studentName || '',
           studentPhone: e.studentPhone,
           enrollmentStatus: e.status,
@@ -269,9 +273,11 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
           this.attendanceService.getBySessionId(card.session.id).pipe(takeUntil(this.destroy$)).subscribe({
             next: (attendances) => {
               if (attendances.length > 0) {
-                const attMap = new Map(attendances.map((a) => [a.studentId, a.status]));
+                const attMap = new Map(attendances.filter((a) => a.enrollmentId).map((a) => [a.enrollmentId!, a.status]));
                 for (const student of card._students || []) {
-                  student.attendanceStatus = attMap.get(student.studentId);
+                  const status = student.enrollmentId ? attMap.get(student.enrollmentId) : undefined;
+                  student.attendanceStatus = status;
+                  student._originalStatus = status;
                 }
               }
             },
@@ -284,6 +290,59 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
         this.toastService.error('Erro ao carregar os alunos da aula.');
       },
     });
+  }
+
+  onAttendanceChange(card: SessionCard, student: SessionStudent, status: AttendanceStatus): void {
+    if (student.attendanceStatus === status) return;
+    student.attendanceStatus = status;
+  }
+
+  hasAttendanceChanges(card: SessionCard): boolean {
+    const students = card._students || [];
+    return students.some((s) => s.attendanceStatus !== s._originalStatus);
+  }
+
+  saveAttendances(card: SessionCard): void {
+    const sessionId = card.session.id;
+    if (!sessionId) return;
+
+    const items = this.getModifiedAttendances(card);
+    if (items.length === 0) return;
+
+    this.savingAttendance[sessionId] = true;
+
+    this.attendanceService.saveSessionAttendances(sessionId, { attendances: items }).pipe(
+      takeUntil(this.destroy$),
+      finalize(() => (this.savingAttendance[sessionId] = false))
+    ).subscribe({
+      next: (responses) => {
+        const resMap = new Map(responses.filter((r) => r.enrollmentId).map((r) => [r.enrollmentId!, r.status]));
+        for (const student of card._students || []) {
+          if (student.enrollmentId && resMap.has(student.enrollmentId)) {
+            student.attendanceStatus = resMap.get(student.enrollmentId)!;
+            student._originalStatus = student.attendanceStatus;
+          }
+        }
+        this.toastService.success('Presenças salvas com sucesso.');
+      },
+      error: () => {
+        for (const student of card._students || []) {
+          student.attendanceStatus = student._originalStatus;
+        }
+        this.toastService.error('Erro ao salvar presenças. Alterações revertidas.');
+      },
+    });
+  }
+
+  private getModifiedAttendances(card: SessionCard): { enrollmentId: string; status: AttendanceStatus }[] {
+    const students = card._students || [];
+    return students
+      .filter((s) => s.enrollmentId && s.attendanceStatus !== s._originalStatus)
+      .map((s) => ({ enrollmentId: s.enrollmentId!, status: s.attendanceStatus! }));
+  }
+
+  isSaving(card: SessionCard): boolean {
+    return card.session.id ? !!this.savingAttendance[card.session.id] : false;
   }
 
   getSessionStudents(card: SessionCard): SessionStudent[] {

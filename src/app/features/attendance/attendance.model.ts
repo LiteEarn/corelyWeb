@@ -16,7 +16,8 @@ export interface Attendance {
 
 export interface SessionAttendance {
   id?: string;
-  studentId: string;
+  studentId?: string;
+  enrollmentId?: string;
   studentName?: string;
   status: AttendanceStatus;
   classSessionId: string;
@@ -33,4 +34,13 @@ export interface AttendanceFilters {
 export interface AttendanceRequest {
   studentId: string;
   status: AttendanceStatus;
+}
+
+export interface SessionBulkAttendanceItem {
+  enrollmentId: string;
+  status: AttendanceStatus;
+}
+
+export interface SessionBulkAttendanceRequest {
+  attendances: SessionBulkAttendanceItem[];
 }

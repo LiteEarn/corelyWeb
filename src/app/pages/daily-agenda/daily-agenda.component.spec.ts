@@ -38,6 +38,8 @@ describe('DailyAgendaComponent', () => {
     studioId: 'studio-1',
     instructorId: 'inst-1',
     title: 'Ballet Infantil',
+    classGroupId: 'cg-1',
+    classGroupName: 'Ballet Infantil',
     scheduledDate: todayStr(),
     startTime: '08:00',
     endTime: '09:00',
@@ -86,6 +88,7 @@ describe('DailyAgendaComponent', () => {
     attendanceService = jasmine.createSpyObj('AttendanceService', [
       'getBySessionId',
       'createAttendance',
+      'saveSessionAttendances',
     ]);
 
     sessionService.getAll.and.returnValue(of([mockSession]));
@@ -228,14 +231,14 @@ describe('DailyAgendaComponent', () => {
       expect(cells[0].textContent).toContain('-');
     });
 
-    it('shows presence badge as placeholder', () => {
-      const badges = fixture.nativeElement.querySelectorAll('.presence-badge');
-      expect(badges.length).toBe(2);
+    it('shows attendance controls', () => {
+      const controls = fixture.nativeElement.querySelectorAll('.students-table .attendance-controls');
+      expect(controls.length).toBe(2);
     });
 
-    it('shows presence badge label as dash when no attendance', () => {
-      const badges = fixture.nativeElement.querySelectorAll('.presence-badge ds-status-chip');
-      expect(badges.length).toBe(2);
+    it('shows presence badge when no attendance', () => {
+      const controls = fixture.nativeElement.querySelectorAll('.students-table .attendance-controls');
+      expect(controls.length).toBe(2);
     });
   });
 
@@ -320,6 +323,87 @@ describe('DailyAgendaComponent', () => {
 
     it('returns pending for undefined', () => {
       expect(component.getPresenceStatus(undefined)).toBe('pending');
+    });
+  });
+
+  describe('attendance editing', () => {
+    let card: any;
+    let student: any;
+
+    beforeEach(() => {
+      card = {
+        session: { id: 'session-1' },
+        _students: [
+          { studentId: 'student-1', enrollmentId: 'enr-1', studentName: 'Maria', attendanceStatus: undefined, _originalStatus: undefined },
+          { studentId: 'student-2', enrollmentId: 'enr-2', studentName: 'João', attendanceStatus: 'PRESENT', _originalStatus: 'PRESENT' },
+        ],
+      };
+    });
+
+    it('onAttendanceChange updates student status', () => {
+      student = card._students[0];
+      component.onAttendanceChange(card, student, 'PRESENT');
+      expect(student.attendanceStatus).toBe('PRESENT');
+    });
+
+    it('onAttendanceChange does nothing if same status', () => {
+      student = card._students[1];
+      component.onAttendanceChange(card, student, 'PRESENT');
+      expect(student.attendanceStatus).toBe('PRESENT');
+    });
+
+    it('hasAttendanceChanges returns true when status differs from original', () => {
+      card._students[0].attendanceStatus = 'ABSENT';
+      expect(component.hasAttendanceChanges(card)).toBeTrue();
+    });
+
+    it('hasAttendanceChanges returns false when no changes', () => {
+      expect(component.hasAttendanceChanges(card)).toBeFalse();
+    });
+
+    it('renders attendance controls in table', () => {
+      component.sessionCards = [{
+        session: { ...mockSession, id: 'session-1' },
+        instructorName: 'Ana Silva',
+        classGroupId: 'cg-1',
+        enrolledCount: 2,
+        expanded: true,
+        _students: [
+          { studentId: 's1', enrollmentId: 'enr-1', studentName: 'Maria', enrollmentStatus: 'ACTIVE' },
+          { studentId: 's2', enrollmentId: 'enr-2', studentName: 'João', enrollmentStatus: 'ACTIVE' },
+        ],
+      }];
+      component.filteredCards = component.sessionCards;
+      fixture.detectChanges();
+      const el = fixture.nativeElement.querySelector('.attendance-controls');
+      expect(el).toBeTruthy();
+    });
+
+    it('saveAttendances calls service and shows success toast', () => {
+      card._students[0].attendanceStatus = 'PRESENT';
+      attendanceService.saveSessionAttendances.and.returnValue(of([
+        { enrollmentId: 'enr-1', status: 'PRESENT', classSessionId: 'session-1' },
+      ] as any));
+      component.saveAttendances(card);
+      expect(attendanceService.saveSessionAttendances).toHaveBeenCalledWith('session-1', {
+        attendances: [{ enrollmentId: 'enr-1', status: 'PRESENT' }],
+      });
+      expect(toastService.success).toHaveBeenCalledWith('Presenças salvas com sucesso.');
+    });
+
+    it('saveAttendances reverts on error and shows error toast', () => {
+      card._students[0].attendanceStatus = 'ABSENT';
+      attendanceService.saveSessionAttendances.and.returnValue(throwError(() => new Error('fail')));
+      component.saveAttendances(card);
+      expect(toastService.error).toHaveBeenCalledWith('Erro ao salvar presenças. Alterações revertidas.');
+      expect(card._students[0].attendanceStatus).toBeUndefined();
+    });
+
+    it('saveAttendances sets loading state', () => {
+      card._students[0].attendanceStatus = 'PRESENT';
+      attendanceService.saveSessionAttendances.and.returnValue(of([]));
+      component.saveAttendances(card);
+      expect(component.savingAttendance['session-1']).toBeFalse();
     });
   });
 });

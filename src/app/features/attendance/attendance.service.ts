@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Attendance, SessionAttendance, AttendanceFilters, AttendanceRequest } from './attendance.model';
+import { Attendance, SessionAttendance, AttendanceFilters, AttendanceRequest, SessionBulkAttendanceRequest } from './attendance.model';
 import { AttendanceBulkRequest } from './attendance-bulk-request.model';
 import { API_CONFIG } from '../../core/config/api.config';
 
@@ -43,5 +43,9 @@ export class AttendanceService {
 
   createAttendance(sessionId: string, data: AttendanceRequest): Observable<SessionAttendance> {
     return this.http.post<SessionAttendance>(`${this.apiUrl}/${sessionId}/attendance`, data);
+  }
+
+  saveSessionAttendances(sessionId: string, data: SessionBulkAttendanceRequest): Observable<SessionAttendance[]> {
+    return this.http.put<SessionAttendance[]>(`${this.apiUrl}/${sessionId}/attendance`, data);
   }
 }
