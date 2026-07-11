@@ -11,9 +11,11 @@ import { ClassGroupService } from '../../features/class-groups/class-group.servi
 import { EnrollmentService } from '../../features/enrollments/enrollment.service';
 import { ToastService } from '../../core/services/toast.service';
 import { AttendanceService } from '../../features/attendance/attendance.service';
+import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 import { Session } from '../../features/sessions/session.model';
 import { Instructor } from '../../features/instructors/instructor.model';
 import { Enrollment } from '../../features/enrollments/enrollment.model';
+import { Subject } from 'rxjs';
 
 function todayStr(): string {
   const d = new Date();
@@ -76,7 +78,15 @@ describe('DailyAgendaComponent', () => {
     enrollmentDate: '2026-01-01',
   };
 
+  let autoRefreshService: jasmine.SpyObj<AutoRefreshService>;
+  let refreshSubject: Subject<void>;
+
   beforeEach(async () => {
+    refreshSubject = new Subject<void>();
+    autoRefreshService = jasmine.createSpyObj('AutoRefreshService', ['triggerRefresh'], {
+      refresh$: refreshSubject.asObservable(),
+    });
+
     sessionService = jasmine.createSpyObj('SessionService', ['getAll', 'start', 'complete']);
     instructorService = jasmine.createSpyObj('InstructorService', ['getAll']);
     classGroupService = jasmine.createSpyObj('ClassGroupService', ['getAll']);
@@ -140,6 +150,7 @@ describe('DailyAgendaComponent', () => {
         { provide: EnrollmentService, useValue: enrollmentService },
         { provide: ToastService, useValue: toastService },
         { provide: AttendanceService, useValue: attendanceService },
+        { provide: AutoRefreshService, useValue: autoRefreshService },
       ],
     }).compileComponents();
 
@@ -323,6 +334,90 @@ describe('DailyAgendaComponent', () => {
 
     it('returns pending for undefined', () => {
       expect(component.getPresenceStatus(undefined)).toBe('pending');
+    });
+  });
+
+  describe('auto-refresh', () => {
+    it('calls loadSessions when refresh$ emits and no pending changes', () => {
+      spyOn(component, 'loadSessions').and.callThrough();
+      refreshSubject.next();
+      expect(component.loadSessions).toHaveBeenCalledWith(true);
+    });
+
+    it('sets pendingChangesBlocked when refresh$ emits and pending changes exist', () => {
+      component.sessionCards = [{
+        session: { id: 'session-1', instructorId: 'inst-1' } as any,
+        instructorName: 'Ana',
+        expanded: false,
+        _students: [
+          { studentId: 's1', enrollmentId: 'enr-1', studentName: 'Maria', enrollmentStatus: 'ACTIVE', attendanceStatus: 'PRESENT', _originalStatus: undefined },
+        ],
+      } as any];
+      component.filteredCards = component.sessionCards;
+      expect(component.pendingChangesBlocked).toBeFalse();
+      refreshSubject.next();
+      expect(component.pendingChangesBlocked).toBeTrue();
+    });
+
+    it('hasAnyPendingChanges returns false when no cards have changes', () => {
+      expect(component.hasAnyPendingChanges()).toBeFalse();
+    });
+
+    it('hasAnyPendingChanges returns true when a card has unsaved attendance', () => {
+      component.sessionCards = [{
+        session: { id: 's1' } as any,
+        instructorName: 'Ana',
+        expanded: false,
+        _students: [
+          { studentId: 's1', attendanceStatus: 'ABSENT', _originalStatus: 'PRESENT' },
+        ],
+      } as any];
+      expect(component.hasAnyPendingChanges()).toBeTrue();
+    });
+
+    it('forceRefresh resets pendingChangesBlocked and triggers smartRefresh', () => {
+      spyOn(component as any, 'smartRefresh');
+      component.pendingChangesBlocked = true;
+      component.forceRefresh();
+      expect(component.pendingChangesBlocked).toBeFalse();
+      expect((component as any).smartRefresh).toHaveBeenCalled();
+    });
+
+    it('smartRefresh saves expanded state and scroll before reload', () => {
+      spyOn(component, 'loadSessions');
+      component.sessionCards = [{
+        session: { id: 's1' } as any,
+        instructorName: 'Ana',
+        expanded: true,
+        _students: [
+          { studentId: 's1', studentName: 'Maria', enrollmentStatus: 'ACTIVE' },
+        ],
+      } as any];
+      (component as any).smartRefresh();
+      expect(component.loadSessions).toHaveBeenCalledWith(true);
+    });
+
+    it('triggers auto refresh after saveAttendances succeeds', () => {
+      const card = {
+        session: { id: 'session-1' },
+        _students: [
+          { studentId: 's1', enrollmentId: 'enr-1', studentName: 'Maria', attendanceStatus: 'PRESENT', _originalStatus: undefined },
+        ],
+      } as any;
+      attendanceService.saveSessionAttendances.and.returnValue(of([
+        { enrollmentId: 'enr-1', status: 'PRESENT', classSessionId: 'session-1' },
+      ] as any));
+      component.saveAttendances(card);
+      expect(autoRefreshService.triggerRefresh).toHaveBeenCalled();
+    });
+
+    it('triggers auto refresh after startSession succeeds', () => {
+      const card = {
+        session: { id: 's1', status: 'SCHEDULED' },
+      } as any;
+      sessionService.start.and.returnValue(of({ id: 's1', status: 'IN_PROGRESS' } as any));
+      component.startSession(card);
+      expect(autoRefreshService.triggerRefresh).toHaveBeenCalled();
     });
   });
 

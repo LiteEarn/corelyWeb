@@ -33,6 +33,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { AttendanceService } from '../../features/attendance/attendance.service';
 import { AttendanceStatus } from '../../features/attendance/attendance.model';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
+import { AutoRefreshService } from '../../core/services/auto-refresh.service';
 
 interface SessionCard {
   session: Session;
@@ -90,10 +91,13 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   sessionActionLoading: Record<string, boolean> = {};
   savingAttendance: { [key: string]: boolean } = {};
   studentColumns: string[] = ['name', 'phone', 'status', 'presence'];
+  pendingChangesBlocked = false;
 
   private allSessions: Session[] = [];
   private classGroups: { id: string; name: string }[] = [];
   private destroy$ = new Subject<void>();
+  private _restoreStates: { id: string; expanded: boolean; students?: SessionStudent[] }[] | null = null;
+  private _restoreScrollY = 0;
 
   constructor(
     private sessionService: SessionService,
@@ -104,6 +108,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private featureGateService: FeatureGateService,
     private dialog: MatDialog,
+    private autoRefreshService: AutoRefreshService,
     @Inject(LOCALE_ID) private locale: string
   ) {}
 
@@ -117,6 +122,17 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     if (this.featureGateService.canLoadSessions()) {
       this.loadSessions();
     }
+
+    this.autoRefreshService.refresh$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        if (this.hasAnyPendingChanges()) {
+          this.pendingChangesBlocked = true;
+          return;
+        }
+        this.pendingChangesBlocked = false;
+        this.smartRefresh();
+      });
   }
 
   ngOnDestroy(): void {
@@ -124,8 +140,10 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadSessions(): void {
-    this.loading = true;
+  loadSessions(silent: boolean = false): void {
+    if (!silent) {
+      this.loading = true;
+    }
     this.error = null;
 
     const filters: { sessionDate: string; instructorId?: string } = {
@@ -138,7 +156,11 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
     this.sessionService.getAll(filters).pipe(
       takeUntil(this.destroy$),
-      finalize(() => (this.loading = false))
+      finalize(() => {
+        if (!silent) {
+          this.loading = false;
+        }
+      })
     ).subscribe({
       next: (sessions) => {
         this.allSessions = sessions || [];
@@ -146,7 +168,9 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.error = 'Erro ao carregar as aulas. Tente novamente.';
-        this.toastService.error('Erro ao carregar as aulas. Tente novamente.');
+        if (!silent) {
+          this.toastService.error('Erro ao carregar as aulas. Tente novamente.');
+        }
       },
     });
   }
@@ -181,6 +205,22 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
         expanded: false,
       };
     });
+
+    if (this._restoreStates) {
+      for (const card of this.sessionCards) {
+        const saved = this._restoreStates.find((s) => s.id === card.session.id);
+        if (saved) {
+          card.expanded = saved.expanded;
+          card._students = saved.students;
+        }
+      }
+      this._restoreStates = null;
+      const scrollY = this._restoreScrollY;
+      this._restoreScrollY = 0;
+      if (scrollY > 0) {
+        requestAnimationFrame(() => window.scrollTo(0, scrollY));
+      }
+    }
 
     this.applyFilter();
 
@@ -327,6 +367,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
           }
         }
         this.toastService.success('Presenças salvas com sucesso.');
+        this.autoRefreshService.triggerRefresh();
       },
       error: () => {
         for (const student of card._students || []) {
@@ -382,6 +423,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
       next: () => {
         card.session.status = 'IN_PROGRESS';
         this.toastService.success('Aula iniciada com sucesso.');
+        this.autoRefreshService.triggerRefresh();
       },
       error: () => {
         this.toastService.error('Erro ao iniciar aula.');
@@ -454,6 +496,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
       next: () => {
         card.session.status = 'COMPLETED';
         this.toastService.success('Aula finalizada com sucesso.');
+        this.autoRefreshService.triggerRefresh();
       },
       error: () => {
         this.toastService.error('Erro ao finalizar aula.');
@@ -513,6 +556,28 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
 
   isSessionReadonly(card: SessionCard): boolean {
     return card.session.status === 'COMPLETED' || card.session.status === 'CANCELLED';
+  }
+
+  hasAnyPendingChanges(): boolean {
+    return this.sessionCards.some((card) => this.hasAttendanceChanges(card));
+  }
+
+  private smartRefresh(): void {
+    this._restoreStates = this.sessionCards
+      .filter((c) => c.expanded || c._students)
+      .map((c) => ({
+        id: c.session.id!,
+        expanded: c.expanded,
+        students: c._students,
+      }));
+    this._restoreScrollY = window.scrollY;
+
+    this.loadSessions(true);
+  }
+
+  forceRefresh(): void {
+    this.pendingChangesBlocked = false;
+    this.smartRefresh();
   }
 
   getDayName(date: Date): string {

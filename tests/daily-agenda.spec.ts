@@ -359,6 +359,110 @@ test.describe('Daily Agenda', () => {
     });
   });
 
+  test.describe('Auto-refresh', () => {
+    test.use({ viewport: { width: 1280, height: 800 } });
+
+    test('refresh triggers after session start', async ({ page }) => {
+      let sessionGetCount = 0;
+      await page.route('**/api/class-sessions*', async (route: any) => {
+        if (route.request().method() === 'GET') {
+          sessionGetCount++;
+        }
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_SESSIONS) });
+      });
+      await page.route('**/api/class-sessions/*/start', async (route: any) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...MOCK_SESSIONS[0], status: 'IN_PROGRESS' }) });
+      });
+
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+      const initialCount = sessionGetCount;
+
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.session-action-btn');
+
+      // Call forceRefresh via page.evaluate
+      await page.evaluate(() => {
+        const el = document.querySelector('app-daily-agenda');
+        if (el) {
+          (el as any).forceRefresh();
+        }
+      });
+
+      await page.waitForTimeout(500);
+      expect(sessionGetCount).toBeGreaterThan(initialCount);
+    });
+
+    test('preserves expanded card after refresh', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await setupAttendanceApi(page);
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      // Expand first card
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.students-table');
+      await expect(page.locator('.students-table')).toBeVisible();
+
+      // Trigger refresh
+      await page.evaluate(() => {
+        const el = document.querySelector('app-daily-agenda');
+        if (el) {
+          (el as any).forceRefresh();
+        }
+      });
+
+      await page.waitForTimeout(500);
+      await expect(page.locator('.students-table')).toBeVisible();
+    });
+
+    test('shows pending changes warning when unsaved attendance exists', async ({ page }) => {
+      await setupEnrollmentsApi(page);
+      await setupAttendanceApi(page);
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      // Expand and change attendance
+      await page.locator('.session-card').first().click();
+      await page.waitForSelector('.att-btn');
+      await page.locator('.att-btn').first().click();
+
+      // Trigger refresh to show warning
+      await page.evaluate(() => {
+        const el = document.querySelector('app-daily-agenda');
+        if (el) {
+          (el as any).forceRefresh();
+        }
+      });
+
+      await page.waitForTimeout(300);
+      const warningBar = page.locator('.pending-changes-bar');
+      await expect(warningBar).toBeVisible();
+      await expect(warningBar).toContainText('Existem alterações pendentes');
+    });
+
+    test('desktop retains scroll position after refresh', async ({ page }) => {
+      await page.goto('/daily-agenda');
+      await page.waitForSelector('.session-card');
+
+      // Scroll down
+      await page.evaluate(() => window.scrollTo(0, 200));
+      const scrollBefore = await page.evaluate(() => window.scrollY);
+      expect(scrollBefore).toBe(200);
+
+      await page.evaluate(() => {
+        const el = document.querySelector('app-daily-agenda');
+        if (el) {
+          (el as any).forceRefresh();
+        }
+      });
+
+      await page.waitForTimeout(500);
+      const scrollAfter = await page.evaluate(() => window.scrollY);
+      expect(scrollAfter).toBe(200);
+    });
+  });
+
   test.describe('Mobile', () => {
     test.use({ viewport: { width: 375, height: 667 } });
 
