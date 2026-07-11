@@ -77,6 +77,18 @@ describe('ShellComponent', () => {
       const sidebar = fixture.nativeElement.querySelector('app-sidebar');
       expect(sidebar).toBeTruthy();
     });
+
+    it('should have content-expanded class by default', () => {
+      const content = fixture.nativeElement.querySelector('mat-sidenav-content');
+      expect(content.classList.contains('content-expanded')).toBeTrue();
+    });
+
+    it('should remove content-expanded class after toggling sidebar', () => {
+      component.onToggleMenu();
+      fixture.detectChanges();
+      const content = fixture.nativeElement.querySelector('mat-sidenav-content');
+      expect(content.classList.contains('content-expanded')).toBeFalse();
+    });
   });
 
   describe('Mobile', () => {
@@ -96,6 +108,11 @@ describe('ShellComponent', () => {
       expect(navigationService.isDrawerOpen()).toBeTrue();
       component.onDrawerClose();
       expect(navigationService.isDrawerOpen()).toBeFalse();
+    });
+
+    it('should have content-expanded class (isCollapsed always false on mobile)', () => {
+      const content = fixture.nativeElement.querySelector('mat-sidenav-content');
+      expect(content.classList.contains('content-expanded')).toBeTrue();
     });
   });
 

@@ -87,6 +87,48 @@ test.describe('Navegação Mobile', () => {
       await page.locator('.menu-button').click();
       await expect(page.locator('.sidebar')).toHaveClass(/sidebar-closed/);
     });
+
+    test('sidebar não congela após toggle múltiplas vezes', async ({ page }) => {
+      await page.goto('/');
+      await page.waitForSelector('.menu-button');
+      for (let i = 0; i < 5; i++) {
+        await page.locator('.menu-button').click();
+        await page.waitForTimeout(300);
+      }
+      await expect(page.locator('.sidebar')).toBeVisible();
+      await expect(page.locator('app-topbar')).toBeVisible();
+    });
+
+    test('navegação funciona após abrir e fechar sidebar', async ({ page }) => {
+      await page.goto('/');
+      await page.waitForSelector('.menu-button');
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      const navLinks = page.locator('app-sidebar .nav-item');
+      const count = await navLinks.count();
+      if (count > 1) {
+        await navLinks.nth(1).click();
+        await page.waitForTimeout(500);
+        await expect(page.locator('app-sidebar')).toBeVisible();
+      }
+    });
+
+    test('conteúdo continua responsivo após toggle sidebar', async ({ page }) => {
+      await page.goto('/');
+      await page.waitForSelector('.menu-button');
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      await page.locator('.menu-button').click();
+      await page.waitForTimeout(300);
+      await expect(page.locator('.sidebar')).toBeVisible();
+      await expect(page.locator('app-topbar')).toBeVisible();
+    });
   });
 
   test.describe('Tablet (768px - 1023px)', () => {
@@ -109,6 +151,17 @@ test.describe('Navegação Mobile', () => {
     test('bottom nav não aparece no tablet', async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('app-bottom-nav')).not.toBeVisible();
+    });
+
+    test('toggle repetido no tablet não congela', async ({ page }) => {
+      await page.goto('/');
+      await page.waitForSelector('.menu-button');
+      for (let i = 0; i < 4; i++) {
+        await page.locator('.menu-button').click();
+        await page.waitForTimeout(300);
+      }
+      await expect(page.locator('app-sidebar')).toBeVisible();
+      await expect(page.locator('app-topbar')).toBeVisible();
     });
   });
 

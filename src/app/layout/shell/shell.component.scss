@@ -47,3 +47,16 @@
     padding: 16px;
   }
 }
+
+// Override container's inline margin via !important to eliminate autosize feedback loop
+// that freezes the UI during sidebar CSS width transition (BUG-LAYOUT-001)
+@media (min-width: 600px) {
+  mat-sidenav-content {
+    margin-left: 72px !important;
+    transition: margin-left 0.25s ease;
+  }
+
+  mat-sidenav-content.content-expanded {
+    margin-left: 260px !important;
+  }
+}
