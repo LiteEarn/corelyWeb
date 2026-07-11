@@ -3,6 +3,8 @@ export interface Session {
   studioId: string;
   instructorId: string;
   title: string;
+  classGroupId: string;
+  classGroupName: string;
   scheduledDate: string;
   startTime: string;
   endTime: string;
