@@ -34,6 +34,8 @@ import { AttendanceService } from '../../features/attendance/attendance.service'
 import { AttendanceStatus } from '../../features/attendance/attendance.model';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 import { AutoRefreshService } from '../../core/services/auto-refresh.service';
+import { CancelSessionRequest, CancelReason } from '../../features/sessions/session.model';
+import { CancelSessionDialogComponent } from './cancel-session-dialog.component';
 
 interface SessionCard {
   session: Session;
@@ -76,6 +78,7 @@ interface SessionStudent {
     DsStatusChipComponent,
     DsButtonComponent,
     LoadingComponent,
+    CancelSessionDialogComponent,
   ],
   templateUrl: './daily-agenda.component.html',
   styleUrl: './daily-agenda.component.scss',
@@ -508,31 +511,27 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
     const id = card.session.id;
     if (!id || this.sessionActionLoading[id]) return;
 
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Cancelar Aula',
-        message: 'Tem certeza que deseja cancelar esta aula?',
-        confirmText: 'Cancelar Aula',
-        cancelText: 'Voltar',
-      },
+    const dialogRef = this.dialog.open(CancelSessionDialogComponent, {
+      width: '450px',
+      disableClose: true,
     });
 
     dialogRef.afterClosed().pipe(
       takeUntil(this.destroy$),
-      switchMap((confirmed) => {
-        if (!confirmed) return of(null);
+      switchMap((result: CancelSessionRequest | null) => {
+        if (!result) return of(null);
         this.sessionActionLoading[id] = true;
-        return this.sessionService.cancel(id).pipe(
+        return this.sessionService.cancel(id, result).pipe(
           finalize(() => (this.sessionActionLoading[id] = false))
         );
       }),
       takeUntil(this.destroy$)
     ).subscribe({
-      next: (result) => {
-        if (result) {
+      next: (apiResult) => {
+        if (apiResult) {
           card.session.status = 'CANCELLED';
           this.toastService.success('Aula cancelada.');
+          this.autoRefreshService.triggerRefresh();
         }
       },
       error: () => {
@@ -551,7 +550,7 @@ export class DailyAgendaComponent implements OnInit, OnDestroy {
   }
 
   canCancel(card: SessionCard): boolean {
-    return card.session.status === 'SCHEDULED' || card.session.status === 'IN_PROGRESS';
+    return card.session.status === 'SCHEDULED';
   }
 
   isSessionReadonly(card: SessionCard): boolean {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Session, SessionFilters } from './session.model';
+import { Session, SessionFilters, CancelSessionRequest } from './session.model';
 import { API_CONFIG } from '../../core/config/api.config';
 
 @Injectable({
@@ -56,7 +56,7 @@ export class SessionService {
     return this.http.patch<Session>(`${this.apiUrl}/${id}/complete`, {});
   }
 
-  cancel(id: string): Observable<Session> {
-    return this.http.patch<Session>(`${this.apiUrl}/${id}/cancel`, {});
+  cancel(id: string, request?: CancelSessionRequest): Observable<Session> {
+    return this.http.patch<Session>(`${this.apiUrl}/${id}/cancel`, request || {});
   }
 }
