@@ -60,6 +60,22 @@
       </span>
     </div>
 
+    <div *ngIf="pendingChangesBlocked" class="pending-changes-bar">
+      <div class="pending-changes-info">
+        <mat-icon>warning</mat-icon>
+        <span>Existem alterações pendentes. Salve antes de atualizar.</span>
+      </div>
+      <button
+        mat-stroked-button
+        color="primary"
+        class="force-refresh-btn"
+        (click)="forceRefresh()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Atualizar Agora
+      </button>
+    </div>
+
     <app-loading *ngIf="loading"></app-loading>
 
     <div *ngIf="!loading && error" class="state-container">
