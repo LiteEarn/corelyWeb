@@ -1,0 +1,91 @@
+<div class="student-plan-tab">
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-icon class="spinner">refresh</mat-icon>
+    <p>Carregando...</p>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div class="tab-actions">
+      <button mat-raised-button color="primary" (click)="onEnroll()" *ngIf="!activeEnrollment">
+        <mat-icon>add</mat-icon>
+        Nova Matrícula
+      </button>
+    </div>
+
+    <div *ngIf="activeEnrollment" class="active-plan-card">
+      <mat-card>
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="plan-icon">card_membership</mat-icon>
+          <mat-card-title>Plano Ativo</mat-card-title>
+          <mat-card-subtitle>{{ activeEnrollment.planName }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="plan-info-grid">
+            <div class="plan-info-item">
+              <span class="label">Valor</span>
+              <span class="value">{{ formatCurrency(activeEnrollment.planValue || 0) }}</span>
+            </div>
+            <div class="plan-info-item">
+              <span class="label">Situação</span>
+              <ds-status-chip [status]="getStatusChipStatus(activeEnrollment.status)" [label]="getStatusLabel(activeEnrollment.status)"></ds-status-chip>
+            </div>
+            <div class="plan-info-item">
+              <span class="label">Data Início</span>
+              <span class="value">{{ formatDate(activeEnrollment.startDate) }}</span>
+            </div>
+            <div class="plan-info-item">
+              <span class="label">Data Término</span>
+              <span class="value">{{ formatDate(activeEnrollment.endDate) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="warn" (click)="onCancelEnrollment()">
+            <mat-icon>cancel</mat-icon>
+            Cancelar Matrícula
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <div class="history-section" *ngIf="enrollments.length > 0">
+      <h3>Histórico de Matrículas</h3>
+      <table mat-table [dataSource]="dataSource" class="history-table">
+        <ng-container matColumnDef="planName">
+          <th mat-header-cell *matHeaderCellDef>Plano</th>
+          <td mat-cell *matCellDef="let e">{{ e.planName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="startDate">
+          <th mat-header-cell *matHeaderCellDef>Data Início</th>
+          <td mat-cell *matCellDef="let e">{{ formatDate(e.startDate) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="endDate">
+          <th mat-header-cell *matHeaderCellDef>Data Término</th>
+          <td mat-cell *matCellDef="let e">{{ formatDate(e.endDate) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let e">
+            <ds-status-chip [status]="getStatusChipStatus(e.status)" [label]="getStatusLabel(e.status)"></ds-status-chip>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <ds-empty-state
+      *ngIf="!isLoading && enrollments.length === 0"
+      icon="card_membership"
+      title="Nenhum plano contratado"
+      description="Este aluno ainda não possui matrícula em nenhum plano."
+      [showAction]="true"
+      actionText="Matricular"
+      (actionClick)="onEnroll()">
+    </ds-empty-state>
+  </div>
+</div>
