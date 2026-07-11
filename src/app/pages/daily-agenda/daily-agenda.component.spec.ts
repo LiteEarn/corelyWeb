@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { LOCALE_ID } from '@angular/core';
 import { of, throwError } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 
 import { DailyAgendaComponent } from './daily-agenda.component';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
@@ -81,13 +82,17 @@ describe('DailyAgendaComponent', () => {
   let autoRefreshService: jasmine.SpyObj<AutoRefreshService>;
   let refreshSubject: Subject<void>;
 
+  function createDialogRef(result: any) {
+    return { afterClosed: () => of(result) };
+  }
+
   beforeEach(async () => {
     refreshSubject = new Subject<void>();
     autoRefreshService = jasmine.createSpyObj('AutoRefreshService', ['triggerRefresh'], {
       refresh$: refreshSubject.asObservable(),
     });
 
-    sessionService = jasmine.createSpyObj('SessionService', ['getAll', 'start', 'complete']);
+    sessionService = jasmine.createSpyObj('SessionService', ['getAll', 'start', 'complete', 'cancel']);
     instructorService = jasmine.createSpyObj('InstructorService', ['getAll']);
     classGroupService = jasmine.createSpyObj('ClassGroupService', ['getAll']);
     enrollmentService = jasmine.createSpyObj('EnrollmentService', [
@@ -418,6 +423,55 @@ describe('DailyAgendaComponent', () => {
       sessionService.start.and.returnValue(of({ id: 's1', status: 'IN_PROGRESS' } as any));
       component.startSession(card);
       expect(autoRefreshService.triggerRefresh).toHaveBeenCalled();
+    });
+  });
+
+  describe('cancel session', () => {
+    it('canCancel returns true only for SCHEDULED', () => {
+      const card = (status: string) => ({ session: { status } } as any);
+      expect(component.canCancel(card('SCHEDULED'))).toBeTrue();
+      expect(component.canCancel(card('IN_PROGRESS'))).toBeFalse();
+      expect(component.canCancel(card('COMPLETED'))).toBeFalse();
+      expect(component.canCancel(card('CANCELLED'))).toBeFalse();
+    });
+
+    it('cancelSession calls sessionService.cancel with reason when dialog confirms', () => {
+      (component as any).dialog = {
+        open: () => ({
+          afterClosed: () => of({ cancelReason: 'OTHER', cancelDescription: 'Test motivo' }),
+        }),
+      };
+      const card = { session: { id: 's1', status: 'SCHEDULED' } } as any;
+      sessionService.cancel.and.returnValue(of({ id: 's1', status: 'CANCELLED' } as any));
+
+      component.cancelSession(card);
+      expect(sessionService.cancel).toHaveBeenCalledWith('s1', { cancelReason: 'OTHER', cancelDescription: 'Test motivo' });
+      expect(card.session.status).toBe('CANCELLED');
+      expect(toastService.success).toHaveBeenCalledWith('Aula cancelada.');
+    });
+
+    it('cancelSession does nothing when dialog is dismissed', () => {
+      (component as any).dialog = {
+        open: () => ({
+          afterClosed: () => of(null),
+        }),
+      };
+      const card = { session: { id: 's1' } } as any;
+      component.cancelSession(card);
+      expect(sessionService.cancel).not.toHaveBeenCalled();
+    });
+
+    it('cancelSession shows error toast on failure', () => {
+      (component as any).dialog = {
+        open: () => ({
+          afterClosed: () => of({ cancelReason: 'HOLIDAY' }),
+        }),
+      };
+      const card = { session: { id: 's1', status: 'SCHEDULED' } } as any;
+      sessionService.cancel.and.returnValue(throwError(() => new Error('fail')));
+
+      component.cancelSession(card);
+      expect(toastService.error).toHaveBeenCalledWith('Erro ao cancelar aula.');
     });
   });
 
