@@ -1,0 +1,75 @@
+<ds-page-form
+  [cancelText]="'Cancelar'"
+  [submitText]="isEditMode ? 'Atualizar' : 'Criar'"
+  [loading]="loading"
+  [disabled]="planForm.invalid"
+  (cancel)="onCancel()"
+  (submit)="onSubmit()">
+  <div class="form-header">
+    <ds-page-header
+      [showBackButton]="true"
+      [backButtonText]="'Voltar para planos'"
+      [title]="pageTitle"
+      [subtitle]="pageSubtitle"
+      (backButtonClick)="onCancel()">
+    </ds-page-header>
+  </div>
+
+  <div class="form-content">
+    <ds-page-card [maxWidth]="'900px'" [padding]="'32px'">
+      <form [formGroup]="planForm">
+        <app-responsive-form-section title="Informações do Plano">
+          <app-responsive-form-grid>
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Nome do Plano</mat-label>
+              <input matInput formControlName="name" placeholder="Ex: Pilates Básico">
+              <mat-error *ngIf="shouldShowError('name')">{{ getFieldError('name') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field full-width">
+              <mat-label>Descrição</mat-label>
+              <textarea matInput formControlName="description" placeholder="Descrição do plano" rows="3"></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Tipo</mat-label>
+              <mat-select formControlName="type">
+                <mat-option value="">Selecione o tipo</mat-option>
+                <mat-option *ngFor="let type of planTypes" [value]="type">{{ planTypeLabels[type] }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="shouldShowError('type')">{{ getFieldError('type') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Valor (R$)</mat-label>
+              <input matInput type="number" step="0.01" min="0.01" formControlName="value" placeholder="0,00">
+              <span matTextPrefix>R$ &nbsp;</span>
+              <mat-error *ngIf="shouldShowError('value')">{{ getFieldError('value') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Duração (dias)</mat-label>
+              <input matInput type="number" min="1" formControlName="duration" placeholder="30">
+              <mat-error *ngIf="shouldShowError('duration')">{{ getFieldError('duration') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Quantidade de Aulas</mat-label>
+              <input matInput type="number" min="1" formControlName="quantityAulas" placeholder="Para pacotes">
+              <mat-hint>Apenas para planos do tipo Pacote</mat-hint>
+              <mat-error *ngIf="shouldShowError('quantityAulas')">{{ getFieldError('quantityAulas') }}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Status</mat-label>
+              <mat-select formControlName="active">
+                <mat-option [value]="true">Ativo</mat-option>
+                <mat-option [value]="false">Inativo</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </app-responsive-form-grid>
+        </app-responsive-form-section>
+      </form>
+    </ds-page-card>
+  </div>
+</ds-page-form>
