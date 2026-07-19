@@ -11,6 +11,7 @@ export const API_CONFIG = {
     objectives: '/objectives',
     evaluations: '/evaluations',
     evolutions: '/evolutions',
-    dashboard: '/dashboard'
+    dashboard: '/dashboard',
+    bookings: '/bookings'
   }
 };

@@ -31,6 +31,7 @@ import {
   MakeupApprovalComponent,
   PlansComponent,
   PlanFormComponent,
+  BookingAgendaComponent,
 } from './pages';
 
 function getRoles(path: string): Role[] {
@@ -77,6 +78,7 @@ export const routes: Routes = [
       { path: 'evolutions', component: EvolutionsComponent, canActivate: [roleGuard], data: { roles: getRoles('evolutions') } },
       { path: 'evolutions/new', component: EvolutionFormComponent, canActivate: [roleGuard], data: { roles: getRoles('evolutions/new') } },
       { path: 'evolutions/:id/edit', component: EvolutionFormComponent, canActivate: [roleGuard], data: { roles: getRoles('evolutions/:id/edit') } },
+      { path: 'booking', component: BookingAgendaComponent, canActivate: [roleGuard], data: { roles: getRoles('booking') } },
       { path: 'plans', component: PlansComponent, canActivate: [roleGuard], data: { roles: getRoles('plans') } },
       { path: 'plans/new', component: PlanFormComponent, canActivate: [roleGuard], data: { roles: getRoles('plans/new') } },
       { path: 'plans/:id/edit', component: PlanFormComponent, canActivate: [roleGuard], data: { roles: getRoles('plans/:id/edit') } },
