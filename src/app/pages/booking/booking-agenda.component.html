@@ -1,0 +1,124 @@
+<ds-page-header title="Agenda"></ds-page-header>
+
+<div class="agenda-toolbar">
+  <mat-form-field appearance="outline" class="view-select">
+    <mat-select [(ngModel)]="viewMode" (selectionChange)="onViewChange($event.value)">
+      <mat-option value="day">Dia</mat-option>
+      <mat-option value="week">Semana</mat-option>
+      <mat-option value="month">Mês</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-icon-button (click)="navigate(-1)"><mat-icon>chevron_left</mat-icon></button>
+  <span class="current-date-label">
+    @switch (viewMode) {
+      @case ('day') { {{ currentDate | date:'EEEE, dd/MM/yyyy' }} }
+      @case ('week') { {{ weekDays[0] | date:'dd/MM' }} - {{ weekDays[6] | date:'dd/MM/yyyy' }} }
+      @case ('month') { {{ monthNames[currentDate.getMonth()] }} {{ currentDate.getFullYear() }} }
+    }
+  </span>
+  <button mat-icon-button (click)="navigate(1)"><mat-icon>chevron_right</mat-icon></button>
+
+  <button mat-stroked-button (click)="goToday()">Hoje</button>
+</div>
+
+<div class="agenda-content">
+  @if (viewMode === 'day') {
+    <div class="day-view">
+      <div class="time-column">
+        @for (hour of timeSlots; track hour) {
+          <div class="time-label">{{ ('0' + hour).slice(-2) }}:00</div>
+        }
+      </div>
+      <div class="events-column">
+        @for (hour of timeSlots; track hour) {
+          <div class="hour-slot">
+            @for (booking of getBookingsForHour(hour); track booking.id) {
+              <div class="booking-card {{ getStatusClass(booking.status) }}">
+                <div class="booking-header">
+                  <span class="booking-time">{{ formatTime(booking.startDateTime) }} - {{ formatTime(booking.endDateTime) }}</span>
+                  <span class="booking-status-badge">{{ getStatusLabel(booking.status) }}</span>
+                </div>
+                <div class="booking-body">
+                  <strong>{{ booking.classType }}</strong> - {{ booking.studentName || booking.studentId }}
+                </div>
+                <div class="booking-footer">
+                  @if (booking.status === 'SCHEDULED') {
+                    <button mat-icon-button matTooltip="Confirmar" (click)="confirmBooking(booking)"><mat-icon>check_circle</mat-icon></button>
+                    <button mat-icon-button matTooltip="Cancelar" (click)="cancelBooking(booking)"><mat-icon>cancel</mat-icon></button>
+                  }
+                  @if (booking.status === 'CONFIRMED') {
+                    <button mat-icon-button matTooltip="Concluir" (click)="completeBooking(booking)"><mat-icon>done</mat-icon></button>
+                    <button mat-icon-button matTooltip="Falta" (click)="noShowBooking(booking)"><mat-icon>person_off</mat-icon></button>
+                    <button mat-icon-button matTooltip="Cancelar" (click)="cancelBooking(booking)"><mat-icon>cancel</mat-icon></button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (viewMode === 'week') {
+    <div class="week-view">
+      <div class="week-header">
+        @for (day of weekDays; track day.getTime()) {
+          <div class="day-header" [class.today]="isToday(day)">
+            <div class="day-name">{{ weekDayNames[day.getDay()] }}</div>
+            <div class="day-number">{{ day.getDate() }}</div>
+          </div>
+        }
+      </div>
+      <div class="week-body">
+        @for (day of weekDays; track day.getTime()) {
+          <div class="day-column" [class.today]="isToday(day)">
+            @for (booking of getBookingsForDay(day); track booking.id) {
+              <div class="booking-card {{ getStatusClass(booking.status) }}">
+                <div class="booking-time">{{ formatTime(booking.startDateTime) }}</div>
+                <div class="booking-type">{{ booking.classType }}</div>
+                <div class="booking-name">{{ booking.studentName || booking.studentId }}</div>
+                <div class="booking-status-badge">{{ getStatusLabel(booking.status) }}</div>
+              </div>
+            }
+            @if (getBookingsForDay(day).length === 0) {
+              <div class="no-bookings">Sem aulas</div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (viewMode === 'month') {
+    <div class="month-view">
+      <div class="month-header">
+        @for (name of weekDayNames; track name) {
+          <div class="weekday-label">{{ name }}</div>
+        }
+      </div>
+      <div class="month-grid">
+        @for (day of calendarDays; track day.getTime()) {
+          <div class="day-cell" [class.other-month]="!isCurrentMonth(day)" [class.today]="isToday(day)">
+            <div class="day-number">{{ day.getDate() }}</div>
+            @for (booking of getBookingsForDay(day).slice(0, 3); track booking.id) {
+              <div class="booking-indicator {{ getStatusClass(booking.status) }}">
+                {{ formatTime(booking.startDateTime) }} {{ booking.classType }}
+              </div>
+            }
+            @if (getBookingsForDay(day).length > 3) {
+              <div class="more-indicator">+{{ getBookingsForDay(day).length - 3 }} mais</div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="loading-overlay">
+      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+    </div>
+  }
+</div>
