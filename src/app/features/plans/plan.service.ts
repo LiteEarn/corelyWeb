@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Plan, PlanEnrollment, StudentPlanResponse } from './plan.model';
 import { API_CONFIG } from '../../core/config/api.config';
@@ -11,8 +11,12 @@ export class PlanService {
 
   constructor(private http: HttpClient) {}
 
-  getPlans(): Observable<Plan[]> {
-    return this.http.get<Plan[]>(this.planUrl);
+  getPlans(activeOnly?: boolean): Observable<Plan[]> {
+    let params = new HttpParams();
+    if (activeOnly) {
+      params = params.set('active', 'true');
+    }
+    return this.http.get<Plan[]>(this.planUrl, { params });
   }
 
   getPlanById(id: string): Observable<Plan> {
