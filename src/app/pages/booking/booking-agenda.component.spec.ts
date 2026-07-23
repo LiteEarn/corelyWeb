@@ -3,15 +3,32 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { BookingAgendaComponent } from './booking-agenda.component';
 import { SessionService } from '../../core/session/session.service';
+import { FeatureGateService } from '../../core/rbac/feature-gate.service';
+import { ComercialBookingService } from '../../features/comercial-booking/comercial-booking.service';
+import { of } from 'rxjs';
 
 describe('BookingAgendaComponent', () => {
   let component: BookingAgendaComponent;
   let fixture: ComponentFixture<BookingAgendaComponent>;
+  let mockBookingService: jasmine.SpyObj<ComercialBookingService>;
+  let mockFeatureGateService: jasmine.SpyObj<FeatureGateService>;
 
   beforeEach(async () => {
+    mockBookingService = jasmine.createSpyObj('ComercialBookingService', [
+      'getAgenda', 'confirm', 'cancel', 'markCompleted', 'markNoShow'
+    ]);
+    mockBookingService.getAgenda.and.returnValue(of({ content: [], totalElements: 0, totalPages: 0, number: 0, size: 20 }));
+
+    mockFeatureGateService = jasmine.createSpyObj('FeatureGateService', ['canLoadStudents']);
+    mockFeatureGateService.canLoadStudents.and.returnValue(true);
+
     await TestBed.configureTestingModule({
       imports: [HttpClientTestingModule, NoopAnimationsModule, BookingAgendaComponent],
-      providers: [SessionService]
+      providers: [
+        SessionService,
+        { provide: ComercialBookingService, useValue: mockBookingService },
+        { provide: FeatureGateService, useValue: mockFeatureGateService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(BookingAgendaComponent);
@@ -58,5 +75,47 @@ describe('BookingAgendaComponent', () => {
   it('should format date correctly', () => {
     const date = new Date(2024, 0, 15);
     expect(component.formatDate(date)).toBe('2024-01-15');
+  });
+
+  it('should load bookings on init', () => {
+    expect(mockBookingService.getAgenda).toHaveBeenCalled();
+  });
+
+  it('should call confirm on service and reload', () => {
+    mockBookingService.confirm.and.returnValue(of(void 0));
+    component.confirmBooking({ id: '123' } as any);
+    expect(mockBookingService.confirm).toHaveBeenCalledWith('123');
+  });
+
+  it('should call cancel on service with ComercialCancelBookingRequest', () => {
+    spyOn(window, 'prompt').and.returnValue('Test reason');
+    mockBookingService.cancel.and.returnValue(of(void 0));
+    component.cancelBooking({ id: '456' } as any);
+    expect(mockBookingService.cancel).toHaveBeenCalledWith('456', { reason: 'OTHER', description: 'Test reason' });
+  });
+
+  it('should call markCompleted on service and reload', () => {
+    mockBookingService.markCompleted.and.returnValue(of(void 0));
+    component.completeBooking({ id: '789' } as any);
+    expect(mockBookingService.markCompleted).toHaveBeenCalledWith('789');
+  });
+
+  it('should call markNoShow on service and reload', () => {
+    mockBookingService.markNoShow.and.returnValue(of(void 0));
+    component.noShowBooking({ id: '101' } as any);
+    expect(mockBookingService.markNoShow).toHaveBeenCalledWith('101');
+  });
+
+  it('should format time correctly from classSessionStartTime', () => {
+    expect(component.formatTime('09:30:00')).toBe('09:30');
+  });
+
+  it('should combine classSessionDate and classSessionStartTime for datetime', () => {
+    const booking = {
+      classSessionDate: '2024-06-15',
+      classSessionStartTime: '10:00:00'
+    } as any;
+    const dt = (component as any).getBookingDateTime(booking);
+    expect(dt).toBe('2024-06-15T10:00:00');
   });
 });

@@ -15,8 +15,8 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DsPageHeaderComponent, DsStatusChipComponent, DsEmptyStateComponent } from '../../shared/design-system';
-import { BookingService } from '../../features/booking/booking.service';
-import { Booking, BookingStatus, AvailabilityResponse } from '../../features/booking/booking.model';
+import { ComercialBookingService } from '../../features/comercial-booking/comercial-booking.service';
+import { ComercialBooking, ComercialCancelBookingRequest } from '../../features/comercial-booking/comercial-booking.model';
 import { SessionService } from '../../core/session/session.service';
 import { FeatureGateService } from '../../core/rbac/feature-gate.service';
 
@@ -34,14 +34,14 @@ import { FeatureGateService } from '../../core/rbac/feature-gate.service';
   styleUrl: './booking-agenda.component.scss'
 })
 export class BookingAgendaComponent implements OnInit {
-  private bookingService = inject(BookingService);
+  private bookingService = inject(ComercialBookingService);
   private sessionService = inject(SessionService);
   private featureGateService = inject(FeatureGateService);
   private dialog = inject(MatDialog);
 
   viewMode: 'day' | 'week' | 'month' = 'day';
   currentDate: Date = new Date();
-  bookings: Booking[] = [];
+  bookings: ComercialBooking[] = [];
   timeSlots: number[] = [];
   loading = false;
   weekDays: Date[] = [];
@@ -67,20 +67,12 @@ export class BookingAgendaComponent implements OnInit {
     }
   }
 
-  get studioId(): string {
-    return this.sessionService.currentStudio()?.id ?? '';
-  }
-
   loadBookings() {
     this.loading = true;
     const { start, end } = this.getDateRange();
-    this.bookingService.getAgenda({
-      studioId: this.studioId,
-      startDate: start,
-      endDate: end
-    }).subscribe({
-      next: (data) => {
-        this.bookings = data;
+    this.bookingService.getAgenda({ startDate: start, endDate: end }).subscribe({
+      next: (response) => {
+        this.bookings = response.content;
         this.loading = false;
       },
       error: () => this.loading = false
@@ -188,13 +180,17 @@ export class BookingAgendaComponent implements OnInit {
     }
   }
 
-  getBookingsForHour(hour: number): Booking[] {
-    return this.bookings.filter(b => new Date(b.startDateTime).getHours() === hour);
+  private getBookingDateTime(booking: ComercialBooking): string {
+    return booking.classSessionDate + 'T' + booking.classSessionStartTime;
   }
 
-  getBookingsForDay(day: Date): Booking[] {
+  getBookingsForHour(hour: number): ComercialBooking[] {
+    return this.bookings.filter(b => new Date(this.getBookingDateTime(b)).getHours() === hour);
+  }
+
+  getBookingsForDay(day: Date): ComercialBooking[] {
     const dateStr = this.formatDate(day);
-    return this.bookings.filter(b => this.formatDate(new Date(b.startDateTime)) === dateStr);
+    return this.bookings.filter(b => this.formatDate(new Date(this.getBookingDateTime(b))) === dateStr);
   }
 
   isToday(day: Date): boolean {
@@ -210,7 +206,7 @@ export class BookingAgendaComponent implements OnInit {
   }
 
   formatTime(dateStr: string): string {
-    return dateStr.slice(11, 16);
+    return dateStr.slice(0, 5);
   }
 
   getStatusClass(status: string): string {
@@ -235,25 +231,26 @@ export class BookingAgendaComponent implements OnInit {
     return map[status] || status;
   }
 
-  confirmBooking(booking: Booking) {
+  confirmBooking(booking: ComercialBooking) {
     if (!booking.id) return;
     this.bookingService.confirm(booking.id).subscribe(() => this.loadBookings());
   }
 
-  cancelBooking(booking: Booking) {
+  cancelBooking(booking: ComercialBooking) {
     if (!booking.id) return;
-    const reason = prompt('Motivo do cancelamento (STUDENT, STUDIO, INSTRUCTOR, WEATHER, OTHER):');
-    if (reason) {
-      this.bookingService.cancel(booking.id, reason).subscribe(() => this.loadBookings());
+    const reasonText = prompt('Motivo do cancelamento:');
+    if (reasonText) {
+      const request: ComercialCancelBookingRequest = { reason: 'OTHER', description: reasonText };
+      this.bookingService.cancel(booking.id, request).subscribe(() => this.loadBookings());
     }
   }
 
-  completeBooking(booking: Booking) {
+  completeBooking(booking: ComercialBooking) {
     if (!booking.id) return;
     this.bookingService.markCompleted(booking.id).subscribe(() => this.loadBookings());
   }
 
-  noShowBooking(booking: Booking) {
+  noShowBooking(booking: ComercialBooking) {
     if (!booking.id) return;
     this.bookingService.markNoShow(booking.id).subscribe(() => this.loadBookings());
   }
