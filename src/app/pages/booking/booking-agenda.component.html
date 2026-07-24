@@ -36,14 +36,19 @@
             @for (booking of getBookingsForHour(hour); track booking.id) {
               <div class="booking-card {{ getStatusClass(booking.status) }}">
                 <div class="booking-header">
-                  <span class="booking-time">{{ formatTime(booking.startDateTime) }} - {{ formatTime(booking.endDateTime) }}</span>
+                  <span class="booking-time">{{ formatTime(booking.classSessionStartTime) }} - {{ formatTime(booking.classSessionEndTime) }}</span>
                   <span class="booking-status-badge">{{ getStatusLabel(booking.status) }}</span>
                 </div>
                 <div class="booking-body">
-                  <strong>{{ booking.classType }}</strong> - {{ booking.studentName || booking.studentId }}
+                  <!-- classType não existe no modelo comercial; exibindo instrutor no lugar -->
+                  <strong>{{ booking.instructorName || 'Sem instrutor' }}</strong> - {{ booking.studentName || booking.studentId }}
                 </div>
                 <div class="booking-footer">
-                  @if (booking.status === 'SCHEDULED') {
+                  <!-- SCHEDULED não existe mais no comercial (todo booking nasce CONFIRMED).
+                       Este bloco só seria acionado no caso raro de um CANCELLED reativado via confirm(),
+                       o que hoje não tem um fluxo de UX para disparar pela tela. Mantido para
+                       compatibilidade futura. -->
+                  @if (isStatus(booking, 'SCHEDULED')) {
                     <button mat-icon-button matTooltip="Confirmar" (click)="confirmBooking(booking)"><mat-icon>check_circle</mat-icon></button>
                     <button mat-icon-button matTooltip="Cancelar" (click)="cancelBooking(booking)"><mat-icon>cancel</mat-icon></button>
                   }
@@ -76,8 +81,9 @@
           <div class="day-column" [class.today]="isToday(day)">
             @for (booking of getBookingsForDay(day); track booking.id) {
               <div class="booking-card {{ getStatusClass(booking.status) }}">
-                <div class="booking-time">{{ formatTime(booking.startDateTime) }}</div>
-                <div class="booking-type">{{ booking.classType }}</div>
+                <div class="booking-time">{{ formatTime(booking.classSessionStartTime) }}</div>
+                <!-- classType não existe no modelo comercial; exibindo instrutor no lugar -->
+                <div class="booking-type">{{ booking.instructorName || 'Sem instrutor' }}</div>
                 <div class="booking-name">{{ booking.studentName || booking.studentId }}</div>
                 <div class="booking-status-badge">{{ getStatusLabel(booking.status) }}</div>
               </div>
@@ -104,7 +110,8 @@
             <div class="day-number">{{ day.getDate() }}</div>
             @for (booking of getBookingsForDay(day).slice(0, 3); track booking.id) {
               <div class="booking-indicator {{ getStatusClass(booking.status) }}">
-                {{ formatTime(booking.startDateTime) }} {{ booking.classType }}
+                <!-- classType substituído por instructorName (modelo comercial não tem classType) -->
+                {{ formatTime(booking.classSessionStartTime) }} {{ booking.instructorName || 'Sem instrutor' }}
               </div>
             }
             @if (getBookingsForDay(day).length > 3) {
