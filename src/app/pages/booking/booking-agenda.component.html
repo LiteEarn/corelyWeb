@@ -48,7 +48,7 @@
                        Este bloco só seria acionado no caso raro de um CANCELLED reativado via confirm(),
                        o que hoje não tem um fluxo de UX para disparar pela tela. Mantido para
                        compatibilidade futura. -->
-                  @if (booking.status === 'SCHEDULED') {
+                  @if (isStatus(booking, 'SCHEDULED')) {
                     <button mat-icon-button matTooltip="Confirmar" (click)="confirmBooking(booking)"><mat-icon>check_circle</mat-icon></button>
                     <button mat-icon-button matTooltip="Cancelar" (click)="cancelBooking(booking)"><mat-icon>cancel</mat-icon></button>
                   }

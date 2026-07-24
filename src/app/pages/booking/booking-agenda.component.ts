@@ -193,6 +193,10 @@ export class BookingAgendaComponent implements OnInit {
     return this.bookings.filter(b => this.formatDate(new Date(this.getBookingDateTime(b))) === dateStr);
   }
 
+  isStatus(booking: ComercialBooking, status: string): boolean {
+    return booking.status === status;
+  }
+
   isToday(day: Date): boolean {
     return this.formatDate(day) === this.formatDate(new Date());
   }

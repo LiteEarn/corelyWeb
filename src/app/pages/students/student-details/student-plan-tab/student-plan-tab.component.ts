@@ -11,11 +11,7 @@ import { Plan, PlanEnrollment, PlanEnrollmentStatus, PlanEnrollmentStatusLabels 
 import { ToastService } from '../../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CurrentStudioService } from '../../../../core/services/current-studio.service';
-<<<<<<< HEAD
-import { EnrollPlanDialogComponent } from './enroll-plan-dialog.component';
-=======
 import { EnrollPlanDialogComponent, EnrollPlanDialogResult } from './enroll-plan-dialog.component';
->>>>>>> origin/main
 
 @Component({
   selector: 'app-student-plan-tab',
@@ -34,10 +30,7 @@ export class StudentPlanTabComponent implements OnInit {
   dataSource = new MatTableDataSource<PlanEnrollment>([]);
   activeEnrollment: PlanEnrollment | null = null;
   isLoading = false;
-<<<<<<< HEAD
-=======
   plans: Plan[] = [];
->>>>>>> origin/main
 
   displayedColumns: string[] = ['planName', 'startDate', 'endDate', 'status'];
 
@@ -49,17 +42,10 @@ export class StudentPlanTabComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-<<<<<<< HEAD
-    this.loadEnrollments();
-  }
-
-  loadEnrollments(): void {
-=======
     this.loadData();
   }
 
   loadData(): void {
->>>>>>> origin/main
     this.isLoading = true;
     this.planService.getStudentEnrollments(this.studentId).subscribe({
       next: (data) => {
@@ -70,28 +56,17 @@ export class StudentPlanTabComponent implements OnInit {
       },
       error: () => this.isLoading = false
     });
-<<<<<<< HEAD
-=======
     this.planService.getPlans().subscribe({
       next: (data) => this.plans = data.filter(p => p.active)
     });
->>>>>>> origin/main
   }
 
   onEnroll(): void {
     const dialogRef = this.dialog.open(EnrollPlanDialogComponent, {
-<<<<<<< HEAD
-      width: '520px',
-      disableClose: true,
-      data: { studentId: this.studentId }
-    });
-    dialogRef.afterClosed().subscribe((result: any) => {
-=======
       width: '500px',
       data: { studentId: this.studentId, plans: this.plans }
     });
     dialogRef.afterClosed().subscribe((result: EnrollPlanDialogResult | undefined) => {
->>>>>>> origin/main
       if (result) {
         this.planService.createEnrollment({
           studioId: this.currentStudioService.getStudioId(),
@@ -101,11 +76,7 @@ export class StudentPlanTabComponent implements OnInit {
           status: PlanEnrollmentStatus.ACTIVE
         }).subscribe({
           next: () => {
-<<<<<<< HEAD
-            this.loadEnrollments();
-=======
             this.loadData();
->>>>>>> origin/main
             this.toastService.success('Matrícula realizada com sucesso');
           },
           error: (err) => this.toastService.error(err.error?.message || 'Erro ao realizar matrícula')
@@ -122,15 +93,21 @@ export class StudentPlanTabComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.planService.cancelEnrollment(this.activeEnrollment!.id!).subscribe({
-<<<<<<< HEAD
-          next: () => { this.loadEnrollments(); this.toastService.success('Matrícula cancelada com sucesso'); },
-=======
           next: () => { this.loadData(); this.toastService.success('Matrícula cancelada com sucesso'); },
->>>>>>> origin/main
           error: (err) => this.toastService.error(err.error?.message || 'Erro ao cancelar matrícula')
         });
       }
     });
+  }
+
+  formatCurrency(value: number): string {
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+
+  formatDate(date: string | Date | undefined): string {
+    if (!date) return '-';
+    const d = new Date(date);
+    return d.toLocaleDateString('pt-BR');
   }
 
   getStatusLabel(status: PlanEnrollmentStatus): string {
@@ -142,16 +119,7 @@ export class StudentPlanTabComponent implements OnInit {
       case PlanEnrollmentStatus.ACTIVE: return 'active';
       case PlanEnrollmentStatus.CANCELLED: return 'inactive';
       case PlanEnrollmentStatus.COMPLETED: return 'completed';
+      default: return 'inactive';
     }
-  }
-
-  formatCurrency(value: number | undefined): string {
-    if (!value) return '-';
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-
-  formatDate(dateString: string | undefined): string {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('pt-BR');
   }
 }
